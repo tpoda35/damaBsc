@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.ZonedDateTime;
+
 /**
  * Data transfer object to transfer specific user data.
  */
@@ -15,4 +17,5 @@ import lombok.NoArgsConstructor;
 public class UserInfoDto {
     private Long userId;
     private String displayName;
+    private ZonedDateTime createdAt;
 }

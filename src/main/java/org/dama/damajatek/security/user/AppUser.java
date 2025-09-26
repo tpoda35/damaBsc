@@ -4,13 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
+import org.dama.damajatek.model.Game;
 import org.dama.damajatek.security.token.Token;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -56,12 +58,20 @@ public class AppUser implements UserDetails {
     @ToString.Exclude
     private List<Token> tokens;
 
+    // Games where this user played as Red
+    @OneToMany(mappedBy = "redPlayer")
+    private List<Game> gamesAsRed = new ArrayList<>();
+
+    // Games where this user played as Black
+    @OneToMany(mappedBy = "blackPlayer")
+    private List<Game> gamesAsBlack = new ArrayList<>();
+
     @CreationTimestamp
     @Column(updatable = false)
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private ZonedDateTime updatedAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

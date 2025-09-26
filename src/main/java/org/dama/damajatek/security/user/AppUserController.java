@@ -30,6 +30,7 @@ public class AppUserController {
         return UserInfoDto.builder()
                 .displayName(appUser.getDisplayName())
                 .userId(appUser.getId())
+                .createdAt(appUser.getCreatedAt())
                 .build();
     }
 }
