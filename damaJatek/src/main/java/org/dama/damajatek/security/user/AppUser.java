@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
 import org.dama.damajatek.entity.Game;
+import org.dama.damajatek.entity.Room;
 import org.dama.damajatek.security.token.Token;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -58,11 +59,17 @@ public class AppUser implements UserDetails {
     @ToString.Exclude
     private List<Token> tokens;
 
-    // Games where this user played as Red
+    // Room part
+    @OneToMany(mappedBy = "host")
+    private List<Room> hostedRooms = new ArrayList<>();
+
+    @OneToMany(mappedBy = "opponent")
+    private List<Room> joinedRooms = new ArrayList<>();
+
+    // Game part
     @OneToMany(mappedBy = "redPlayer")
     private List<Game> gamesAsRed = new ArrayList<>();
 
-    // Games where this user played as Black
     @OneToMany(mappedBy = "blackPlayer")
     private List<Game> gamesAsBlack = new ArrayList<>();
 

@@ -51,56 +51,7 @@ public class GameService implements IGameService {
     @Override
     @Transactional
     public Game makeMove(Long gameId, Move move) {
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new IllegalArgumentException("Game not found"));
-
-        if (game.getStatus() != GameStatus.IN_PROGRESS) {
-            throw new IllegalArgumentException("Game is not in progress");
-        }
-
-        Board board = loadBoard(game);
-
-        // Check if player must capture (forced capture rule)
-        List<Move> possibleCaptures = findAllCaptureMoves(board, game.getCurrentTurn());
-        if (!possibleCaptures.isEmpty() && !isCapture(move)) {
-            throw new IllegalArgumentException("Must capture when capture is available");
-        }
-
-        // Validate move
-        if (!isValidMove(board, move, game.getCurrentTurn())) {
-            throw new IllegalArgumentException("Invalid move");
-        }
-
-        // Apply move
-        applyMove(board, move);
-
-        // Check promotion
-        promoteIfKing(board, move);
-
-        // Check for additional captures (multi-jump)
-        if (isCapture(move)) {
-            List<Move> additionalCaptures = findCaptureMovesForPiece(board, move.getToRow(), move.getToCol());
-            if (!additionalCaptures.isEmpty()) {
-                // Player can make additional captures - don't switch turn yet
-                saveBoard(game, board);
-                return gameRepository.save(game);
-            }
-        }
-
-        // Switch turn
-        game.setCurrentTurn(game.getCurrentTurn() == PieceColor.RED ? PieceColor.BLACK : PieceColor.RED);
-
-        // Check win condition
-        if (isGameOver(board, game.getCurrentTurn())) {
-            game.setStatus(GameStatus.FINISHED);
-            game.setWinner(
-                    game.getCurrentTurn() == PieceColor.RED ? game.getBlackPlayer() : game.getRedPlayer()
-            );
-        }
-
-        // Save updated board
-        saveBoard(game, board);
-        return gameRepository.save(game);
+        return null;
     }
 
     private boolean isValidMove(Board board, Move move, PieceColor currentTurn) {
@@ -153,19 +104,7 @@ public class GameService implements IGameService {
     }
 
     private boolean isValidCapture(Board board, Move move, Piece movingPiece) {
-        int capturedRow = (move.getFromRow() + move.getToRow()) / 2;
-        int capturedCol = (move.getFromCol() + move.getToCol()) / 2;
-
-        Piece capturedPiece = board.getPiece(capturedRow, capturedCol);
-
-        if (capturedPiece == null || capturedPiece.getColor() == movingPiece.getColor()) {
-            return false;
-        }
-
-        // Clear captured pieces list and add this capture
-        move.getCapturedPieces().clear();
-        move.getCapturedPieces().add(new int[]{capturedRow, capturedCol});
-        return true;
+        return false;
     }
 
     private boolean isCapture(Move move) {
@@ -283,6 +222,7 @@ public class GameService implements IGameService {
         return moves;
     }
 
+    // Checks if the piece is on the board.
     private boolean isInBounds(int row, int col) {
         return row >= 0 && row < 8 && col >= 0 && col < 8;
     }

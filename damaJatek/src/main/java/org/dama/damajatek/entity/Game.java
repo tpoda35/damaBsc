@@ -25,6 +25,10 @@ public class Game {
     @Column(nullable = false, length = 25)
     private String name;
 
+    @OneToOne
+    @JoinColumn(name = "room_id")
+    private Room room;
+
     // Red player (could be human or null if bot)
     @ManyToOne
     @JoinColumn(name = "red_player_id")
