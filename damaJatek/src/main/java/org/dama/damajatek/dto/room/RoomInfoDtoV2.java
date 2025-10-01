@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RoomInfoDto {
+public class RoomInfoDtoV2 {
 
     private Long id;
     private String name;

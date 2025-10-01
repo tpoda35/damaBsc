@@ -2,7 +2,7 @@ package org.dama.damajatek.util;
 
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Piece;
-import org.dama.damajatek.enums.PieceColor;
+import org.dama.damajatek.enums.game.PieceColor;
 
 public class BoardInitializer {
 

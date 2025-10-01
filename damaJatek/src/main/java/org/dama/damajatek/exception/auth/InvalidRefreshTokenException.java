@@ -1,4 +1,4 @@
-package org.dama.damajatek.exception;
+package org.dama.damajatek.exception.auth;
 
 public class InvalidRefreshTokenException extends RuntimeException {
     public InvalidRefreshTokenException() {

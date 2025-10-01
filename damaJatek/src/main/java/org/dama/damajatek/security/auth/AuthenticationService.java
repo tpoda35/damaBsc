@@ -2,8 +2,8 @@ package org.dama.damajatek.security.auth;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.dama.damajatek.exception.InvalidRefreshTokenException;
-import org.dama.damajatek.exception.RefreshTokenNotFoundException;
+import org.dama.damajatek.exception.auth.InvalidRefreshTokenException;
+import org.dama.damajatek.exception.auth.RefreshTokenNotFoundException;
 import org.dama.damajatek.exception.UserNotFoundException;
 import org.dama.damajatek.security.config.JwtService;
 import org.dama.damajatek.security.token.Token;

@@ -8,9 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Move;
 import org.dama.damajatek.model.Piece;
-import org.dama.damajatek.enums.BotDifficulty;
-import org.dama.damajatek.enums.GameStatus;
-import org.dama.damajatek.enums.PieceColor;
+import org.dama.damajatek.enums.game.BotDifficulty;
+import org.dama.damajatek.enums.game.GameStatus;
+import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.repository.GameRepository;
 import org.dama.damajatek.security.user.AppUser;
@@ -31,11 +31,10 @@ public class GameService implements IGameService {
 
     @Override
     @Transactional
-    public Game createGame(String name, AppUser redPlayer, AppUser blackPlayer, boolean vsBot, BotDifficulty difficulty) {
+    public Game createGame(AppUser redPlayer, AppUser blackPlayer, boolean vsBot, BotDifficulty difficulty) {
         Board board = BoardInitializer.createStartingBoard();
 
         Game game = Game.builder()
-                .name(name)
                 .redPlayer(redPlayer)
                 .blackPlayer(blackPlayer)
                 .currentTurn(PieceColor.RED)

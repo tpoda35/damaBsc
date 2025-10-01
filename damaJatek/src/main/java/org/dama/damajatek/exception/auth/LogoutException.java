@@ -1,4 +1,4 @@
-package org.dama.damajatek.exception;
+package org.dama.damajatek.exception.auth;
 
 public class LogoutException extends RuntimeException{
     public LogoutException(String message) {

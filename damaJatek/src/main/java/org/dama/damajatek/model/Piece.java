@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.dama.damajatek.enums.PieceColor;
+import org.dama.damajatek.enums.game.PieceColor;
 
 @Data
 @AllArgsConstructor

@@ -1,4 +1,4 @@
-package org.dama.damajatek.enums;
+package org.dama.damajatek.enums.game;
 
 public enum PieceColor {
     RED,

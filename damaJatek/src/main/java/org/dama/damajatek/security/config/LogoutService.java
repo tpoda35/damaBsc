@@ -5,7 +5,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
-import org.dama.damajatek.exception.LogoutException;
+import org.dama.damajatek.exception.auth.LogoutException;
 import org.dama.damajatek.security.token.TokenRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;

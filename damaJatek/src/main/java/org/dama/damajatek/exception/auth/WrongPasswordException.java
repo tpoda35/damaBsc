@@ -1,4 +1,4 @@
-package org.dama.damajatek.exception;
+package org.dama.damajatek.exception.auth;
 
 /**
  * Exception thrown when the provided current password

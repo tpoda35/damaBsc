@@ -6,7 +6,7 @@ import org.dama.damajatek.dto.game.ErrorMessage;
 import org.dama.damajatek.dto.game.GameStateMessage;
 import org.dama.damajatek.dto.game.MoveMessage;
 import org.dama.damajatek.entity.Game;
-import org.dama.damajatek.enums.GameStatus;
+import org.dama.damajatek.enums.game.GameStatus;
 import org.dama.damajatek.model.Move;
 import org.dama.damajatek.service.IGameService;
 import org.springframework.messaging.handler.annotation.DestinationVariable;

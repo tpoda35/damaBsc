@@ -2,8 +2,8 @@ package org.dama.damajatek.dto.game;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.dama.damajatek.enums.GameStatus;
-import org.dama.damajatek.enums.PieceColor;
+import org.dama.damajatek.enums.game.GameStatus;
+import org.dama.damajatek.enums.game.PieceColor;
 
 @Data
 @AllArgsConstructor
