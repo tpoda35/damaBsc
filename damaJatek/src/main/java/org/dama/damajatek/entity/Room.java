@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dama.damajatek.enums.room.ReadyStatus;
-import org.dama.damajatek.security.user.AppUser;
+import org.dama.damajatek.authentication.user.AppUser;
 
 import static org.dama.damajatek.enums.room.ReadyStatus.NOT_READY;
 

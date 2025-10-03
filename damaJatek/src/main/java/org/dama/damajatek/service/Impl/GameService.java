@@ -13,7 +13,7 @@ import org.dama.damajatek.enums.game.GameStatus;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.repository.GameRepository;
-import org.dama.damajatek.security.user.AppUser;
+import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.util.BoardInitializer;
 import org.springframework.stereotype.Service;

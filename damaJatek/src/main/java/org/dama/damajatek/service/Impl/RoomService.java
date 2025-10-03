@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.dto.room.RoomCreateDto;
 import org.dama.damajatek.dto.room.RoomInfoDtoV1;
 import org.dama.damajatek.dto.room.RoomInfoDtoV2;
+import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.Room;
 import org.dama.damajatek.enums.game.BotDifficulty;
 import org.dama.damajatek.exception.PasswordMismatchException;
@@ -14,8 +15,8 @@ import org.dama.damajatek.exception.auth.AccessDeniedException;
 import org.dama.damajatek.exception.room.*;
 import org.dama.damajatek.mapper.RoomMapper;
 import org.dama.damajatek.repository.RoomRepository;
-import org.dama.damajatek.security.user.AppUser;
-import org.dama.damajatek.security.user.AppUserService;
+import org.dama.damajatek.authentication.user.AppUser;
+import org.dama.damajatek.authentication.user.AppUserService;
 import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.service.IRoomService;
 import org.springframework.data.domain.Page;
@@ -79,6 +80,7 @@ public class RoomService implements IRoomService {
                 throw new HostCannotJoinOwnRoomException();
             }
 
+            // Websocket message
             room.setOpponent(opponent);
 
         } catch (OptimisticLockException e) {
@@ -153,8 +155,9 @@ public class RoomService implements IRoomService {
     }
 
 
+    @Transactional
     @Override
-    public void start(Long roomId) {
+    public Game start(Long roomId) {
         Room room = findRoomByIdWithUsers(roomId);
 
         AppUser user = appUserService.getLoggedInUser();
@@ -180,7 +183,7 @@ public class RoomService implements IRoomService {
                 redPlayer = room.getHost();
             }
 
-            gameService.createGame(redPlayer, blackPlayer, false, BotDifficulty.EASY);
+            return gameService.createGame(redPlayer, blackPlayer, false, BotDifficulty.EASY);
         } else {
             log.warn("Game start blocked for room(id: {}): hostReadyStatus={}, opponentReadyStatus={}",
                     roomId, room.getHostReadyStatus(), room.getOpponentReadyStatus());

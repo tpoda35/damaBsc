@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import org.dama.damajatek.enums.game.BotDifficulty;
 import org.dama.damajatek.enums.game.GameStatus;
 import org.dama.damajatek.enums.game.PieceColor;
-import org.dama.damajatek.security.user.AppUser;
+import org.dama.damajatek.authentication.user.AppUser;
 
 import static org.dama.damajatek.enums.game.GameStatus.WAITING;
 import static org.dama.damajatek.enums.game.PieceColor.BLACK;
