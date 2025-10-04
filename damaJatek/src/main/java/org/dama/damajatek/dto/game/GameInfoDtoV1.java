@@ -1,4 +1,4 @@
-package org.dama.damajatek.dto.room;
+package org.dama.damajatek.dto.game;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RoomInfoDtoV2 {
+public class GameInfoDtoV1 {
 
     private Long id;
-    private String name;
-    private int playerCount;
-    private boolean locked;
+
 
 }

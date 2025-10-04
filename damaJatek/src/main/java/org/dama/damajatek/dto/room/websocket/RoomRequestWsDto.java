@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dama.damajatek.annotation.room.ValidRoomWsDto;
 import org.dama.damajatek.dto.room.RoomCreateDto;
-import org.dama.damajatek.dto.room.RoomInfoDtoV1;
 import org.dama.damajatek.enums.room.RoomWsType;
 
 @ValidRoomWsDto // When type is CREATE, roomCreateDto is required, when type is not create, roomId required
@@ -17,7 +16,7 @@ import org.dama.damajatek.enums.room.RoomWsType;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoomWsDto {
+public class RoomRequestWsDto {
 
     @NotNull(message = "Type is required.")
     @Enumerated(EnumType.STRING)
@@ -27,7 +26,4 @@ public class RoomWsDto {
     private Long password; // only at join, if needed
 
     private RoomCreateDto roomCreateDto;
-
-    // Only used for sending data to frontend
-    private RoomInfoDtoV1 roomInfoDtoV1;
 }

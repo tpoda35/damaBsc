@@ -2,7 +2,7 @@ package org.dama.damajatek.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dama.damajatek.dto.room.websocket.RoomWsDto;
+import org.dama.damajatek.dto.room.websocket.RoomRequestWsDto;
 import org.dama.damajatek.service.IRoomService;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -21,13 +21,7 @@ public class RoomWebSocketController {
     @MessageMapping("/rooms/{roomId}")
     public void handleRoomMessage(
             @DestinationVariable Long roomId,
-            @Payload RoomWsDto payload
+            @Payload RoomRequestWsDto payload
     ) {
-        RoomWsDto results;
-
-        switch (payload.getType()) {
-//            case CREATE ->
-//                results = roomService.create(payload.getRoomCreateDto())
-        }
     }
 }

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dama.damajatek.dto.appUser.AppUserInfoDtoV1;
 
 @Data
 @AllArgsConstructor
@@ -11,10 +12,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RoomInfoDtoV1 {
 
+    // Room info
     private Long id;
     private String name;
-    private String host;
-    private boolean started;
-    private boolean locked;
+
+    private AppUserInfoDtoV1 host;
+    private AppUserInfoDtoV1 opponent;
 
 }

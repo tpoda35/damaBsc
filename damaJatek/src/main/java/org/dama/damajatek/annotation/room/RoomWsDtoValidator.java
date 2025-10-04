@@ -2,13 +2,13 @@ package org.dama.damajatek.annotation.room;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import org.dama.damajatek.dto.room.websocket.RoomWsDto;
+import org.dama.damajatek.dto.room.websocket.RoomRequestWsDto;
 import org.dama.damajatek.enums.room.RoomWsType;
 
-public class RoomWsDtoValidator implements ConstraintValidator<ValidRoomWsDto, RoomWsDto> {
+public class RoomWsDtoValidator implements ConstraintValidator<ValidRoomWsDto, RoomRequestWsDto> {
 
     @Override
-    public boolean isValid(RoomWsDto dto, ConstraintValidatorContext context) {
+    public boolean isValid(RoomRequestWsDto dto, ConstraintValidatorContext context) {
         if (dto == null) {
             return true; // @NotNull should handle null object itself
         }

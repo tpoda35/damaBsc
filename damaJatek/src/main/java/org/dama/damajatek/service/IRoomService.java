@@ -6,8 +6,10 @@ import org.dama.damajatek.dto.room.RoomInfoDtoV2;
 import org.dama.damajatek.entity.Game;
 import org.springframework.data.domain.Page;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface IRoomService {
-    RoomInfoDtoV1 create(RoomCreateDto roomCreateDto);
+    void create(RoomCreateDto roomCreateDto);
     void join(Long roomId, String password);
     void leave(Long roomId);
     void kick(Long roomId);
@@ -15,5 +17,6 @@ public interface IRoomService {
     void ready(Long roomId);
     Game start(Long roomId);
 
-    Page<RoomInfoDtoV2> getRooms(int pageNum, int pageSize);
+    CompletableFuture<Page<RoomInfoDtoV2>> getRooms(int pageNum, int pageSize);
+    CompletableFuture<RoomInfoDtoV1> getRoom(Long roomId);
 }

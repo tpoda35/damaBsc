@@ -4,6 +4,8 @@ import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dama.damajatek.authentication.user.AppUser;
+import org.dama.damajatek.authentication.user.AppUserService;
 import org.dama.damajatek.dto.room.RoomCreateDto;
 import org.dama.damajatek.dto.room.RoomInfoDtoV1;
 import org.dama.damajatek.dto.room.RoomInfoDtoV2;
@@ -15,17 +17,17 @@ import org.dama.damajatek.exception.auth.AccessDeniedException;
 import org.dama.damajatek.exception.room.*;
 import org.dama.damajatek.mapper.RoomMapper;
 import org.dama.damajatek.repository.RoomRepository;
-import org.dama.damajatek.authentication.user.AppUser;
-import org.dama.damajatek.authentication.user.AppUserService;
 import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.service.IRoomService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 import static org.dama.damajatek.enums.room.ReadyStatus.NOT_READY;
 import static org.dama.damajatek.enums.room.ReadyStatus.READY;
@@ -42,19 +44,15 @@ public class RoomService implements IRoomService {
 
     @Transactional
     @Override
-    public RoomInfoDtoV1 create(RoomCreateDto roomCreateDto) {
+    public void create(RoomCreateDto roomCreateDto) {
         AppUser host = appUserService.getLoggedInUser();
 
-        Room room = Room.builder()
-                .name(roomCreateDto.getName())
-                .locked(roomCreateDto.isLocked())
-                .password(roomCreateDto.isLocked()
-                        ? passwordEncoder.encode(roomCreateDto.getPassword())
-                        : null)
-                .host(host)
-                .build();
+        String encodedPassword = roomCreateDto.isLocked()
+                ? passwordEncoder.encode(roomCreateDto.getPassword())
+                : null;
 
-        return RoomMapper.createRoomInfoDtoV1(roomRepository.save(room));
+        Room room = RoomMapper.createRoom(roomCreateDto, host, encodedPassword);
+        roomRepository.save(room);
     }
 
     @Transactional
@@ -80,9 +78,7 @@ public class RoomService implements IRoomService {
                 throw new HostCannotJoinOwnRoomException();
             }
 
-            // Websocket message
             room.setOpponent(opponent);
-
         } catch (OptimisticLockException e) {
             log.warn("Concurrent join detected for room(id: {}).", roomId);
             throw new RoomAlreadyFullException();
@@ -98,11 +94,11 @@ public class RoomService implements IRoomService {
 
         if (user.getId().equals(room.getHost().getId())) {
             log.info("Host left the room(id: {}), deleting room", roomId);
-            // Event listener here, to disconnect the opponent from the room.
+            // Something here, to give a signal to the front-end.
             roomRepository.delete(room);
         } else if (room.getOpponent() != null && user.getId().equals(room.getOpponent().getId())) {
             room.setOpponent(null);
-            // Some kind of message that opponent leaved the room with websocket.
+            // Some kind of message that opponent leaved the room.
             log.info("Opponent left the room(id: {})", roomId);
         } else {
             log.warn("Unauthorized access to room(id: {}) from user(id: {}).", roomId, user.getId());
@@ -191,11 +187,27 @@ public class RoomService implements IRoomService {
         }
     }
 
+    @Async
     @Override
-    public Page<RoomInfoDtoV2> getRooms(int pageNum, int pageSize) {
+    public CompletableFuture<Page<RoomInfoDtoV2>> getRooms(int pageNum, int pageSize) {
         Pageable pageable = PageRequest.of(pageNum, pageSize);
-        return roomRepository.findAll(pageable)
+        Page<RoomInfoDtoV2> rooms = roomRepository.findAll(pageable)
                 .map(RoomMapper::createRoomInfoDtoV2);
+
+        if (rooms.isEmpty()) {
+            throw new RoomNotFoundException("There's no active room.");
+        }
+
+        return CompletableFuture.completedFuture(rooms);
+    }
+
+    @Async
+    @Override
+    public CompletableFuture<RoomInfoDtoV1> getRoom(Long roomId) {
+        Room room = findRoomByIdWithUsers(roomId);
+        return CompletableFuture.completedFuture(
+                RoomMapper.createRoomInfoDtoV1(room, room.getHost(), room.getOpponent())
+        );
     }
 
     private Room findRoomByIdWithUsers(Long roomId) {
