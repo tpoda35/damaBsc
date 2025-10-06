@@ -11,9 +11,6 @@ import java.time.Duration;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
-/**
- * Controller class for the user authentication system.
- */
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -55,7 +52,7 @@ public class AuthenticationController {
         response.addHeader(SET_COOKIE, accessTokenCookie.toString());
         response.addHeader(SET_COOKIE, refreshTokenCookie.toString());
 
-        return ResponseEntity.ok(authResponse.getAccessToken());
+        return ResponseEntity.ok(authResponse.getAccessToken()); // this is just for testing purposes
     }
 
     @PostMapping("/refresh")

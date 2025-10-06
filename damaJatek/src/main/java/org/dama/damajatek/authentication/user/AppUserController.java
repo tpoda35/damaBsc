@@ -5,9 +5,6 @@ import org.dama.damajatek.dto.UserInfoDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Controller class for the user specific endpoints.
- */
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -15,7 +12,7 @@ public class AppUserController {
 
     private final AppUserService appUserService;
 
-    @PatchMapping
+    @PatchMapping("/changePassword")
     public ResponseEntity<?> changePassword(
           @RequestBody ChangePasswordRequest request
     ) {
@@ -23,7 +20,7 @@ public class AppUserController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/getLoggedInUserInfo")
+    @GetMapping
     public UserInfoDto getUserInfo() {
         AppUser appUser = appUserService.getLoggedInUser();
 
