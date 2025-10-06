@@ -15,12 +15,17 @@ import org.springframework.security.authentication.BadCredentialsException;
 @NoArgsConstructor
 public class RegisterRequest {
 
-    @NotBlank(message = "DisplayName field cannot be blank.")
+    @NotBlank(message = "Display name field cannot be blank.")
     private String displayName;
+
     @NotBlank(message = "Email field cannot be blank.")
     @Email(message = "Invalid Email format.")
     private String email;
+
+    @NotBlank(message = "Password field cannot be blank.")
     private String password;
+
+    @NotBlank(message = "Confirm password field cannot be blank.")
     private String confirmPassword;
 
     @PrePersist

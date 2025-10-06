@@ -1,3 +1,7 @@
 export const getErrorMessage = (err, fallbackMessage = 'An error occurred') => {
-    return err?.response?.data?.message || err?.message || fallbackMessage;
+    if (err?.response?.data) {
+        const data = err.response.data;
+        return data.message || data.error || fallbackMessage;
+    }
+    return err?.message || fallbackMessage;
 };

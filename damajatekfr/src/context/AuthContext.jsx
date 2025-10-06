@@ -7,40 +7,41 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const fetchUser = useCallback(async () => {
+        setLoading(true);
+        try {
+            const data = await ApiService.get("/users");
+            setUser(data);
+        } catch {
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const data = await ApiService.get("/auth/me");
-                setUser(data);
-            } catch {
-                setUser(null);
-            } finally {
-                setLoading(false);
-            }
-        };
+        fetchUser();
+    }, [fetchUser]);
 
-        checkAuth();
-    }, []);
-
-    const login = useCallback(async (credentials) => {
-        await ApiService.post("/auth/login", credentials);
-        const data = await ApiService.get("/auth/me");
-        setUser(data);
-    }, []);
+    const login = useCallback(
+        async (formData) => {
+            await ApiService.post("/auth/login", formData);
+            await fetchUser();
+        },
+        [fetchUser]
+    );
 
     const register = useCallback(async (formData) => {
         await ApiService.post("/auth/register", formData);
-        const data = await ApiService.get("/auth/me");
-        setUser(data);
     }, []);
 
     const logout = useCallback(async () => {
-        await ApiService.post("/auth/logout"); // implement this backend route
+        await ApiService.post("/auth/logout");
         setUser(null);
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, fetchUser }}>
             {children}
         </AuthContext.Provider>
     );

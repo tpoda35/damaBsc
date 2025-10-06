@@ -12,7 +12,7 @@ public class AppUserController {
 
     private final AppUserService appUserService;
 
-    @PatchMapping("/changePassword")
+    @PostMapping("/changePassword")
     public ResponseEntity<?> changePassword(
           @RequestBody ChangePasswordRequest request
     ) {

@@ -21,9 +21,6 @@ import static org.dama.damajatek.authentication.token.TokenType.BEARER;
 import static org.dama.damajatek.authentication.user.Role.USER;
 import static org.dama.damajatek.authentication.user.Status.OFFLINE;
 
-/**
- * Service class for the authentication system.
- */
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -59,13 +56,16 @@ public class AuthenticationService {
                         request.getPassword()
                 )
         );
+
         AppUser user = repository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
+
         String jwtToken = jwtService.generateToken(user);
-        // Will be modified to stay the same for 30 days.
-        String refreshToken = jwtService.generateRefreshToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user); // Will be modified to stay the same for 30 days.
+
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
+
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)

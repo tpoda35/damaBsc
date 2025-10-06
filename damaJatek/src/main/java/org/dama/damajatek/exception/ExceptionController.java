@@ -4,30 +4,31 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.persistence.EntityNotFoundException;
 import org.dama.damajatek.dto.CustomExceptionDto;
+import org.dama.damajatek.exception.auth.UserNotLoggedInException;
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.CompletionException;
 
-/**
- * Global exception handler, catches every uncaught and unhandled exception.
- *
- * <p>Annotated with @RestControllerAdvice, which enables this class as a global exception handler.
- * Every @ExceptionHandler handles a different exception.</p>
- */
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 @RestControllerAdvice
 public class ExceptionController {
+
+    // ----------------------
+    // Validation Exceptions
+    // ----------------------
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ResponseEntity<CustomExceptionDto> handleMethodValidationException(
             HandlerMethodValidationException e
@@ -37,141 +38,109 @@ public class ExceptionController {
                 .map(MessageSourceResolvable::getDefaultMessage)
                 .orElse("Validation failed");
 
-        CustomExceptionDto customExceptionDto = CustomExceptionDto.builder()
-                .date(new Date())
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .message(errorMessage)
-                .build();
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(customExceptionDto);
+        return buildResponse(errorMessage, BAD_REQUEST);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<CustomExceptionDto> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException ex
+    ) {
+        List<String> globalErrors = ex.getBindingResult()
+                .getGlobalErrors()
+                .stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .toList();
+
+        List<String> fieldErrors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .toList();
+
+        List<String> allErrors = new ArrayList<>();
+        allErrors.addAll(globalErrors);
+        allErrors.addAll(fieldErrors);
+
+        String combinedMessage = String.join(", ", allErrors);
+        return buildResponse(combinedMessage.isEmpty() ? "Validation failed" : combinedMessage, BAD_REQUEST);
+    }
+
+    // ----------------------
+    // CompletionException delegation
+    // ----------------------
     @ExceptionHandler(CompletionException.class)
-    public ResponseEntity<?> handleCompletionException(
+    public ResponseEntity<CustomExceptionDto> handleCompletionException(
             CompletionException e
     ) {
         Throwable cause = e.getCause();
-
         if (cause instanceof UserNotFoundException) {
             return handleUserNotFoundException((UserNotFoundException) cause);
         } else if (cause instanceof IllegalStateException) {
             return handleIllegalStateException((IllegalStateException) cause);
         }
-
         return globalExceptionHandler(e);
     }
 
+    // ----------------------
+    // Specific exceptions
+    // ----------------------
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<CustomExceptionDto> handleUserNotFoundException(
-            UserNotFoundException e
-    ) {
-        var response = CustomExceptionDto.builder()
-                .date(new Date())
-                .statusCode(HttpStatus.NOT_FOUND.value())
-                .message(e.getMessage())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    public ResponseEntity<CustomExceptionDto> handleUserNotFoundException(UserNotFoundException e) {
+        return buildResponse(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<CustomExceptionDto> handleIllegalStateException(
-            IllegalStateException e
-    ) {
-        var response = CustomExceptionDto.builder()
-                .date(new Date())
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .message(e.getMessage())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    public ResponseEntity<CustomExceptionDto> handleIllegalStateException(IllegalStateException e) {
+        return buildResponse(e.getMessage(), BAD_REQUEST);
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<CustomExceptionDto> handleAuthorizationDeniedException(
-            AuthorizationDeniedException e
-    ) {
-        var response = CustomExceptionDto.builder()
-                .date(new Date())
-                .statusCode(HttpStatus.FORBIDDEN.value())
-                .message(e.getMessage())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    public ResponseEntity<CustomExceptionDto> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+        return buildResponse(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<CustomExceptionDto> handleEntityNotFoundException(
-            EntityNotFoundException e
-    ) {
-        var response = CustomExceptionDto.builder()
-                .date(new Date())
-                .statusCode(HttpStatus.NOT_FOUND.value())
-                .message(e.getMessage())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException ex){
-        Map<String, String> errors = new HashMap<>();
-
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    public ResponseEntity<CustomExceptionDto> handleEntityNotFoundException(EntityNotFoundException e) {
+        return buildResponse(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<CustomExceptionDto> handleJwtExpirationException(
-            ExpiredJwtException e
-    ){
-        var response = CustomExceptionDto.builder()
-                .date(new Date())
-                .statusCode(HttpStatus.UNAUTHORIZED.value())
-                .message("Session expired.")
-                .build();
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    public ResponseEntity<CustomExceptionDto> handleJwtExpirationException(ExpiredJwtException e) {
+        return buildResponse("Session expired.", HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(MalformedJwtException.class)
-    public ResponseEntity<CustomExceptionDto> handleMalformedJwtException(
-            MalformedJwtException e
-    ){
-        var response = CustomExceptionDto.builder()
-                .date(new Date())
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .message("Invalid JWT token.")
-                .build();
+    public ResponseEntity<CustomExceptionDto> handleMalformedJwtException(MalformedJwtException e) {
+        return buildResponse("Invalid JWT token.", BAD_REQUEST);
+    }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    @ExceptionHandler(UserNotLoggedInException.class)
+    public ResponseEntity<CustomExceptionDto> handleUserNotLoggedInException(UserNotLoggedInException e) {
+        return buildResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Map<String, String>> handleBadCredentialsException(
-            BadCredentialsException ex
-    ){
-        Map<String, String> errors = new HashMap<>();
-        errors.put("error", ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    public ResponseEntity<CustomExceptionDto> handleBadCredentialsException(BadCredentialsException e) {
+        return buildResponse(e.getMessage(), BAD_REQUEST);
     }
 
+    // ----------------------
+    // Fallback for other exceptions
+    // ----------------------
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<CustomExceptionDto> globalExceptionHandler(
-            Exception e
-    ){
-        var response = CustomExceptionDto.builder()
-                .date(new Date())
-                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message(e.getMessage())
-                .build();
+    public ResponseEntity<CustomExceptionDto> globalExceptionHandler(Exception e) {
+        return buildResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    // ----------------------
+    // Utility method to build consistent responses
+    // ----------------------
+    private ResponseEntity<CustomExceptionDto> buildResponse(String message, HttpStatus status) {
+        CustomExceptionDto response = CustomExceptionDto.builder()
+                .date(new Date())
+                .statusCode(status.value())
+                .message(message)
+                .build();
+        return ResponseEntity.status(status).body(response);
     }
 }

@@ -1,41 +1,33 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import Form from "../components/Form.jsx";
 
 const Register = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const { register } = useAuth();
     const navigate = useNavigate();
+    const [error, setError] = useState("");
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // TODO: call ApiService.post("/auth/register", { email, password })
-        navigate("/login");
+    const handleRegister = async (data) => {
+        setError("");
+        console.log(data);
+        try {
+            await register(data);
+            navigate("/");
+        } catch (err) {
+            console.error(err);
+            setError("Failed to register. Try again.");
+        }
     };
 
-    return (
-        <div style={{ padding: "2rem" }}>
-            <h2>Register</h2>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <br />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <br />
-                <button type="submit">Register</button>
-            </form>
-        </div>
-    );
+    const fields = [
+        { name: "displayName", type: "text", placeholder: "Display name", required: true },
+        { name: "email", type: "email", placeholder: "Email", required: true },
+        { name: "password", type: "password", placeholder: "Password", required: true },
+        { name: "confirmPassword", type: "password", placeholder: "Confirm password", required: true },
+    ];
+
+    return <Form fields={fields} onSubmit={handleRegister} buttonText="Register" error={error} />;
 };
 
 export default Register;

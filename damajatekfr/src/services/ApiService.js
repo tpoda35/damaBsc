@@ -17,6 +17,7 @@ class ApiService {
         } catch (err) {
             console.error("API Request failed:", err);
             const message = getErrorMessage(err, "API request failed.");
+            console.log('custom message: ', message);
             throw new Error(message);
         }
     }
