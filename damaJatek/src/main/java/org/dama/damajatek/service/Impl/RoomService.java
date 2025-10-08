@@ -44,7 +44,7 @@ public class RoomService implements IRoomService {
 
     @Transactional
     @Override
-    public void create(RoomCreateDto roomCreateDto) {
+    public Long create(RoomCreateDto roomCreateDto) {
         AppUser host = appUserService.getLoggedInUser();
 
         String encodedPassword = roomCreateDto.isLocked()
@@ -52,7 +52,7 @@ public class RoomService implements IRoomService {
                 : null;
 
         Room room = RoomMapper.createRoom(roomCreateDto, host, encodedPassword);
-        roomRepository.save(room);
+        return roomRepository.save(room).getId();
     }
 
     @Transactional
@@ -163,7 +163,7 @@ public class RoomService implements IRoomService {
             throw new AccessDeniedException("Only the host can start the game");
         }
 
-        if (room.getHostReadyStatus() == READY && room.getOpponentReadyStatus() == READY) {
+        if (room.isFullyReady()) {
             // Game start logic
             AppUser redPlayer;
             AppUser blackPlayer;
@@ -193,10 +193,6 @@ public class RoomService implements IRoomService {
         Pageable pageable = PageRequest.of(pageNum, pageSize);
         Page<RoomInfoDtoV2> rooms = roomRepository.findAll(pageable)
                 .map(RoomMapper::createRoomInfoDtoV2);
-
-        if (rooms.isEmpty()) {
-            throw new RoomNotFoundException("There's no active room.");
-        }
 
         return CompletableFuture.completedFuture(rooms);
     }

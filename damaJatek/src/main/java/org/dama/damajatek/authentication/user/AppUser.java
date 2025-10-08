@@ -61,16 +61,24 @@ public class AppUser implements UserDetails {
 
     // Room part
     @OneToMany(mappedBy = "host")
+    @JsonIgnore
+    @ToString.Exclude
     private List<Room> hostedRooms = new ArrayList<>();
 
     @OneToMany(mappedBy = "opponent")
+    @JsonIgnore
+    @ToString.Exclude
     private List<Room> joinedRooms = new ArrayList<>();
 
     // Game part
     @OneToMany(mappedBy = "redPlayer")
+    @JsonIgnore
+    @ToString.Exclude
     private List<Game> gamesAsRed = new ArrayList<>();
 
     @OneToMany(mappedBy = "blackPlayer")
+    @JsonIgnore
+    @ToString.Exclude
     private List<Game> gamesAsBlack = new ArrayList<>();
 
     @CreationTimestamp

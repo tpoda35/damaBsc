@@ -1,22 +1,32 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Form from "../components/Form.jsx";
+import {useState} from "react";
 
 const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
+    const [error, setError] = useState("");
 
     const handleLogin = async (data) => {
-        await login(data);
-        navigate("/");
+        setError("");
+        try {
+            await login(data);
+            navigate("/");
+        } catch (err) {
+            // console.log("Login error:", err);
+            // console.log("Login errorMsg:", err.message);
+            setError(err.message);
+        }
+
     };
 
     const fields = [
-        { name: "email", type: "email", placeholder: "Email", required: true },
-        { name: "password", type: "password", placeholder: "Password", required: true },
+        { label: "E-Mail", name: "email", type: "email", placeholder: "MyEmail123@mail.com", required: true },
+        { label: "Password", name: "password", type: "password", placeholder: "********", required: true },
     ];
 
-    return <Form fields={fields} onSubmit={handleLogin} buttonText="Login" />;
+    return <Form fields={fields} onSubmit={handleLogin} buttonText="Login" error={error} />;
 };
 
 export default Login;

@@ -1,9 +1,11 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
+import {AuthProvider} from "./context/AuthContext";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Rooms from "./pages/Rooms.jsx";
+import Room from "./pages/Room.jsx";
 
 function App() {
     return (
@@ -12,6 +14,8 @@ function App() {
                 <Routes>
                     <Route element={<Layout />}>
                         <Route path="/" element={<Home />} />
+                        <Route path="/rooms" element={<Rooms />} />
+                        <Route path="/rooms/:id" element={<Room />} />
                     </Route>
 
                     <Route path="/login" element={<Login />} />

@@ -1,5 +1,6 @@
 package org.dama.damajatek.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.dto.room.RoomCreateDto;
@@ -23,10 +24,10 @@ public class RoomController {
     private final IRoomService roomService;
 
     @PostMapping
-    public ResponseEntity<RoomInfoDtoV1> createRoom(@RequestBody RoomCreateDto dto) {
-        roomService.create(dto);
-
-        return ResponseEntity.created(URI.create("/rooms")).build();
+    public ResponseEntity<Long> createRoom(@RequestBody @Valid RoomCreateDto dto) {
+        Long roomId = roomService.create(dto);
+        URI location = URI.create("/rooms/" + roomId);
+        return ResponseEntity.created(location).body(roomId);
     }
 
     @PostMapping("/{roomId}/join")

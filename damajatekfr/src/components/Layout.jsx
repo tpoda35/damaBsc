@@ -3,9 +3,9 @@ import Navbar from "./Navbar";
 
 const Layout = () => {
     return (
-        <div className="app-layout">
+        <div>
             <Navbar />
-            <main className="p-4">
+            <main>
                 <Outlet />
             </main>
         </div>

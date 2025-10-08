@@ -10,6 +10,7 @@ import org.dama.damajatek.enums.room.ReadyStatus;
 import org.dama.damajatek.authentication.user.AppUser;
 
 import static org.dama.damajatek.enums.room.ReadyStatus.NOT_READY;
+import static org.dama.damajatek.enums.room.ReadyStatus.READY;
 
 @Data
 @AllArgsConstructor
@@ -28,7 +29,7 @@ public class Room {
     private String name;
 
     // If this is true, then the room requires password
-    private boolean locked = false;
+    private boolean locked;
 
     // This is hashed with bcrypt
     private String password;
@@ -37,15 +38,15 @@ public class Room {
     @JoinColumn(name = "host_id", nullable = false)
     private AppUser host;
 
-    private ReadyStatus hostReadyStatus = NOT_READY;
+    private ReadyStatus hostReadyStatus;
 
     @ManyToOne
     @JoinColumn(name = "opponent_id")
-    private AppUser opponent = null;
+    private AppUser opponent;
 
-    private ReadyStatus opponentReadyStatus = NOT_READY;
+    private ReadyStatus opponentReadyStatus;
 
-    private boolean started = false;
+    private boolean started;
 
     @OneToOne(mappedBy = "room")
     private Game game;
@@ -55,6 +56,15 @@ public class Room {
 
     @Transient
     public boolean isFullyReady() {
-        return hostReadyStatus == ReadyStatus.READY && opponentReadyStatus == ReadyStatus.READY;
+        return hostReadyStatus == READY && opponentReadyStatus == READY;
+    }
+
+    @PrePersist
+    public void Init() {
+        locked = false;
+        started = false;
+
+        hostReadyStatus = NOT_READY;
+        opponentReadyStatus = NOT_READY;
     }
 }

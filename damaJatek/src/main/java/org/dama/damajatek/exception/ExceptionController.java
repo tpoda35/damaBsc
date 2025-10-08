@@ -3,7 +3,9 @@ package org.dama.damajatek.exception;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.dto.CustomExceptionDto;
+import org.dama.damajatek.exception.auth.RefreshTokenNotFoundException;
 import org.dama.damajatek.exception.auth.UserNotLoggedInException;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -24,6 +26,7 @@ import java.util.concurrent.CompletionException;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RestControllerAdvice
+@Slf4j
 public class ExceptionController {
 
     // ----------------------
@@ -89,6 +92,11 @@ public class ExceptionController {
         return buildResponse(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(RefreshTokenNotFoundException.class)
+    public ResponseEntity<CustomExceptionDto> handleRefreshTokenNotFoundException(RefreshTokenNotFoundException e) {
+        return buildResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<CustomExceptionDto> handleIllegalStateException(IllegalStateException e) {
         return buildResponse(e.getMessage(), BAD_REQUEST);
@@ -121,6 +129,7 @@ public class ExceptionController {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<CustomExceptionDto> handleBadCredentialsException(BadCredentialsException e) {
+        log.info("Bad credental szex: {}", e.getMessage());
         return buildResponse(e.getMessage(), BAD_REQUEST);
     }
 

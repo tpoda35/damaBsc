@@ -6,13 +6,13 @@ const Home = () => {
     if (loading) return <p>Loading...</p>;
 
     return (
-        <div className="text-center mt-10">
+        <div>
             {!user ? (
-                <h2 className="text-xl font-semibold">
+                <h2>
                     Login or Register to play.
                 </h2>
             ) : (
-                <h2 className="text-xl font-semibold">
+                <h2>
                     Welcome back, {user.displayName || "Player"}!
                 </h2>
             )}

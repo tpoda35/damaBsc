@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page;
 import java.util.concurrent.CompletableFuture;
 
 public interface IRoomService {
-    void create(RoomCreateDto roomCreateDto);
+    Long create(RoomCreateDto roomCreateDto);
     void join(Long roomId, String password);
     void leave(Long roomId);
     void kick(Long roomId);

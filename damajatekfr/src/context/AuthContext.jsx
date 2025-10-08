@@ -5,7 +5,7 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     const fetchUser = useCallback(async () => {
         setLoading(true);
@@ -23,21 +23,33 @@ export const AuthProvider = ({ children }) => {
         fetchUser();
     }, [fetchUser]);
 
-    const login = useCallback(
-        async (formData) => {
+    const login = useCallback(async (formData) => {
+        setLoading(true);
+        try {
             await ApiService.post("/auth/login", formData);
             await fetchUser();
-        },
-        [fetchUser]
-    );
-
+        } finally {
+            setLoading(false);
+        }
+    }, [fetchUser]);
+    
     const register = useCallback(async (formData) => {
-        await ApiService.post("/auth/register", formData);
+        setLoading(true);
+        try {
+            await ApiService.post("/auth/register", formData);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
     const logout = useCallback(async () => {
-        await ApiService.post("/auth/logout");
-        setUser(null);
+        setLoading(true);
+        try {
+            await ApiService.post("/auth/logout");
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
     return (

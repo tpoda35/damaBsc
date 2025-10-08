@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import {useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {useAuth} from "../context/AuthContext";
 import Form from "../components/Form.jsx";
 
 const Register = () => {
@@ -10,21 +10,21 @@ const Register = () => {
 
     const handleRegister = async (data) => {
         setError("");
-        console.log(data);
         try {
             await register(data);
             navigate("/");
         } catch (err) {
-            console.error(err);
-            setError("Failed to register. Try again.");
+            // console.log("Register error: ", err);
+            // console.log("Register errorMsg: ", err.message);
+            setError(err.message);
         }
     };
 
     const fields = [
-        { name: "displayName", type: "text", placeholder: "Display name", required: true },
-        { name: "email", type: "email", placeholder: "Email", required: true },
-        { name: "password", type: "password", placeholder: "Password", required: true },
-        { name: "confirmPassword", type: "password", placeholder: "Confirm password", required: true },
+        { label: "Display name", name: "displayName", type: "text", placeholder: "MyName123", required: true },
+        { label: "E-Mail", name: "email", type: "email", placeholder: "MyEmail123@mail.com", required: true },
+        { label: "Password", name: "password", type: "password", placeholder: "********", required: true },
+        { label: "Confirm password", name: "confirmPassword", type: "password", placeholder: "********", required: true },
     ];
 
     return <Form fields={fields} onSubmit={handleRegister} buttonText="Register" error={error} />;
