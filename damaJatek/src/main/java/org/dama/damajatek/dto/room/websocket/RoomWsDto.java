@@ -6,18 +6,24 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dama.damajatek.dto.appUser.AppUserInfoDtoV1;
 import org.dama.damajatek.dto.room.RoomInfoDtoV1;
-import org.dama.damajatek.enums.room.RoomWsType;
+import org.dama.damajatek.enums.room.RoomWsAction;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RoomResponseWsDto {
+public class RoomWsDto {
+
+    // This will be mainly sent to the host
 
     @Enumerated(EnumType.STRING)
-    private RoomWsType type;
+    private RoomWsAction action;
 
-    private RoomInfoDtoV1 roomInfoDtoV1;
+    private Long id;
+    private String name;
+
+    private AppUserInfoDtoV1 opponent;
 
 }

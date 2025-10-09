@@ -47,6 +47,10 @@ public class RoomMapper {
     }
 
     private static AppUserInfoDtoV1 createAppUserInfoDtoV1(AppUser appUser) {
+        if (appUser == null) {
+            return null;
+        }
+
         return AppUserInfoDtoV1.builder()
                 .id(appUser.getId())
                 .displayName(appUser.getDisplayName())

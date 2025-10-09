@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useSharedAuth } from "../contexts/AuthContext";
 
 const Navbar = () => {
-    const { user, logout } = useAuth();
+    const { user, logout } = useSharedAuth();
 
     return (
         <nav style={{

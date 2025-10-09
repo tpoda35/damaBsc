@@ -1,7 +1,7 @@
-import { useAuth } from "../context/AuthContext";
+import { useSharedAuth } from "../contexts/AuthContext";
 
 const Home = () => {
-    const { user, loading } = useAuth();
+    const { user, loading } = useSharedAuth();
 
     if (loading) return <p>Loading...</p>;
 

@@ -79,6 +79,7 @@ public class RoomService implements IRoomService {
             }
 
             room.setOpponent(opponent);
+
         } catch (OptimisticLockException e) {
             log.warn("Concurrent join detected for room(id: {}).", roomId);
             throw new RoomAlreadyFullException();
@@ -90,18 +91,18 @@ public class RoomService implements IRoomService {
     public void leave(Long roomId) {
         Room room = findRoomByIdWithUsers(roomId);
 
-        AppUser user = appUserService.getLoggedInUser();
+        AppUser loggedInUser = appUserService.getLoggedInUser();
 
-        if (user.getId().equals(room.getHost().getId())) {
+        if (loggedInUser.getId().equals(room.getHost().getId())) {
             log.info("Host left the room(id: {}), deleting room", roomId);
             // Something here, to give a signal to the front-end.
             roomRepository.delete(room);
-        } else if (room.getOpponent() != null && user.getId().equals(room.getOpponent().getId())) {
+        } else if (room.getOpponent() != null && loggedInUser.getId().equals(room.getOpponent().getId())) {
             room.setOpponent(null);
             // Some kind of message that opponent leaved the room.
             log.info("Opponent left the room(id: {})", roomId);
         } else {
-            log.warn("Unauthorized access to room(id: {}) from user(id: {}).", roomId, user.getId());
+            log.warn("Unauthorized access to room(id: {}) from user(id: {}).", roomId, loggedInUser.getId());
             throw new AccessDeniedException("You are not a participant in this room");
         }
     }
@@ -111,10 +112,10 @@ public class RoomService implements IRoomService {
     public void kick(Long roomId) {
         Room room = findRoomByIdWithUsers(roomId);
 
-        AppUser user = appUserService.getLoggedInUser();
+        AppUser loggedInUser = appUserService.getLoggedInUser();
 
-        if (!room.getHost().getId().equals(user.getId())) {
-            log.warn("Unauthorized access to room(id: {}) from user(id: {}).", roomId, user.getId());
+        if (!room.getHost().getId().equals(loggedInUser.getId())) {
+            log.warn("Unauthorized access to room(id: {}) from user(id: {}).", roomId, loggedInUser.getId());
             throw new AccessDeniedException("Only the host can kick players");
         } else {
             if (room.getOpponent() == null) {
@@ -132,20 +133,20 @@ public class RoomService implements IRoomService {
     public void ready(Long roomId) {
         Room room = findRoomByIdWithUsers(roomId);
 
-        AppUser user = appUserService.getLoggedInUser();
+        AppUser loggedInUser = appUserService.getLoggedInUser();
 
-        if (room.getHost().getId().equals(user.getId())) {
+        if (room.getHost().getId().equals(loggedInUser.getId())) {
             // toggle host ready status
             room.setHostReadyStatus(
                     room.getHostReadyStatus() == READY ? NOT_READY : READY
             );
-        } else if (room.getOpponent() != null && room.getOpponent().getId().equals(user.getId())) {
+        } else if (room.getOpponent() != null && room.getOpponent().getId().equals(loggedInUser.getId())) {
             // toggle opponent ready status
             room.setOpponentReadyStatus(
                     room.getOpponentReadyStatus() == READY ? NOT_READY : READY
             );
         } else {
-            log.warn("User(id: {}) is not a participant of room(id: {})", user.getId(), roomId);
+            log.warn("User(id: {}) is not a participant of room(id: {})", loggedInUser.getId(), roomId);
             throw new AccessDeniedException("You are not a participant in this room");
         }
     }
@@ -156,10 +157,10 @@ public class RoomService implements IRoomService {
     public Game start(Long roomId) {
         Room room = findRoomByIdWithUsers(roomId);
 
-        AppUser user = appUserService.getLoggedInUser();
+        AppUser loggedInUser = appUserService.getLoggedInUser();
 
-        if (!user.getId().equals(room.getHost().getId())) {
-            log.info("User(id: {}) attempted to access Room(id: {}) but is not the host.", user.getId(), roomId);
+        if (!loggedInUser.getId().equals(room.getHost().getId())) {
+            log.info("User(id: {}) attempted to access Room(id: {}) but is not the host.", loggedInUser.getId(), roomId);
             throw new AccessDeniedException("Only the host can start the game");
         }
 
@@ -201,8 +202,21 @@ public class RoomService implements IRoomService {
     @Override
     public CompletableFuture<RoomInfoDtoV1> getRoom(Long roomId) {
         Room room = findRoomByIdWithUsers(roomId);
+        AppUser loggedInUser = appUserService.getLoggedInUser();
+
+        AppUser host = room.getHost();
+        AppUser opponent = room.getOpponent();
+
+        boolean isHost = host != null && loggedInUser.getId().equals(host.getId());
+        boolean isOpponent = opponent != null && loggedInUser.getId().equals(opponent.getId());
+
+        if (!isHost && !isOpponent) {
+            log.warn("User(id: {}) is not a participant of room(id: {})", loggedInUser.getId(), roomId);
+            throw new AccessDeniedException("You are not a participant in this room");
+        }
+
         return CompletableFuture.completedFuture(
-                RoomMapper.createRoomInfoDtoV1(room, room.getHost(), room.getOpponent())
+                RoomMapper.createRoomInfoDtoV1(room, host, opponent)
         );
     }
 

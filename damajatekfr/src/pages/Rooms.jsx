@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
 import ApiService from "../services/ApiService";
 import Modal from "../components/Modal";
 import Form from "../components/Form.jsx";
-import room from "./Room.jsx";
 
 const Rooms = () => {
     const [rooms, setRooms] = useState(null);
@@ -46,26 +45,9 @@ const Rooms = () => {
     };
 
     const fields = [
-        {
-            label: "Room name",
-            name: "name",
-            type: "text",
-            placeholder: "MyRoom123",
-            required: true,
-        },
-        {
-            label: "Locked",
-            name: "locked",
-            type: "checkbox",
-            required: true,
-        },
-        {
-            label: "Password",
-            name: "password",
-            type: "password",
-            placeholder: "********",
-            required: true,
-        },
+        { label: "Room name", name: "name", type: "text", placeholder: "MyRoom123", required: true },
+        { label: "Locked", name: "locked", type: "checkbox", required: true },
+        { label: "Password", name: "password", type: "password", placeholder: "********", required: true },
     ];
 
     if (loading) return <div>Loading rooms...</div>;

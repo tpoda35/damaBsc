@@ -60,4 +60,10 @@ export const AuthProvider = ({ children }) => {
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useAuth = () => useContext(AuthContext);
+export function useSharedAuth() {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useSharedAuth must be used within a AuthProvider');
+    }
+    return context;
+}

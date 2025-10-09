@@ -12,7 +12,6 @@ import org.dama.damajatek.dto.appUser.AppUserInfoDtoV1;
 @Builder
 public class RoomInfoDtoV1 {
 
-    // Room info
     private Long id;
     private String name;
 

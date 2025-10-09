@@ -1,5 +1,5 @@
 package org.dama.damajatek.enums.room;
 
-public enum RoomWsType {
+public enum RoomWsAction {
     CREATE, JOIN, LEAVE, KICK, READY, START
 }

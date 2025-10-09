@@ -1,9 +1,11 @@
 package org.dama.damajatek.mapper;
 
-import org.dama.damajatek.dto.room.websocket.RoomResponseWsDto;
+import org.dama.damajatek.dto.room.websocket.RoomWsDto;
 
 public class RoomWsMapper {
 
-    public static RoomResponseWsDto createRoomResponseWsDto(){return null;}
+    public static RoomWsDto createRoomWsDto() {
+        return RoomWsDto.builder().build();
+    }
 
 }

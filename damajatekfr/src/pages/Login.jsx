@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useSharedAuth } from "../contexts/AuthContext";
 import Form from "../components/Form.jsx";
 import {useState} from "react";
 
 const Login = () => {
-    const { login } = useAuth();
+    const { login } = useSharedAuth();
     const navigate = useNavigate();
     const [error, setError] = useState("");
 
