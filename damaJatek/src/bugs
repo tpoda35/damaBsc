@@ -1,0 +1,1 @@
+UserNotFound, when the token should be not found, so it should return 401, not 404.

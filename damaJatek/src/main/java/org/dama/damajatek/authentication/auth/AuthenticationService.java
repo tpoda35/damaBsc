@@ -2,6 +2,7 @@ package org.dama.damajatek.authentication.auth;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.exception.auth.InvalidRefreshTokenException;
 import org.dama.damajatek.exception.auth.RefreshTokenNotFoundException;
 import org.dama.damajatek.exception.UserNotFoundException;
@@ -10,6 +11,7 @@ import org.dama.damajatek.authentication.token.Token;
 import org.dama.damajatek.authentication.token.TokenRepository;
 import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.AppUserRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +25,7 @@ import static org.dama.damajatek.authentication.user.Status.OFFLINE;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationService {
 
     private final AppUserRepository repository;
@@ -116,7 +119,13 @@ public class AuthenticationService {
 
         var accessToken = jwtService.generateToken(user);
         revokeAllUserTokens(user);
-        saveUserToken(user, accessToken);
+
+        try {
+            saveUserToken(user, accessToken);
+        } catch (DataIntegrityViolationException e) {
+            // Token already exists (race condition), which is fine
+            log.debug("Token already exists (race condition), skipping save");
+        }
 
         return accessToken;
     }

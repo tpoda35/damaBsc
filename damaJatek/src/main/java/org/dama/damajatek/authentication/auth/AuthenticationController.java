@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
+import java.util.Map;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
@@ -73,5 +74,11 @@ public class AuthenticationController {
         response.addHeader(SET_COOKIE, accessTokenCookie.toString());
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/ws-token")
+    public ResponseEntity<String> getWebSocketToken(
+            @CookieValue("Authorization") String jwtToken) {
+        return ResponseEntity.ok(jwtToken);
     }
 }

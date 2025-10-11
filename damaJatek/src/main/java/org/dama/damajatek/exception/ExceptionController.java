@@ -129,7 +129,6 @@ public class ExceptionController {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<CustomExceptionDto> handleBadCredentialsException(BadCredentialsException e) {
-        log.info("Bad credental szex: {}", e.getMessage());
         return buildResponse(e.getMessage(), BAD_REQUEST);
     }
 

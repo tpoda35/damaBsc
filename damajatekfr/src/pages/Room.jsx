@@ -29,6 +29,41 @@ const Room = () => {
         if (roomId) fetchRoom();
     }, [roomId]);
 
+    useEffect(() => {
+        if (!ws || !roomId) return;
+
+        let unsubscribeFn = null;
+
+        const connectAndSubscribe = async () => {
+            try {
+                const client = await ws.connect();
+
+                unsubscribeFn = ws.subscribe(
+                    `/topic/rooms/${roomId}`,
+                    (message) => {
+                        try {
+                            const body = JSON.parse(message.body);
+                            console.log("[WS] Room update:", body);
+                            setRoom((prev) => ({ ...prev, ...body }));
+                        } catch (e) {
+                            console.error("Invalid WS message:", e);
+                        }
+                    }
+                );
+
+                console.log("[WS] Subscribed to /topic/rooms/" + roomId);
+            } catch (e) {
+                console.error("[WS] Failed to connect/subscribe:", e);
+            }
+        };
+
+        connectAndSubscribe();
+
+        return () => {
+            if (unsubscribeFn) unsubscribeFn();
+        };
+    }, [roomId]);
+
     if (loading) return <div>Loading room...</div>;
     if (error) return <div>Error: {error}</div>;
     if (!room) return <div>Room not found</div>;

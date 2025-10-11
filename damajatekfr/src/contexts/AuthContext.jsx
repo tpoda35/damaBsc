@@ -47,6 +47,7 @@ export const AuthProvider = ({ children }) => {
         try {
             await ApiService.post("/auth/logout");
             setUser(null);
+            ApiService.cleanup();
         } finally {
             setLoading(false);
         }

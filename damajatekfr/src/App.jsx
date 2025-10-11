@@ -5,8 +5,28 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Rooms from "./pages/Rooms.jsx";
 import Room from "./pages/Room.jsx";
+import {useSharedAuth} from "./contexts/AuthContext.jsx";
+import {useSharedWebSocket} from "./contexts/WebSocketContext.jsx";
+import useTokenRefresh from "./hooks/useTokenRefresh.js";
+import {useEffect} from "react";
 
 function App() {
+    const { user } = useSharedAuth();
+    const { connect, disconnect, isConnected } = useSharedWebSocket();
+
+    const isAuthenticated = !!user;
+
+    useTokenRefresh(isAuthenticated);
+
+    // Connect WebSocket when authenticated
+    useEffect(() => {
+        if (isAuthenticated && !isConnected) {
+            connect();
+        } else if (!isAuthenticated && isConnected) {
+            disconnect();
+        }
+    }, [isAuthenticated, isConnected, connect, disconnect]);
+
     return (
         <BrowserRouter>
             <Routes>
