@@ -1,5 +1,5 @@
 package org.dama.damajatek.enums.room;
 
 public enum RoomWsAction {
-    CREATE, JOIN, LEAVE, KICK, READY, START
+    OPPONENT_JOIN, OPPONENT_LEAVE, HOST_LEAVE, KICK, OPPONENT_READY, HOST_READY, START
 }

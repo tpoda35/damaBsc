@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.dto.room.RoomCreateDto;
 import org.dama.damajatek.dto.room.RoomInfoDtoV1;
 import org.dama.damajatek.dto.room.RoomInfoDtoV2;
+import org.dama.damajatek.dto.room.RoomJoinRequest;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.service.IRoomService;
 import org.springframework.data.domain.Page;
@@ -31,11 +32,12 @@ public class RoomController {
     }
 
     @PostMapping("/{roomId}/join")
-    public void joinRoom(
+    public Long joinRoom(
             @PathVariable Long roomId,
-            @RequestParam(required = false) String password
+            @RequestBody(required = false) RoomJoinRequest roomJoinRequest
     ) {
-        roomService.join(roomId, password);
+        String password = roomJoinRequest != null ? roomJoinRequest.getPassword() : null;
+        return roomService.join(roomId, password);
     }
 
     @PostMapping("/{roomId}/leave")

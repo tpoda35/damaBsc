@@ -10,7 +10,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface IRoomService {
     Long create(RoomCreateDto roomCreateDto);
-    void join(Long roomId, String password);
+    Long join(Long roomId, String password);
     void leave(Long roomId);
     void kick(Long roomId);
 

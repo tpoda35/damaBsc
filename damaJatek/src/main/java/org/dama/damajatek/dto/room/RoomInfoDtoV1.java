@@ -15,6 +15,7 @@ public class RoomInfoDtoV1 {
     private Long id;
     private String name;
 
+    private Boolean isHost;
     private AppUserInfoDtoV1 host;
     private AppUserInfoDtoV1 opponent;
 

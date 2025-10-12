@@ -16,14 +16,9 @@ import org.dama.damajatek.enums.room.RoomWsAction;
 @Builder
 public class RoomWsDto {
 
-    // This will be mainly sent to the host
-
     @Enumerated(EnumType.STRING)
     private RoomWsAction action;
 
-    private Long id;
-    private String name;
-
-    private AppUserInfoDtoV1 opponent;
+    private AppUserInfoDtoV1 player;
 
 }

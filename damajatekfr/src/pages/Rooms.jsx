@@ -17,8 +17,8 @@ const Rooms = () => {
             setLoading(true);
             setError(null);
             try {
-                const data = await ApiService.get("/rooms");
-                setRooms(data);
+                const rooms = await ApiService.get("/rooms");
+                setRooms(rooms);
             } catch (err) {
                 setError(err.message || "Failed to fetch rooms");
             } finally {
@@ -31,6 +31,26 @@ const Rooms = () => {
 
     const handleHostRoom = () => {
         setIsModalOpen(true);
+    };
+
+    const handleJoinRoom = async (room) => {
+        try {
+            let joinedRoomId;
+
+            if (room.locked) {
+                const password = prompt(`Enter password for room "${room.name}"`);
+                if (password === null || password.trim() === "") {
+                    return; // user cancelled or empty password
+                }
+                joinedRoomId = await ApiService.post(`/rooms/${room.id}/join`, { password });
+            } else {
+                joinedRoomId = await ApiService.post(`/rooms/${room.id}/join`);
+            }
+
+            navigate(`/rooms/${joinedRoomId}`);
+        } catch (err) {
+            setError(err.message || "Failed to join room");
+        }
     };
 
     const handleCreateRoom = async (formData) => {
@@ -67,6 +87,7 @@ const Rooms = () => {
                         <li key={room.id}>
                             {room.name || `Room ${room.id}`} -{" "}
                             {room.content || "No content"}
+                            <button onClick={() => handleJoinRoom(room)}>Join</button>
                         </li>
                     ))}
                 </ul>

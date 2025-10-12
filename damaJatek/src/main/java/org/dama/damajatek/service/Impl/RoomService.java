@@ -19,6 +19,7 @@ import org.dama.damajatek.mapper.RoomMapper;
 import org.dama.damajatek.repository.RoomRepository;
 import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.service.IRoomService;
+import org.dama.damajatek.service.IRoomWebSocketService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +32,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.dama.damajatek.enums.room.ReadyStatus.NOT_READY;
 import static org.dama.damajatek.enums.room.ReadyStatus.READY;
+import static org.dama.damajatek.enums.room.RoomWsAction.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +43,7 @@ public class RoomService implements IRoomService {
     private final PasswordEncoder passwordEncoder;
     private final AppUserService appUserService;
     private final IGameService gameService;
+    private final IRoomWebSocketService roomWebSocketService;
 
     @Transactional
     @Override
@@ -57,7 +60,7 @@ public class RoomService implements IRoomService {
 
     @Transactional
     @Override
-    public void join(Long roomId, String password) {
+    public Long join(Long roomId, String password) {
         try {
             Room room = findRoomByIdWithUsers(roomId);
 
@@ -71,16 +74,24 @@ public class RoomService implements IRoomService {
                 throw new PasswordMismatchException();
             }
 
-            AppUser opponent = appUserService.getLoggedInUser();
+            AppUser loggedInUser = appUserService.getLoggedInUser();
 
-            if (room.getHost().equals(opponent)) {
+            if (isHost(room, loggedInUser)) {
                 log.warn("Host tried to join as opponent in their own room(id: {}).", roomId);
                 throw new HostCannotJoinOwnRoomException();
             }
 
-            room.setOpponent(opponent);
+            room.setOpponent(loggedInUser);
+            roomWebSocketService.broadcastRoomUpdate(
+                    room.getOpponentReadyStatus(),
+                    loggedInUser,
+                    OPPONENT_JOIN,
+                    "/topic/rooms/" + roomId
+            );
 
+            return roomId;
         } catch (OptimisticLockException e) {
+            // This part is to fix a race condition if two user tries to connect at the same time
             log.warn("Concurrent join detected for room(id: {}).", roomId);
             throw new RoomAlreadyFullException();
         }
@@ -93,14 +104,16 @@ public class RoomService implements IRoomService {
 
         AppUser loggedInUser = appUserService.getLoggedInUser();
 
-        if (loggedInUser.getId().equals(room.getHost().getId())) {
+        if (isHost(room, loggedInUser)) {
             log.info("Host left the room(id: {}), deleting room", roomId);
-            // Something here, to give a signal to the front-end.
             roomRepository.delete(room);
-        } else if (room.getOpponent() != null && loggedInUser.getId().equals(room.getOpponent().getId())) {
+
+            roomWebSocketService.broadcastRoomUpdate(HOST_LEAVE, "/topic/rooms/" + roomId);
+        } else if (room.getOpponent() != null && isOpponent(room, loggedInUser)) {
             room.setOpponent(null);
-            // Some kind of message that opponent leaved the room.
             log.info("Opponent left the room(id: {})", roomId);
+
+            roomWebSocketService.broadcastRoomUpdate(OPPONENT_LEAVE, "/topic/rooms/" + roomId);
         } else {
             log.warn("Unauthorized access to room(id: {}) from user(id: {}).", roomId, loggedInUser.getId());
             throw new AccessDeniedException("You are not a participant in this room");
@@ -114,7 +127,7 @@ public class RoomService implements IRoomService {
 
         AppUser loggedInUser = appUserService.getLoggedInUser();
 
-        if (!room.getHost().getId().equals(loggedInUser.getId())) {
+        if (!isHost(room, loggedInUser)) {
             log.warn("Unauthorized access to room(id: {}) from user(id: {}).", roomId, loggedInUser.getId());
             throw new AccessDeniedException("Only the host can kick players");
         } else {
@@ -123,8 +136,8 @@ public class RoomService implements IRoomService {
                 throw new OpponentNotFoundException("There's no opponent you can kick");
             }
 
-            // Websocket handling.
             room.setOpponent(null);
+            roomWebSocketService.broadcastRoomUpdate(KICK, "/topic/rooms/" + roomId);
         }
     }
 
@@ -135,16 +148,20 @@ public class RoomService implements IRoomService {
 
         AppUser loggedInUser = appUserService.getLoggedInUser();
 
-        if (room.getHost().getId().equals(loggedInUser.getId())) {
+        if (isHost(room, loggedInUser)) {
             // toggle host ready status
             room.setHostReadyStatus(
                     room.getHostReadyStatus() == READY ? NOT_READY : READY
             );
-        } else if (room.getOpponent() != null && room.getOpponent().getId().equals(loggedInUser.getId())) {
+
+            roomWebSocketService.broadcastRoomUpdate(room.getHostReadyStatus(), loggedInUser, HOST_READY, "/topic/rooms/" + roomId);
+        } else if (room.getOpponent() != null && isOpponent(room, loggedInUser)) {
             // toggle opponent ready status
             room.setOpponentReadyStatus(
                     room.getOpponentReadyStatus() == READY ? NOT_READY : READY
             );
+
+            roomWebSocketService.broadcastRoomUpdate(room.getOpponentReadyStatus(), loggedInUser, OPPONENT_READY, "/topic/rooms/" + roomId);
         } else {
             log.warn("User(id: {}) is not a participant of room(id: {})", loggedInUser.getId(), roomId);
             throw new AccessDeniedException("You are not a participant in this room");
@@ -215,8 +232,10 @@ public class RoomService implements IRoomService {
             throw new AccessDeniedException("You are not a participant in this room");
         }
 
+        RoomInfoDtoV1 roomInfoDtoV1 = RoomMapper.createRoomInfoDtoV1(room, host, opponent, isHost);
+
         return CompletableFuture.completedFuture(
-                RoomMapper.createRoomInfoDtoV1(room, host, opponent)
+                roomInfoDtoV1
         );
     }
 
@@ -226,5 +245,13 @@ public class RoomService implements IRoomService {
                     log.warn("Room(id: {}) not found.", roomId);
                     return new RoomNotFoundException();
                 });
+    }
+
+    private boolean isHost(Room room, AppUser loggedInUser) {
+        return room.getHost().getId().equals(loggedInUser.getId());
+    }
+
+    private boolean isOpponent(Room room, AppUser loggedInUser) {
+        return room.getOpponent().getId().equals(loggedInUser.getId());
     }
 }
