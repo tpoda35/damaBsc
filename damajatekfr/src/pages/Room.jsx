@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ApiService from "../services/ApiService";
 import { useSharedWebSocket } from "../contexts/WebSocketContext.jsx";
@@ -8,16 +8,21 @@ const Room = () => {
     const [room, setRoom] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const hasLeftRoom = useRef(false);
 
     const ws = useSharedWebSocket();
     const navigate = useNavigate();
 
     const handleLeaveRoom = async () => {
+        if (hasLeftRoom.current) return;
+        hasLeftRoom.current = true;
+
         try {
             await ApiService.post(`/rooms/${roomId}/leave`);
             navigate("/rooms");
         } catch (err) {
             setError(err.message || "Failed to leave room");
+            hasLeftRoom.current = false;
         }
     };
 
@@ -76,7 +81,6 @@ const Room = () => {
 
                         switch (action) {
                             case "OPPONENT_JOIN":
-                                // Host receives info about who joined
                                 setRoom((prev) => {
                                     if (prev?.isHost) {
                                         console.log(`[WS] Opponent joined:`, player);
@@ -90,7 +94,6 @@ const Room = () => {
                                 break;
 
                             case "OPPONENT_LEAVE":
-                                // Host receives info when opponent leaves
                                 setRoom((prev) => {
                                     if (prev?.isHost) {
                                         console.log(`[WS] Opponent left.`);
@@ -104,20 +107,17 @@ const Room = () => {
                                 break;
 
                             case "HOST_LEAVE":
-                                // Room is being deleted, redirect everyone
                                 console.warn(`[WS] Host left, room ${roomId} is closing`);
                                 navigate("/rooms");
                                 break;
 
                             case "KICK":
-                                // If you're not the host → you were kicked
                                 setRoom((prev) => {
                                     if (!prev?.isHost) {
                                         console.warn(`[WS] You were kicked from room ${roomId}`);
                                         navigate("/rooms");
                                         return prev;
                                     } else {
-                                        // Host sees opponent removed
                                         console.log(`[WS] Opponent was kicked.`);
                                         return {
                                             ...prev,
@@ -170,7 +170,6 @@ const Room = () => {
 
         connectAndSubscribe();
 
-        // Cleanup
         return () => {
             if (unsubscribeFn) {
                 unsubscribeFn();
@@ -178,6 +177,46 @@ const Room = () => {
             }
         };
     }, [ws, roomId, navigate]);
+
+    // React unmount (navigation within app)
+    useEffect(() => {
+        if (!roomId) return;
+
+        return () => {
+            if (!hasLeftRoom.current) {
+                hasLeftRoom.current = true;
+                ApiService.post(`/rooms/${roomId}/leave`).catch(() => {});
+            }
+        };
+    }, [roomId]);
+
+    // Browser close/reload - use sendBeacon
+    useEffect(() => {
+        if (!roomId) return;
+
+        const handleBeforeUnload = () => {
+            if (!hasLeftRoom.current) {
+                hasLeftRoom.current = true;
+
+                try {
+                    const backendBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
+                    const url = `${backendBaseUrl}/rooms/${roomId}/leave`;
+                    const blob = new Blob([JSON.stringify({})], { type: "application/json" });
+
+                    const ok = navigator.sendBeacon(url, blob);
+                    console.log(`[Beacon] Leave room ${roomId} sent:`, ok);
+                } catch (err) {
+                    console.warn(`[Beacon] Failed to send leave for room ${roomId}:`, err);
+                }
+            }
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [roomId]);
 
     if (loading) return <div>Loading room...</div>;
     if (error) return <div>Error: {error}</div>;

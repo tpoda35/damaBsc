@@ -39,12 +39,11 @@ const Rooms = () => {
 
             if (room.locked) {
                 const password = prompt(`Enter password for room "${room.name}"`);
-                if (password === null || password.trim() === "") {
-                    return; // user cancelled or empty password
-                }
+                if (!password || password.trim() === "") return;
+
                 joinedRoomId = await ApiService.post(`/rooms/${room.id}/join`, { password });
             } else {
-                joinedRoomId = await ApiService.post(`/rooms/${room.id}/join`);
+                joinedRoomId = await ApiService.post(`/rooms/${room.id}/join`, null);
             }
 
             navigate(`/rooms/${joinedRoomId}`);
@@ -55,8 +54,8 @@ const Rooms = () => {
 
     const handleCreateRoom = async (formData) => {
         try {
+            console.log("formData: ", formData);
             const roomId = await ApiService.post("/rooms", formData);
-            console.log(roomId);
             setIsModalOpen(false);
             navigate(`/rooms/${roomId}`);
         } catch (err) {

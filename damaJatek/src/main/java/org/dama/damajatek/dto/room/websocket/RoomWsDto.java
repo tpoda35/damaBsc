@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dama.damajatek.dto.appUser.AppUserInfoDtoV1;
-import org.dama.damajatek.dto.room.RoomInfoDtoV1;
 import org.dama.damajatek.enums.room.RoomWsAction;
 
 @Data

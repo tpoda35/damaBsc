@@ -29,7 +29,7 @@ public class Room {
     private String name;
 
     // If this is true, then the room requires password
-    private boolean locked;
+    private Boolean locked;
 
     // This is hashed with bcrypt
     private String password;
@@ -46,7 +46,7 @@ public class Room {
 
     private ReadyStatus opponentReadyStatus;
 
-    private boolean started;
+    private Boolean started;
 
     @OneToOne(mappedBy = "room")
     private Game game;
@@ -61,9 +61,6 @@ public class Room {
 
     @PrePersist
     public void Init() {
-        locked = false;
-        started = false;
-
         hostReadyStatus = NOT_READY;
         opponentReadyStatus = NOT_READY;
     }

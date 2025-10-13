@@ -50,7 +50,7 @@ public class RoomService implements IRoomService {
     public Long create(RoomCreateDto roomCreateDto) {
         AppUser host = appUserService.getLoggedInUser();
 
-        String encodedPassword = roomCreateDto.isLocked()
+        String encodedPassword = roomCreateDto.getLocked()
                 ? passwordEncoder.encode(roomCreateDto.getPassword())
                 : null;
 
@@ -69,9 +69,9 @@ public class RoomService implements IRoomService {
                 throw new RoomAlreadyFullException();
             }
 
-            if (room.isLocked() && !passwordEncoder.matches(password, room.getPassword())) {
+            if (room.getLocked() && !passwordEncoder.matches(password, room.getPassword())) {
                 log.warn("Wrong password for room(id: {}).", roomId);
-                throw new PasswordMismatchException();
+                throw new PasswordMismatchException("Wrong password");
             }
 
             AppUser loggedInUser = appUserService.getLoggedInUser();
