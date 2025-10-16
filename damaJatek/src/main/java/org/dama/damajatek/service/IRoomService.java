@@ -15,8 +15,10 @@ public interface IRoomService {
     void kick(Long roomId);
 
     void ready(Long roomId);
-    Game start(Long roomId);
+    void start(Long roomId);
 
     CompletableFuture<Page<RoomInfoDtoV2>> getRooms(int pageNum, int pageSize);
     CompletableFuture<RoomInfoDtoV1> getRoom(Long roomId);
+
+    void handleUserDisconnect(String email);
 }

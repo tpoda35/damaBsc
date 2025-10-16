@@ -9,6 +9,7 @@ import {useSharedAuth} from "./contexts/AuthContext.jsx";
 import {useSharedWebSocket} from "./contexts/WebSocketContext.jsx";
 import useTokenRefresh from "./hooks/useTokenRefresh.js";
 import {useEffect} from "react";
+import Game from "./pages/Game.jsx";
 
 function App() {
     const { user } = useSharedAuth();
@@ -34,6 +35,7 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/rooms" element={<Rooms />} />
                     <Route path="/rooms/:roomId" element={<Room />} />
+                    <Route path="/games/:gameId" element={<Game />} />
                 </Route>
 
                 <Route path="/login" element={<Login />} />

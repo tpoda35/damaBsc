@@ -3,6 +3,7 @@ package org.dama.damajatek.authentication.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.Room;
@@ -17,11 +18,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * User class for the whole authentication system.
- *
- * <p>It has the {@link UserDetails} implemented, which is required for the JWT system.
- */
 @Data
 @Builder
 @NoArgsConstructor
@@ -46,6 +42,8 @@ public class AppUser implements UserDetails {
     @Email(message = "Invalid email format.")
     private String email;
 
+    @Column(nullable = false)
+    @NotBlank(message = "Password cannot be empty.")
     private String password;
 
     @Enumerated(EnumType.STRING)

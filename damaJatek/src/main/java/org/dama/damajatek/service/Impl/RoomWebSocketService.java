@@ -23,7 +23,7 @@ public class RoomWebSocketService implements IRoomWebSocketService {
     public void broadcastRoomUpdate(ReadyStatus readyStatus, AppUser player, RoomWsAction action, String destination) {
         RoomWsDto message = RoomWsMapper.createRoomWsDto(action, player, readyStatus);
 
-        log.info("Broadcasting room update: action={}, destination={}", action, destination);
+        log.info("Broadcasting room update: readyStatus={}, action={}, destination={}", readyStatus, action, destination);
 
         messagingTemplate.convertAndSend(destination, message);
     }
@@ -33,6 +33,15 @@ public class RoomWebSocketService implements IRoomWebSocketService {
         RoomWsDto message = RoomWsMapper.createRoomWsDto(action);
 
         log.info("Broadcasting room update: action={}, destination={}", action, destination);
+
+        messagingTemplate.convertAndSend(destination, message);
+    }
+
+    @Override
+    public void broadcastRoomUpdate(RoomWsAction action, Long gameId, String destination) {
+        RoomWsDto message = RoomWsMapper.createRoomWsDto(action, gameId);
+
+        log.info("Broadcasting room update: action={}, gameId={}, destination={}", action, gameId, destination);
 
         messagingTemplate.convertAndSend(destination, message);
     }

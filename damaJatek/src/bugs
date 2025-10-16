@@ -1,1 +1,5 @@
 UserNotFound, when the token should be not found, so it should return 401, not 404.
+
+- Migration partial unique indexes:
+    - Room - Host - Opponent (Lock that a user only can have one room at one time, service part already done)
+    (Also add the roomService create and join the exception handling)

@@ -17,7 +17,13 @@ import static org.dama.damajatek.enums.room.ReadyStatus.READY;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "rooms")
+@Table(
+        name = "rooms",
+        indexes = {
+                @Index(name = "idx_room_host", columnList = "host_id"),
+                @Index(name = "idx_room_opponent", columnList = "opponent_id")
+        }
+)
 public class Room {
 
     @Id

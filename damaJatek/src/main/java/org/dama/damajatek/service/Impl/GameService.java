@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dama.damajatek.entity.Room;
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Move;
 import org.dama.damajatek.model.Piece;
@@ -31,14 +32,13 @@ public class GameService implements IGameService {
 
     @Override
     @Transactional
-    public Game createGame(AppUser redPlayer, AppUser blackPlayer, boolean vsBot, BotDifficulty difficulty) {
+    public Game createGame(AppUser redPlayer, AppUser blackPlayer, Room room, boolean vsBot, BotDifficulty difficulty) {
         Board board = BoardInitializer.createStartingBoard();
 
         Game game = Game.builder()
+                .room(room)
                 .redPlayer(redPlayer)
                 .blackPlayer(blackPlayer)
-                .currentTurn(PieceColor.RED)
-                .status(GameStatus.IN_PROGRESS)
                 .vsBot(vsBot)
                 .botDifficulty(difficulty)
                 .build();

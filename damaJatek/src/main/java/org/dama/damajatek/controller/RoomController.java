@@ -56,8 +56,8 @@ public class RoomController {
     }
 
     @PostMapping("/{roomId}/start")
-    public Game startGame(@PathVariable Long roomId) {
-        return roomService.start(roomId);
+    public void startGame(@PathVariable Long roomId) {
+        roomService.start(roomId);
     }
 
     @GetMapping

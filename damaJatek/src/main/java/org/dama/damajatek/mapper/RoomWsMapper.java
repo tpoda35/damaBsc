@@ -15,6 +15,13 @@ public class RoomWsMapper {
                 .build();
     }
 
+    public static RoomWsDto createRoomWsDto(RoomWsAction action, Long gameId) {
+        return RoomWsDto.builder()
+                .action(action)
+                .gameId(gameId)
+                .build();
+    }
+
     public static RoomWsDto createRoomWsDto(RoomWsAction action) {
         return RoomWsDto.builder()
                 .action(action)

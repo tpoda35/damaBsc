@@ -5,12 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.enums.game.BotDifficulty;
 import org.dama.damajatek.enums.game.GameStatus;
 import org.dama.damajatek.enums.game.PieceColor;
-import org.dama.damajatek.authentication.user.AppUser;
 
-import static org.dama.damajatek.enums.game.GameStatus.WAITING;
+import static org.dama.damajatek.enums.game.GameStatus.IN_PROGRESS;
 import static org.dama.damajatek.enums.game.PieceColor.BLACK;
 
 @Data
@@ -22,7 +22,7 @@ import static org.dama.damajatek.enums.game.PieceColor.BLACK;
 public class Game {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     @OneToOne
@@ -38,14 +38,14 @@ public class Game {
     private AppUser blackPlayer;
 
     @Enumerated(EnumType.STRING)
-    private PieceColor currentTurn = BLACK;
+    private PieceColor currentTurn;
 
     @Enumerated(EnumType.STRING)
-    private GameStatus status = WAITING;
+    private GameStatus status;
 
     @ManyToOne
     @JoinColumn(name = "winner_id")
-    private AppUser winner = null;
+    private AppUser winner;
 
     @Lob
     private String boardState;
@@ -54,5 +54,11 @@ public class Game {
 
     @Enumerated(EnumType.STRING)
     private BotDifficulty botDifficulty;
+
+    @PrePersist
+    public void Init() {
+        currentTurn = BLACK;
+        status = IN_PROGRESS;
+    }
 }
 

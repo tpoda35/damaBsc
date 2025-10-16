@@ -20,4 +20,6 @@ public class RoomWsDto {
 
     private AppUserInfoDtoV1 player;
 
+    private Long gameId;
+
 }

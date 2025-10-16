@@ -7,4 +7,5 @@ import org.dama.damajatek.enums.room.RoomWsAction;
 public interface IRoomWebSocketService {
     void broadcastRoomUpdate(ReadyStatus readyStatus, AppUser player, RoomWsAction action, String destination);
     void broadcastRoomUpdate(RoomWsAction action, String destination);
+    void broadcastRoomUpdate(RoomWsAction action, Long gameId, String destination);
 }

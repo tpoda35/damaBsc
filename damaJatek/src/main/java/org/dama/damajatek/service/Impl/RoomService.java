@@ -5,13 +5,13 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
+import org.dama.damajatek.authentication.user.AppUserRepository;
 import org.dama.damajatek.authentication.user.AppUserService;
 import org.dama.damajatek.dto.room.RoomCreateDto;
 import org.dama.damajatek.dto.room.RoomInfoDtoV1;
 import org.dama.damajatek.dto.room.RoomInfoDtoV2;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.Room;
-import org.dama.damajatek.enums.game.BotDifficulty;
 import org.dama.damajatek.exception.PasswordMismatchException;
 import org.dama.damajatek.exception.auth.AccessDeniedException;
 import org.dama.damajatek.exception.room.*;
@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
+import static org.dama.damajatek.enums.game.BotDifficulty.EASY;
 import static org.dama.damajatek.enums.room.ReadyStatus.NOT_READY;
 import static org.dama.damajatek.enums.room.ReadyStatus.READY;
 import static org.dama.damajatek.enums.room.RoomWsAction.*;
@@ -44,7 +45,9 @@ public class RoomService implements IRoomService {
     private final AppUserService appUserService;
     private final IGameService gameService;
     private final IRoomWebSocketService roomWebSocketService;
+    private final AppUserRepository appUserRepository;
 
+    // Lock handling, also set database restr. with flyway
     @Transactional
     @Override
     public Long create(RoomCreateDto roomCreateDto) {
@@ -58,6 +61,7 @@ public class RoomService implements IRoomService {
         return roomRepository.save(room).getId();
     }
 
+    // Lock handling, also set database restr. with flyway
     @Transactional
     @Override
     public Long join(Long roomId, String password) {
@@ -171,7 +175,7 @@ public class RoomService implements IRoomService {
 
     @Transactional
     @Override
-    public Game start(Long roomId) {
+    public void start(Long roomId) {
         Room room = findRoomByIdWithUsers(roomId);
 
         AppUser loggedInUser = appUserService.getLoggedInUser();
@@ -197,7 +201,11 @@ public class RoomService implements IRoomService {
                 redPlayer = room.getHost();
             }
 
-            return gameService.createGame(redPlayer, blackPlayer, false, BotDifficulty.EASY);
+            room.setStarted(true);
+            roomRepository.save(room);
+
+            Game game = gameService.createGame(redPlayer, blackPlayer, room, false, EASY);
+            roomWebSocketService.broadcastRoomUpdate(START, game.getId(), "/topic/rooms/" + roomId);
         } else {
             log.warn("Game start blocked for room(id: {}): hostReadyStatus={}, opponentReadyStatus={}",
                     roomId, room.getHostReadyStatus(), room.getOpponentReadyStatus());
@@ -237,6 +245,47 @@ public class RoomService implements IRoomService {
         return CompletableFuture.completedFuture(
                 roomInfoDtoV1
         );
+    }
+
+    @Transactional
+    @Override
+    public void handleUserDisconnect(String email) {
+        AppUser appUser = appUserRepository.findByEmail(email)
+                .orElse(null);
+
+        if (appUser == null) {
+            log.warn("User not found for disconnect cleanup: {}", email);
+            return;
+        }
+
+        Room room = roomRepository.findByHostOrOpponent(appUser)
+                .orElse(null);
+
+        if (room == null) {
+            log.debug("User {} not in any room, no cleanup needed", email);
+            return;
+        }
+
+        log.info("Cleaning up room {} for disconnected appUser {}", room.getId(), email);
+
+        boolean isHost = isHost(room, appUser);
+
+        if (isHost) {
+            log.info("Host disconnected from room {}, closing room", room.getId());
+
+            if (room.getOpponent() != null) {
+                roomWebSocketService.broadcastRoomUpdate(HOST_LEAVE, "/topic/rooms/" + room.getId());
+            }
+
+            roomRepository.delete(room);
+        } else {
+            log.info("Opponent disconnected from room {}, removing opponent", room.getId());
+
+            room.setOpponent(null);
+            roomRepository.save(room);
+
+            roomWebSocketService.broadcastRoomUpdate(OPPONENT_LEAVE, "/topic/rooms/" + room.getId());
+        }
     }
 
     private Room findRoomByIdWithUsers(Long roomId) {

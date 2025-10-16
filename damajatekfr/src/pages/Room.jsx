@@ -77,7 +77,7 @@ const Room = () => {
                 unsubscribeFn = ws.subscribe(`/topic/rooms/${roomId}`, (message) => {
                     try {
                         const body = JSON.parse(message.body);
-                        const { action, player } = body;
+                        const { action, player, gameId } = body;
 
                         switch (action) {
                             case "OPPONENT_JOIN":
@@ -108,6 +108,7 @@ const Room = () => {
 
                             case "HOST_LEAVE":
                                 console.warn(`[WS] Host left, room ${roomId} is closing`);
+                                hasLeftRoom.current = true;
                                 navigate("/rooms");
                                 break;
 
@@ -150,8 +151,8 @@ const Room = () => {
                                 break;
 
                             case "START":
-                                console.log(`[WS] Game started in room ${roomId}`);
-                                navigate(`/rooms/${roomId}/game`);
+                                console.log(`[WS] Game started in room ${roomId}, with gameId ${gameId}`);
+                                navigate(`/games/${gameId}`);
                                 break;
 
                             default:
