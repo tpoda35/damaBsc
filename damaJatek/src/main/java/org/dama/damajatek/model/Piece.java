@@ -11,6 +11,6 @@ import org.dama.damajatek.enums.game.PieceColor;
 @NoArgsConstructor
 @Builder
 public class Piece {
-    private PieceColor color;  // RED or BLACK
+    private PieceColor color;
     private boolean isKing;
 }

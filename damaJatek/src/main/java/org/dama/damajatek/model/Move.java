@@ -18,7 +18,6 @@ public class Move {
     private int toRow;
     private int toCol;
 
-    // optional: list of captured positions (for multi-jumps)
     private List<int[]> capturedPieces = new ArrayList<>();
 }
 

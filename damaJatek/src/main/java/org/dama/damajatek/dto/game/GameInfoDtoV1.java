@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class GameInfoDtoV1 {
 
     private Long id;
-
+    private String board;
 
 }

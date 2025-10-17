@@ -3,8 +3,8 @@ package org.dama.damajatek.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.dto.game.ErrorMessage;
-import org.dama.damajatek.dto.game.GameStateMessage;
-import org.dama.damajatek.dto.game.MoveMessage;
+import org.dama.damajatek.dto.game.websocket.GameStateWsDto;
+import org.dama.damajatek.dto.game.websocket.MoveWsDto;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.enums.game.GameStatus;
 import org.dama.damajatek.model.Move;
@@ -28,7 +28,7 @@ public class GameWebSocketController {
     @MessageMapping("/game/{gameId}/move")
     public void handleMove(
             @DestinationVariable Long gameId,
-            @Payload MoveMessage moveMsg,
+            @Payload MoveWsDto moveMsg,
             Principal principal
     ) {
         try {
@@ -42,7 +42,7 @@ public class GameWebSocketController {
 
             Game updated = gameService.makeMove(gameId, move);
 
-            GameStateMessage state = getGameStateMessage(updated);
+            GameStateWsDto state = getGameStateMessage(updated);
 
             template.convertAndSend("/topic/games." + gameId, state);
 
@@ -55,7 +55,7 @@ public class GameWebSocketController {
         }
     }
 
-    private static GameStateMessage getGameStateMessage(Game updated) {
+    private static GameStateWsDto getGameStateMessage(Game updated) {
         String boardJson = updated.getBoardState();
 
         String winnerName = null;
@@ -63,7 +63,7 @@ public class GameWebSocketController {
             winnerName = updated.getWinner().getDisplayName();
         }
 
-        return new GameStateMessage(
+        return new GameStateWsDto(
                 updated.getId(),
                 boardJson,
                 updated.getCurrentTurn(),

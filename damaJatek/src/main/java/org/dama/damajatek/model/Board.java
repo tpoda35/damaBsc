@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class Board {
-    // 8x8 checkers board
     private Piece[][] grid = new Piece[8][8];
 
     public Piece getPiece(int row, int col) {

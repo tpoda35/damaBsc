@@ -5,16 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dama.damajatek.authentication.user.AppUser;
+import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.Room;
+import org.dama.damajatek.enums.game.BotDifficulty;
+import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Move;
 import org.dama.damajatek.model.Piece;
-import org.dama.damajatek.enums.game.BotDifficulty;
-import org.dama.damajatek.enums.game.GameStatus;
-import org.dama.damajatek.enums.game.PieceColor;
-import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.repository.GameRepository;
-import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.util.BoardInitializer;
 import org.springframework.stereotype.Service;
@@ -54,61 +53,71 @@ public class GameService implements IGameService {
     }
 
     private boolean isValidMove(Board board, Move move, PieceColor currentTurn) {
+        int fromRow = move.getFromRow();
+        int fromCol = move.getFromCol();
+        int toRow = move.getToRow();
+        int toCol = move.getToCol();
+
         // Bounds checking
-        if (!isInBounds(move.getFromRow(), move.getFromCol()) ||
-                !isInBounds(move.getToRow(), move.getToCol())) {
-            return false;
-        }
+        if (!isInBounds(fromRow, fromCol) ||
+                !isInBounds(toRow, toCol)) return false;
 
-        Piece piece = board.getPiece(move.getFromRow(), move.getFromCol());
-        if (piece == null || piece.getColor() != currentTurn) {
-            return false;
-        }
+        // Check if that piece exists what the player wants to move
+        Piece piece = board.getPiece(fromRow, fromCol);
+        if (piece == null || piece.getColor() != currentTurn) return false;
 
-        // Destination must be empty
-        if (board.getPiece(move.getToRow(), move.getToCol()) != null) {
-            return false;
-        }
-
-        int rowDiff = move.getToRow() - move.getFromRow();
-        int colDiff = move.getToCol() - move.getFromCol();
+        // Destination must be empty where the piece goes
+        if (board.getPiece(toRow, toCol) != null) return false;
 
         // Must move diagonally
-        if (Math.abs(rowDiff) != Math.abs(colDiff)) {
-            return false;
-        }
+        // Rule: rowDiff and colDiff always need to be the same
+        // row: up/down
+        // col: right/left
+        if (Math.abs(toRow - fromRow) != Math.abs(toCol - fromCol)) return false;
 
         // Direction validation for regular pieces
         if (!piece.isKing()) {
-            if (piece.getColor() == PieceColor.RED && rowDiff < 0) {
-                return false; // Red pieces can't move backward
-            }
-            if (piece.getColor() == PieceColor.BLACK && rowDiff > 0) {
-                return false; // Black pieces can't move backward
-            }
+            // Red pieces can't move backward
+            if (piece.getColor() == PieceColor.RED && toRow - fromRow < 0) return false;
+            // Black pieces can't move backward
+            if (piece.getColor() == PieceColor.BLACK && toRow - fromRow > 0) return false;
         }
 
         // Simple move (distance 1)
-        if (Math.abs(rowDiff) == 1) {
-            return true;
-        }
+        if (Math.abs(toRow - fromRow) == 1) return true;
 
         // Capture move (distance 2)
-        if (Math.abs(rowDiff) == 2) {
-            return isValidCapture(board, move, piece);
-        }
+        if (isCapture(move)) return isValidCapture(board, move, piece);
 
         // Invalid distance
         return false;
     }
 
     private boolean isValidCapture(Board board, Move move, Piece movingPiece) {
-        return false;
+        if (!isCapture(move)) return false;
+
+        int fromRow = move.getFromRow();
+        int fromCol = move.getFromCol();
+        int toRow = move.getToRow();
+        int toCol = move.getToCol();
+
+        int midRow = (fromRow + toRow) / 2;
+        int midCol = (fromCol + toCol) / 2;
+
+        Piece middle = board.getPiece(midRow, midCol);
+        return middle != null && middle.getColor() != movingPiece.getColor();
     }
 
     private boolean isCapture(Move move) {
-        return Math.abs(move.getToRow() - move.getFromRow()) == 2;
+        return Math.abs(move.getToRow() - move.getFromRow()) == 2 &&
+                Math.abs(move.getToCol() - move.getFromCol()) == 2;
     }
+
+
+
+
+
+
 
     private List<Move> findAllCaptureMoves(Board board, PieceColor color) {
         List<Move> captures = new ArrayList<>();
@@ -220,6 +229,11 @@ public class GameService implements IGameService {
 
         return moves;
     }
+
+
+
+
+
 
     // Checks if the piece is on the board.
     private boolean isInBounds(int row, int col) {

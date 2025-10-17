@@ -1,4 +1,4 @@
-package org.dama.damajatek.dto.game;
+package org.dama.damajatek.dto.game.websocket;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import org.dama.damajatek.enums.game.PieceColor;
 
 @Data
 @AllArgsConstructor
-public class GameStateMessage {
+public class GameStateWsDto {
     private Long gameId;
     private String boardJson;         // serialized Board (client will parse)
     private PieceColor currentTurn;

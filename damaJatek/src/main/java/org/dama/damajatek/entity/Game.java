@@ -55,6 +55,9 @@ public class Game {
     @Enumerated(EnumType.STRING)
     private BotDifficulty botDifficulty;
 
+    @Version
+    private Long version;
+
     @PrePersist
     public void Init() {
         currentTurn = BLACK;
