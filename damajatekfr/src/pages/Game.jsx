@@ -5,6 +5,7 @@ import ApiService from "../services/ApiService.js";
 const Game = () => {
     const { gameId } = useParams();
     const [game, setGame] = useState(null);
+    console.log("Game object: ", game);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -24,6 +25,7 @@ const Game = () => {
 
         if (gameId) fetchGame();
     }, [gameId]);
+
 
 
 };

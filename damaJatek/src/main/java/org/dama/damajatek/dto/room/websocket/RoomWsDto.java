@@ -2,6 +2,7 @@ package org.dama.damajatek.dto.room.websocket;
 
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +17,7 @@ import org.dama.damajatek.enums.room.RoomWsAction;
 public class RoomWsDto {
 
     @Enumerated(EnumType.STRING)
+    @NotNull
     private RoomWsAction action;
 
     private AppUserInfoDtoV1 player;

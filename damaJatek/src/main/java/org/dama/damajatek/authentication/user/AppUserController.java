@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AppUserController {
 
-    private final AppUserService appUserService;
+    private final IAppUserService appUserService;
 
     @PostMapping("/changePassword")
     public ResponseEntity<?> changePassword(

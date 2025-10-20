@@ -6,20 +6,31 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
+import org.dama.damajatek.authentication.user.IAppUserService;
+import org.dama.damajatek.dto.game.GameInfoDtoV1;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.Room;
 import org.dama.damajatek.enums.game.BotDifficulty;
 import org.dama.damajatek.enums.game.PieceColor;
+import org.dama.damajatek.exception.auth.AccessDeniedException;
+import org.dama.damajatek.exception.game.GameAlreadyFinishedException;
+import org.dama.damajatek.exception.game.GameNotFoundException;
+import org.dama.damajatek.exception.game.InvalidMoveException;
+import org.dama.damajatek.mapper.GameMapper;
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Move;
 import org.dama.damajatek.model.Piece;
 import org.dama.damajatek.repository.GameRepository;
 import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.util.BoardInitializer;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+import static org.dama.damajatek.enums.game.GameStatus.FINISHED;
 
 @Slf4j
 @Service
@@ -28,9 +39,12 @@ public class GameService implements IGameService {
 
     private final ObjectMapper objectMapper;
     private final GameRepository gameRepository;
+    private final IAppUserService appUserService;
 
-    @Override
+    // The forced capture rule is used, so if there's a capture, then the user only gets that move.
+
     @Transactional
+    @Override
     public Game createGame(AppUser redPlayer, AppUser blackPlayer, Room room, boolean vsBot, BotDifficulty difficulty) {
         Board board = BoardInitializer.createStartingBoard();
 
@@ -46,71 +60,110 @@ public class GameService implements IGameService {
         return gameRepository.save(game);
     }
 
-    @Override
+    @Async
     @Transactional
-    public Game makeMove(Long gameId, Move move) {
-        return null;
+    @Override
+    public CompletableFuture<GameInfoDtoV1> getGameInfo(Long gameId) {
+        Game game = findGameByIdWithPlayers(gameId);
+        AppUser loggedInUser = appUserService.getLoggedInUser();
+
+        checkUserAccessToGame(game, loggedInUser);
+
+        PieceColor playerColor =
+                loggedInUser.getId().equals(game.getRedPlayer().getId())
+                        ? PieceColor.RED
+                        : PieceColor.BLACK;
+
+        Board board = loadBoard(game);
+        List<Move> validMoves = findAllValidMoves(board, game.getCurrentTurn());
+
+        return CompletableFuture.completedFuture(
+                GameMapper.createGameInfoDtoV1(game, board, validMoves, playerColor)
+        );
     }
 
-    private boolean isValidMove(Board board, Move move, PieceColor currentTurn) {
-        int fromRow = move.getFromRow();
-        int fromCol = move.getFromCol();
-        int toRow = move.getToRow();
-        int toCol = move.getToCol();
+    @Transactional
+    @Override
+    public void makeMove(Long gameId, Move move) {
+        Game game = findGameByIdWithPlayers(gameId);
+        AppUser loggedInUser = appUserService.getLoggedInUser();
 
-        // Bounds checking
-        if (!isInBounds(fromRow, fromCol) ||
-                !isInBounds(toRow, toCol)) return false;
+        checkUserAccessToGame(game, loggedInUser);
 
-        // Check if that piece exists what the player wants to move
-        Piece piece = board.getPiece(fromRow, fromCol);
-        if (piece == null || piece.getColor() != currentTurn) return false;
-
-        // Destination must be empty where the piece goes
-        if (board.getPiece(toRow, toCol) != null) return false;
-
-        // Must move diagonally
-        // Rule: rowDiff and colDiff always need to be the same
-        // row: up/down
-        // col: right/left
-        if (Math.abs(toRow - fromRow) != Math.abs(toCol - fromCol)) return false;
-
-        // Direction validation for regular pieces
-        if (!piece.isKing()) {
-            // Red pieces can't move backward
-            if (piece.getColor() == PieceColor.RED && toRow - fromRow < 0) return false;
-            // Black pieces can't move backward
-            if (piece.getColor() == PieceColor.BLACK && toRow - fromRow > 0) return false;
+        if (game.getStatus() == FINISHED) {
+            throw new GameAlreadyFinishedException();
         }
 
-        // Simple move (distance 1)
-        if (Math.abs(toRow - fromRow) == 1) return true;
+        Board board = loadBoard(game);
+        PieceColor currentTurn = game.getCurrentTurn();
 
-        // Capture move (distance 2)
-        if (isCapture(move)) return isValidCapture(board, move, piece);
+        if ((currentTurn == PieceColor.RED && !loggedInUser.getId().equals(game.getRedPlayer().getId())) ||
+                (currentTurn == PieceColor.BLACK && !loggedInUser.getId().equals(game.getBlackPlayer().getId()))) {
+            throw new AccessDeniedException("Not your turn");
+        }
 
-        // Invalid distance
-        return false;
+        // Check for forced captures
+        List<Move> captureMoves = findAllCaptureMoves(board, currentTurn);
+        List<Move> validMoves;
+
+        if (!captureMoves.isEmpty()) {
+            // If captures exist, only those are valid (forced capture rule)
+            validMoves = captureMoves;
+        } else {
+            // Otherwise, all regular moves are valid
+            validMoves = findAllValidMoves(board, currentTurn);
+        }
+
+        // Check if the move is on the list of valid moves
+        if (!isMoveInValidMoves(validMoves, move)) {
+            log.warn("Move not in valid moves list for game {}: {}", gameId, move);
+            throw new InvalidMoveException("Invalid move - forced capture rule violation or move not available");
+        }
+
+        applyMove(board, move);
+        promoteIfKing(board, move);
+
+        // Switch turns
+        PieceColor nextTurn = (currentTurn == PieceColor.RED)
+                ? PieceColor.BLACK
+                : PieceColor.RED;
+
+        if (isGameOver(board, nextTurn)) {
+            game.setStatus(FINISHED);
+            game.setWinner(
+                    game.getCurrentTurn() == PieceColor.RED ? game.getRedPlayer() : game.getBlackPlayer()
+            );
+            log.info("Game {} finished. Winner: {}", gameId, currentTurn);
+        } else {
+            game.setCurrentTurn(nextTurn);
+        }
+
+        saveBoard(game, board);
+
+        log.info("Move executed in game {}", gameId);
+        gameRepository.save(game);
     }
 
-    private boolean isValidCapture(Board board, Move move, Piece movingPiece) {
-        if (!isCapture(move)) return false;
+    private void checkUserAccessToGame(Game game, AppUser loggedInUser) {
+        Long userId = loggedInUser.getId();
 
-        int fromRow = move.getFromRow();
-        int fromCol = move.getFromCol();
-        int toRow = move.getToRow();
-        int toCol = move.getToCol();
+        boolean isBlackPlayer = game.getBlackPlayer() != null &&
+                userId.equals(game.getBlackPlayer().getId());
+        boolean isRedPlayer = game.getRedPlayer() != null &&
+                userId.equals(game.getRedPlayer().getId());
 
-        int midRow = (fromRow + toRow) / 2;
-        int midCol = (fromCol + toCol) / 2;
-
-        Piece middle = board.getPiece(midRow, midCol);
-        return middle != null && middle.getColor() != movingPiece.getColor();
+        if (!isBlackPlayer && !isRedPlayer) {
+            log.warn("Unauthorized access to game(id: {}) from user(id: {}).", game.getId(), userId);
+            throw new AccessDeniedException("You are not a participant in this game");
+        }
     }
 
-    private boolean isCapture(Move move) {
-        return Math.abs(move.getToRow() - move.getFromRow()) == 2 &&
-                Math.abs(move.getToCol() - move.getFromCol()) == 2;
+    private boolean isMoveInValidMoves(List<Move> validMoves, Move move) {
+        return validMoves.stream()
+                .anyMatch(m -> m.getFromRow() == move.getFromRow() &&
+                        m.getFromCol() == move.getFromCol() &&
+                        m.getToRow() == move.getToRow() &&
+                        m.getToCol() == move.getToCol());
     }
 
 
@@ -118,6 +171,56 @@ public class GameService implements IGameService {
 
 
 
+    // Iterates through the full table, searches for the pieces with the given color.
+    // It uses the findValidMovesForPiece method, to find all the possible moves for all the pieces.
+    private List<Move> findAllValidMoves(Board board, PieceColor color) {
+        List<Move> moves = new ArrayList<>();
+
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                Piece piece = board.getPiece(row, col);
+                if (piece != null && piece.getColor() == color) {
+                    moves.addAll(findValidMovesForPiece(board, row, col));
+                }
+            }
+        }
+
+        return moves;
+    }
+
+    private List<Move> findValidMovesForPiece(Board board, int row, int col) {
+        List<Move> moves = new ArrayList<>();
+        Piece piece = board.getPiece(row, col);
+
+        if (piece == null) return moves;
+
+        // Check regular moves
+        int[][] directions = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+
+        for (int[] dir : directions) {
+            // Skip backward moves for regular pieces
+            if (!piece.isKing()) {
+                if (piece.getColor() == PieceColor.RED && dir[0] < 0) continue;
+                if (piece.getColor() == PieceColor.BLACK && dir[0] > 0) continue;
+            }
+
+            int newRow = row + dir[0];
+            int newCol = col + dir[1];
+
+            if (isInBounds(newRow, newCol) && board.getPiece(newRow, newCol) == null) {
+                moves.add(
+                        Move.builder()
+                        .fromRow(row)
+                        .fromCol(col)
+                        .toRow(newRow)
+                        .toCol(newCol)
+                        .build()
+                );
+            }
+        }
+
+        return moves;
+    }
 
     private List<Move> findAllCaptureMoves(Board board, PieceColor color) {
         List<Move> captures = new ArrayList<>();
@@ -175,67 +278,12 @@ public class GameService implements IGameService {
         return captures;
     }
 
-    private List<Move> findAllValidMoves(Board board, PieceColor color) {
-        List<Move> moves = new ArrayList<>();
-
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                Piece piece = board.getPiece(row, col);
-                if (piece != null && piece.getColor() == color) {
-                    moves.addAll(findValidMovesForPiece(board, row, col));
-                }
-            }
-        }
-
-        return moves;
-    }
-
-    private List<Move> findValidMovesForPiece(Board board, int row, int col) {
-        List<Move> moves = new ArrayList<>();
-        Piece piece = board.getPiece(row, col);
-
-        if (piece == null) return moves;
-
-        // First check captures
-        moves.addAll(findCaptureMovesForPiece(board, row, col));
-
-        // If captures exist, only return captures (forced capture rule)
-        if (!moves.isEmpty()) return moves;
-
-        // Check regular moves
-        int[][] directions = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
-
-        for (int[] dir : directions) {
-            // Skip backward moves for regular pieces
-            if (!piece.isKing()) {
-                if (piece.getColor() == PieceColor.RED && dir[0] < 0) continue;
-                if (piece.getColor() == PieceColor.BLACK && dir[0] > 0) continue;
-            }
-
-            int newRow = row + dir[0];
-            int newCol = col + dir[1];
-
-            if (isInBounds(newRow, newCol) && board.getPiece(newRow, newCol) == null) {
-                moves.add(
-                        Move.builder()
-                        .fromRow(row)
-                        .fromCol(col)
-                        .toRow(newRow)
-                        .toCol(newCol)
-                        .build()
-                );
-            }
-        }
-
-        return moves;
-    }
 
 
 
 
 
-
-    // Checks if the piece is on the board.
+    // Checks if the given row&col is on the board.
     private boolean isInBounds(int row, int col) {
         return row >= 0 && row < 8 && col >= 0 && col < 8;
     }
@@ -317,5 +365,13 @@ public class GameService implements IGameService {
             log.error("Failed to save board for game {}: {}", game.getId(), e.getMessage());
             throw new RuntimeException("Failed to save board", e);
         }
+    }
+
+    private Game findGameByIdWithPlayers(Long gameId) {
+        return gameRepository.findByIdWithPlayers(gameId)
+                .orElseThrow(() -> {
+                   log.info("Game not found with id {}.", gameId);
+                   return new GameNotFoundException();
+                });
     }
 }

@@ -25,52 +25,52 @@ public class GameWebSocketController {
     private final SimpMessagingTemplate template;
     private final IGameService gameService;
 
-    @MessageMapping("/game/{gameId}/move")
-    public void handleMove(
-            @DestinationVariable Long gameId,
-            @Payload MoveWsDto moveMsg,
-            Principal principal
-    ) {
-        try {
-            // Build the service Move model from DTO
-            Move move = Move.builder()
-                    .fromRow(moveMsg.getFromRow())
-                    .fromCol(moveMsg.getFromCol())
-                    .toRow(moveMsg.getToRow())
-                    .toCol(moveMsg.getToCol())
-                    .build();
-
-            Game updated = gameService.makeMove(gameId, move);
-
-            GameStateWsDto state = getGameStateMessage(updated);
-
-            template.convertAndSend("/topic/games." + gameId, state);
-
-        } catch (IllegalArgumentException ex) {
-            log.warn("Move rejected: {}", ex.getMessage());
-            sendErrorToPlayer(principal, "/topic/games." + gameId, ex.getMessage());
-        } catch (Exception e) {
-            log.error("Unexpected error handling move", e);
-            sendErrorToPlayer(principal, "/topic/games." + gameId, "Server error handling move");
-        }
-    }
-
-    private static GameStateWsDto getGameStateMessage(Game updated) {
-        String boardJson = updated.getBoardState();
-
-        String winnerName = null;
-        if (updated.getStatus() == GameStatus.FINISHED && updated.getWinner() != null) {
-            winnerName = updated.getWinner().getDisplayName();
-        }
-
-        return new GameStateWsDto(
-                updated.getId(),
-                boardJson,
-                updated.getCurrentTurn(),
-                updated.getStatus(),
-                winnerName
-        );
-    }
+//    @MessageMapping("/game/{gameId}/move")
+//    public void handleMove(
+//            @DestinationVariable Long gameId,
+//            @Payload MoveWsDto moveMsg,
+//            Principal principal
+//    ) {
+//        try {
+//            // Build the service Move model from DTO
+//            Move move = Move.builder()
+//                    .fromRow(moveMsg.getFromRow())
+//                    .fromCol(moveMsg.getFromCol())
+//                    .toRow(moveMsg.getToRow())
+//                    .toCol(moveMsg.getToCol())
+//                    .build();
+//
+//            Game updated = gameService.makeMove(gameId, move);
+//
+//            GameStateWsDto state = getGameStateMessage(updated);
+//
+//            template.convertAndSend("/topic/games." + gameId, state);
+//
+//        } catch (IllegalArgumentException ex) {
+//            log.warn("Move rejected: {}", ex.getMessage());
+//            sendErrorToPlayer(principal, "/topic/games." + gameId, ex.getMessage());
+//        } catch (Exception e) {
+//            log.error("Unexpected error handling move", e);
+//            sendErrorToPlayer(principal, "/topic/games." + gameId, "Server error handling move");
+//        }
+//    }
+//
+//    private static GameStateWsDto getGameStateMessage(Game updated) {
+//        String boardJson = updated.getBoardState();
+//
+//        String winnerName = null;
+//        if (updated.getStatus() == GameStatus.FINISHED && updated.getWinner() != null) {
+//            winnerName = updated.getWinner().getDisplayName();
+//        }
+//
+//        return new GameStateWsDto(
+//                updated.getId(),
+//                boardJson,
+//                updated.getCurrentTurn(),
+//                updated.getStatus(),
+//                winnerName
+//        );
+//    }
 
     private void sendErrorToPlayer(Principal principal, String fallbackTopic, String errorMsg) {
         ErrorMessage err = new ErrorMessage(errorMsg);

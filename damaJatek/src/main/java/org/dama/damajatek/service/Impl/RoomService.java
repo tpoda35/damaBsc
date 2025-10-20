@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.AppUserRepository;
-import org.dama.damajatek.authentication.user.AppUserService;
+import org.dama.damajatek.authentication.user.IAppUserService;
 import org.dama.damajatek.dto.room.RoomCreateDto;
 import org.dama.damajatek.dto.room.RoomInfoDtoV1;
 import org.dama.damajatek.dto.room.RoomInfoDtoV2;
@@ -42,7 +42,7 @@ public class RoomService implements IRoomService {
 
     private final RoomRepository roomRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AppUserService appUserService;
+    private final IAppUserService appUserService;
     private final IGameService gameService;
     private final IRoomWebSocketService roomWebSocketService;
     private final AppUserRepository appUserRepository;
@@ -110,7 +110,7 @@ public class RoomService implements IRoomService {
 
         if (isHost(room, loggedInUser)) {
             log.info("Host left the room(id: {}), deleting room", roomId);
-            roomRepository.delete(room);
+            if (room.getStarted() != null && !room.getStarted()) roomRepository.delete(room);
 
             roomWebSocketService.broadcastRoomUpdate(HOST_LEAVE, "/topic/rooms/" + roomId);
         } else if (room.getOpponent() != null && isOpponent(room, loggedInUser)) {
