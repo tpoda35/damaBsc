@@ -7,23 +7,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.dama.damajatek.dto.game.GameInfoDtoV1;
-import org.dama.damajatek.enums.game.GameStateWsAction;
-import org.dama.damajatek.enums.game.PieceColor;
-import org.dama.damajatek.model.Board;
-import org.dama.damajatek.model.Move;
-
-import java.util.List;
+import org.dama.damajatek.dto.game.MoveInfoDtoV1;
+import org.dama.damajatek.enums.game.GameWsAction;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GameStateWsDto {
+public class GameWsDto {
 
     @Enumerated(EnumType.STRING)
     @NotNull
-    private GameStateWsAction action;
+    private GameWsAction action;
 
-    private GameInfoDtoV1 game;
+    private MoveInfoDtoV1 game;
 }

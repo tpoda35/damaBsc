@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.IAppUserService;
 import org.dama.damajatek.dto.game.GameInfoDtoV1;
+import org.dama.damajatek.dto.game.websocket.GameWsDto;
+import org.dama.damajatek.dto.game.websocket.MoveWsDto;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.Room;
 import org.dama.damajatek.enums.game.BotDifficulty;
@@ -17,15 +19,18 @@ import org.dama.damajatek.exception.game.GameAlreadyFinishedException;
 import org.dama.damajatek.exception.game.GameNotFoundException;
 import org.dama.damajatek.exception.game.InvalidMoveException;
 import org.dama.damajatek.mapper.GameMapper;
+import org.dama.damajatek.mapper.GameWsMapper;
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Move;
 import org.dama.damajatek.model.Piece;
 import org.dama.damajatek.repository.GameRepository;
 import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.util.BoardInitializer;
+import org.dama.damajatek.util.BoardSerializer;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -37,7 +42,6 @@ import static org.dama.damajatek.enums.game.GameStatus.FINISHED;
 @RequiredArgsConstructor
 public class GameService implements IGameService {
 
-    private final ObjectMapper objectMapper;
     private final GameRepository gameRepository;
     private final IAppUserService appUserService;
 
@@ -56,7 +60,7 @@ public class GameService implements IGameService {
                 .botDifficulty(difficulty)
                 .build();
 
-        saveBoard(game, board);
+        BoardSerializer.saveBoard(game, board);
         return gameRepository.save(game);
     }
 
@@ -74,7 +78,7 @@ public class GameService implements IGameService {
                         ? PieceColor.RED
                         : PieceColor.BLACK;
 
-        Board board = loadBoard(game);
+        Board board = BoardSerializer.loadBoard(game);
         List<Move> validMoves = findAllValidMoves(board, game.getCurrentTurn());
 
         return CompletableFuture.completedFuture(
@@ -84,7 +88,7 @@ public class GameService implements IGameService {
 
     @Transactional
     @Override
-    public void makeMove(Long gameId, Move move) {
+    public GameWsDto makeMove(Long gameId, Move move) {
         Game game = findGameByIdWithPlayers(gameId);
         AppUser loggedInUser = appUserService.getLoggedInUser();
 
@@ -94,7 +98,7 @@ public class GameService implements IGameService {
             throw new GameAlreadyFinishedException();
         }
 
-        Board board = loadBoard(game);
+        Board board = BoardSerializer.loadBoard(game);
         PieceColor currentTurn = game.getCurrentTurn();
 
         if ((currentTurn == PieceColor.RED && !loggedInUser.getId().equals(game.getRedPlayer().getId())) ||
@@ -138,10 +142,12 @@ public class GameService implements IGameService {
             game.setCurrentTurn(nextTurn);
         }
 
-        saveBoard(game, board);
+        BoardSerializer.saveBoard(game, board);
 
         log.info("Move executed in game {}", gameId);
         gameRepository.save(game);
+
+        return null;
     }
 
     private void checkUserAccessToGame(Game game, AppUser loggedInUser) {
@@ -347,24 +353,6 @@ public class GameService implements IGameService {
         }
 
         return false;
-    }
-
-    private Board loadBoard(Game game) {
-        try {
-            return objectMapper.readValue(game.getBoardState(), Board.class);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to load board for game {}: {}", game.getId(), e.getMessage());
-            throw new RuntimeException("Failed to load board", e);
-        }
-    }
-
-    private void saveBoard(Game game, Board board) {
-        try {
-            game.setBoardState(objectMapper.writeValueAsString(board));
-        } catch (JsonProcessingException e) {
-            log.error("Failed to save board for game {}: {}", game.getId(), e.getMessage());
-            throw new RuntimeException("Failed to save board", e);
-        }
     }
 
     private Game findGameByIdWithPlayers(Long gameId) {
