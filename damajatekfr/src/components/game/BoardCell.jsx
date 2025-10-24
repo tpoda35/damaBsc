@@ -14,17 +14,17 @@ const BoardCell = ({
     const isDark = (row + col) % 2 === 1;
 
     const cellClass = `
-    cell 
-    ${isDark ? "dark" : "light"}
-    ${isHighlighted ? "highlighted" : ""}
-    ${isSelected ? "selected" : ""}
-    ${canSelect ? "can-select" : ""}
-  `;
+        cell 
+        ${isDark ? "dark" : "light"}
+        ${isHighlighted ? "highlighted" : ""}
+        ${isSelected ? "selected" : ""}
+        ${canSelect ? "can-select" : ""}
+    `;
 
     return (
         <div
             className={cellClass}
-            onClick={() => canSelect && onClick(row, col)}
+            onClick={() => onClick(row, col)} // always call onClick
         >
             {piece && <Piece color={piece.color} isKing={piece.king} />}
         </div>

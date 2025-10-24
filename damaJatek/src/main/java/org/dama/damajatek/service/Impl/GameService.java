@@ -1,15 +1,14 @@
 package org.dama.damajatek.service.Impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.IAppUserService;
 import org.dama.damajatek.dto.game.GameInfoDtoV1;
-import org.dama.damajatek.dto.game.websocket.GameWsDto;
-import org.dama.damajatek.dto.game.websocket.MoveWsDto;
+import org.dama.damajatek.dto.game.websocket.GameEventDto;
+import org.dama.damajatek.dto.game.websocket.MoveMadeEventDto;
+import org.dama.damajatek.dto.game.websocket.NextTurnEventDto;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.Room;
 import org.dama.damajatek.enums.game.BotDifficulty;
@@ -18,8 +17,8 @@ import org.dama.damajatek.exception.auth.AccessDeniedException;
 import org.dama.damajatek.exception.game.GameAlreadyFinishedException;
 import org.dama.damajatek.exception.game.GameNotFoundException;
 import org.dama.damajatek.exception.game.InvalidMoveException;
+import org.dama.damajatek.mapper.EventMapper;
 import org.dama.damajatek.mapper.GameMapper;
-import org.dama.damajatek.mapper.GameWsMapper;
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Move;
 import org.dama.damajatek.model.Piece;
@@ -28,6 +27,7 @@ import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.util.BoardInitializer;
 import org.dama.damajatek.util.BoardSerializer;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -79,7 +79,7 @@ public class GameService implements IGameService {
                         : PieceColor.BLACK;
 
         Board board = BoardSerializer.loadBoard(game);
-        List<Move> validMoves = findAllValidMoves(board, game.getCurrentTurn());
+        List<Move> validMoves = getAvailableMoves(board, game.getCurrentTurn());
 
         return CompletableFuture.completedFuture(
                 GameMapper.createGameInfoDtoV1(game, board, validMoves, playerColor)
@@ -88,9 +88,11 @@ public class GameService implements IGameService {
 
     @Transactional
     @Override
-    public GameWsDto makeMove(Long gameId, Move move) {
+    public List<GameEventDto> makeMove(Long gameId, Move move, Principal principal) {
         Game game = findGameByIdWithPlayers(gameId);
-        AppUser loggedInUser = appUserService.getLoggedInUser();
+
+        Authentication auth = (Authentication) principal;
+        AppUser loggedInUser = (AppUser) auth.getPrincipal();
 
         checkUserAccessToGame(game, loggedInUser);
 
@@ -106,17 +108,8 @@ public class GameService implements IGameService {
             throw new AccessDeniedException("Not your turn");
         }
 
-        // Check for forced captures
-        List<Move> captureMoves = findAllCaptureMoves(board, currentTurn);
-        List<Move> validMoves;
-
-        if (!captureMoves.isEmpty()) {
-            // If captures exist, only those are valid (forced capture rule)
-            validMoves = captureMoves;
-        } else {
-            // Otherwise, all regular moves are valid
-            validMoves = findAllValidMoves(board, currentTurn);
-        }
+        // Get available moves (forced capture rule applied)
+        List<Move> validMoves = getAvailableMoves(board, currentTurn);
 
         // Check if the move is on the list of valid moves
         if (!isMoveInValidMoves(validMoves, move)) {
@@ -145,9 +138,13 @@ public class GameService implements IGameService {
         BoardSerializer.saveBoard(game, board);
 
         log.info("Move executed in game {}", gameId);
-        gameRepository.save(game);
+        Game savedGame = gameRepository.save(game);
 
-        return null;
+        MoveMadeEventDto moveMadeEvent = EventMapper.createMoveMadeEventDto(move);
+
+        NextTurnEventDto nextTurnEvent = EventMapper.createNextTurnEventDto(savedGame.getCurrentTurn(), getAvailableMoves(board, nextTurn));
+
+        return List.of(moveMadeEvent, nextTurnEvent);
     }
 
     private void checkUserAccessToGame(Game game, AppUser loggedInUser) {
@@ -176,9 +173,19 @@ public class GameService implements IGameService {
 
 
 
+    private List<Move> getAvailableMoves(Board board, PieceColor color) {
+        List<Move> captureMoves = findAllCaptureMoves(board, color);
+
+        if (!captureMoves.isEmpty()) {
+            return captureMoves;
+        }
+
+        return findAllValidMoves(board, color);
+    }
 
     // Iterates through the full table, searches for the pieces with the given color.
     // It uses the findValidMovesForPiece method, to find all the possible moves for all the pieces.
+    // It only returns valid moves, not captures.
     private List<Move> findAllValidMoves(Board board, PieceColor color) {
         List<Move> moves = new ArrayList<>();
 
@@ -302,7 +309,7 @@ public class GameService implements IGameService {
         // Remove captured pieces
         for (int[] captured : move.getCapturedPieces()) {
             board.removePiece(captured[0], captured[1]);
-            log.debug("Captured piece at [{}, {}]", captured[0], captured[1]);
+            log.info("Captured piece at [{}, {}]", captured[0], captured[1]);
         }
     }
 

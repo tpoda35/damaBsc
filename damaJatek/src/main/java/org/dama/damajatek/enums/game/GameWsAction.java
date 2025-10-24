@@ -1,5 +1,5 @@
 package org.dama.damajatek.enums.game;
 
 public enum GameWsAction {
-    MOVE_MADE, INVALID_MOVE, GAME_OVER, FORFEIT
+    MOVE_MADE, CAPTURE_MADE, NEXT_TURN, INVALID_MOVE, GAME_OVER, FORFEIT
 }

@@ -1,7 +1,6 @@
 package org.dama.damajatek.mapper;
 
 import org.dama.damajatek.dto.game.GameInfoDtoV1;
-import org.dama.damajatek.dto.game.MoveInfoDtoV1;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.model.Board;
@@ -18,13 +17,6 @@ public class GameMapper {
                 .currentTurn(game.getCurrentTurn())
                 .allowedMoves(allowedMoves)
                 .playerColor(playerColor)
-                .build();
-    }
-
-    public static MoveInfoDtoV1 createGameInfoDtoV2(Game game, List<Move> allowedMoves) {
-        return MoveInfoDtoV1.builder()
-                .currentTurn(game.getCurrentTurn())
-                .allowedMoves(allowedMoves)
                 .build();
     }
 

@@ -1,24 +1,19 @@
-package org.dama.damajatek.model;
+package org.dama.damajatek.dto.game;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Move {
+public class MoveDto {
+
     private int fromRow;
     private int fromCol;
     private int toRow;
     private int toCol;
 
-    @Builder.Default
-    private List<int[]> capturedPieces = new ArrayList<>();
 }
-
