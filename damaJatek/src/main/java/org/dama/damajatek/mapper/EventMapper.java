@@ -1,5 +1,6 @@
 package org.dama.damajatek.mapper;
 
+import org.dama.damajatek.dto.game.websocket.CaptureMadeEventDto;
 import org.dama.damajatek.dto.game.websocket.MoveMadeEventDto;
 import org.dama.damajatek.dto.game.websocket.NextTurnEventDto;
 import org.dama.damajatek.enums.game.PieceColor;
@@ -22,6 +23,16 @@ public class EventMapper {
         return NextTurnEventDto.builder()
                 .currentTurn(currentTurn)
                 .allowedMoves(allowedMoves)
+                .build();
+    }
+
+    public static CaptureMadeEventDto createCaptureMadeEventDto(Move move) {
+        return CaptureMadeEventDto.builder()
+                .fromRow(move.getFromRow())
+                .fromCol(move.getFromCol())
+                .toRow(move.getToRow())
+                .toCol(move.getToCol())
+                .capturedPieces(move.getCapturedPieces())
                 .build();
     }
 

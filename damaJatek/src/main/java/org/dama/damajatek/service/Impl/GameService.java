@@ -32,8 +32,11 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static org.dama.damajatek.enums.game.GameStatus.FINISHED;
 
@@ -111,14 +114,19 @@ public class GameService implements IGameService {
         // Get available moves (forced capture rule applied)
         List<Move> validMoves = getAvailableMoves(board, currentTurn);
 
-        // Check if the move is on the list of valid moves
-        if (!isMoveInValidMoves(validMoves, move)) {
-            log.warn("Move not in valid moves list for game {}: {}", gameId, move);
-            throw new InvalidMoveException("Invalid move - forced capture rule violation or move not available");
-        }
+        Move actualMove = validMoves.stream()
+                .filter(m -> m.getFromRow() == move.getFromRow() &&
+                        m.getFromCol() == move.getFromCol() &&
+                        m.getToRow() == move.getToRow() &&
+                        m.getToCol() == move.getToCol())
+                .findFirst()
+                .orElseThrow(() -> {
+                    log.warn("Move not in valid moves list for game {}: {}", gameId, move);
+                    return new InvalidMoveException("Invalid move - forced capture rule violation or move not available");
+                });
 
-        applyMove(board, move);
-        promoteIfKing(board, move);
+        applyMove(board, actualMove);
+        promoteIfKing(board, actualMove);
 
         // Switch turns
         PieceColor nextTurn = (currentTurn == PieceColor.RED)
@@ -140,11 +148,23 @@ public class GameService implements IGameService {
         log.info("Move executed in game {}", gameId);
         Game savedGame = gameRepository.save(game);
 
-        MoveMadeEventDto moveMadeEvent = EventMapper.createMoveMadeEventDto(move);
+        List<GameEventDto> events = new ArrayList<>();
 
-        NextTurnEventDto nextTurnEvent = EventMapper.createNextTurnEventDto(savedGame.getCurrentTurn(), getAvailableMoves(board, nextTurn));
+        if (!actualMove.getCapturedPieces().isEmpty()) {
+            GameEventDto captureEvent = EventMapper.createCaptureMadeEventDto(actualMove);
+            events.add(captureEvent);
+        } else {
+            MoveMadeEventDto moveMadeEvent = EventMapper.createMoveMadeEventDto(actualMove);
+            events.add(moveMadeEvent);
+        }
 
-        return List.of(moveMadeEvent, nextTurnEvent);
+        NextTurnEventDto nextTurnEvent = EventMapper.createNextTurnEventDto(
+                savedGame.getCurrentTurn(),
+                getAvailableMoves(board, nextTurn)
+        );
+        events.add(nextTurnEvent);
+
+        return events;
     }
 
     private void checkUserAccessToGame(Game game, AppUser loggedInUser) {
@@ -159,14 +179,6 @@ public class GameService implements IGameService {
             log.warn("Unauthorized access to game(id: {}) from user(id: {}).", game.getId(), userId);
             throw new AccessDeniedException("You are not a participant in this game");
         }
-    }
-
-    private boolean isMoveInValidMoves(List<Move> validMoves, Move move) {
-        return validMoves.stream()
-                .anyMatch(m -> m.getFromRow() == move.getFromRow() &&
-                        m.getFromCol() == move.getFromCol() &&
-                        m.getToRow() == move.getToRow() &&
-                        m.getToCol() == move.getToCol());
     }
 
 
@@ -251,47 +263,114 @@ public class GameService implements IGameService {
     }
 
     private List<Move> findCaptureMovesForPiece(Board board, int row, int col) {
-        List<Move> captures = new ArrayList<>();
+        List<Move> allCaptures = new ArrayList<>();
         Piece piece = board.getPiece(row, col);
 
-        if (piece == null) return captures;
+        if (piece == null) return allCaptures;
 
-        // Check all four diagonal directions
+        // Start the recursive chain capture search
+        Move initialMove = Move.builder()
+                .fromRow(row)
+                .fromCol(col)
+                .toRow(row)
+                .toCol(col)
+                .build();
+
+        findChainCapturesRecursive(board, row, col, piece, initialMove, new HashSet<>(), allCaptures);
+
+        // If no chain captures found, return empty list
+        if (allCaptures.isEmpty()) {
+            return allCaptures;
+        }
+
+        // Find the maximum number of captures in any chain
+        int maxCaptures = allCaptures.stream()
+                .mapToInt(move -> move.getCapturedPieces().size())
+                .max()
+                .orElse(0);
+
+        // Only return moves with the maximum number of captures (forced capture rule)
+        return allCaptures.stream()
+                .filter(move -> move.getCapturedPieces().size() == maxCaptures)
+                .collect(Collectors.toList());
+    }
+
+    private void findChainCapturesRecursive(
+            Board board,
+            int currentRow,
+            int currentCol,
+            Piece originalPiece,
+            Move currentMove,
+            Set<String> capturedPositions,
+            List<Move> allCaptures) {
+
+        boolean foundCapture = false;
         int[][] directions = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
 
         for (int[] dir : directions) {
             // Skip backward moves for regular pieces
-            if (!piece.isKing()) {
-                if (piece.getColor() == PieceColor.RED && dir[0] < 0) continue;
-                if (piece.getColor() == PieceColor.BLACK && dir[0] > 0) continue;
+            if (!originalPiece.isKing()) {
+                if (originalPiece.getColor() == PieceColor.RED && dir[0] < 0) continue;
+                if (originalPiece.getColor() == PieceColor.BLACK && dir[0] > 0) continue;
             }
 
-            int jumpRow = row + dir[0] * 2;
-            int jumpCol = col + dir[1] * 2;
-            int middleRow = row + dir[0];
-            int middleCol = col + dir[1];
+            int middleRow = currentRow + dir[0];
+            int middleCol = currentCol + dir[1];
+            int jumpRow = currentRow + dir[0] * 2;
+            int jumpCol = currentCol + dir[1] * 2;
 
+            String middleKey = middleRow + "," + middleCol;
+
+            // Check if this is a valid capture
             if (isInBounds(jumpRow, jumpCol) &&
-                    board.getPiece(jumpRow, jumpCol) == null) {
+                    isInBounds(middleRow, middleCol) &&
+                    board.getPiece(jumpRow, jumpCol) == null &&
+                    !capturedPositions.contains(middleKey)) {
 
                 Piece middle = board.getPiece(middleRow, middleCol);
-                if (middle != null && middle.getColor() != piece.getColor()) {
-                    Move capture = Move.builder()
-                            .fromRow(row)
-                            .fromCol(col)
+
+                if (middle != null && middle.getColor() != originalPiece.getColor()) {
+                    foundCapture = true;
+
+                    // Create a new move with this capture added
+                    Move newMove = Move.builder()
+                            .fromRow(currentMove.getFromRow())
+                            .fromCol(currentMove.getFromCol())
                             .toRow(jumpRow)
                             .toCol(jumpCol)
                             .build();
-                    capture.getCapturedPieces().add(new int[]{middleRow, middleCol});
-                    captures.add(capture);
+
+                    // Copy all previously captured pieces
+                    for (int[] captured : currentMove.getCapturedPieces()) {
+                        newMove.getCapturedPieces().add(new int[]{captured[0], captured[1]});
+                    }
+
+                    // Add this new captured piece
+                    newMove.getCapturedPieces().add(new int[]{middleRow, middleCol});
+
+                    // Create new set of captured positions for this branch
+                    Set<String> newCaptured = new HashSet<>(capturedPositions);
+                    newCaptured.add(middleKey);
+
+                    // Continue searching for more captures from the landing position
+                    findChainCapturesRecursive(
+                            board,
+                            jumpRow,
+                            jumpCol,
+                            originalPiece,
+                            newMove,
+                            newCaptured,
+                            allCaptures
+                    );
                 }
             }
         }
 
-        return captures;
+        // If no more captures possible from this position, add this as a complete chain
+        if (!foundCapture && !currentMove.getCapturedPieces().isEmpty()) {
+            allCaptures.add(currentMove);
+        }
     }
-
-
 
 
 
@@ -353,7 +432,7 @@ public class GameService implements IGameService {
         }
 
         // Check if current player has any valid moves
-        List<Move> validMoves = findAllValidMoves(board, currentTurn);
+        List<Move> validMoves = getAvailableMoves(board, currentTurn);
         if (validMoves.isEmpty()) {
             log.info("Game over: {} has no valid moves", currentTurn);
             return true;

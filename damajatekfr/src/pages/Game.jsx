@@ -50,6 +50,7 @@ const Game = () => {
                 try {
                     const response = JSON.parse(message.body);
                     const { action } = response;
+                    console.log("Response: ", response);
 
                     setGame((prevGame) => {
                         if (!prevGame) return prevGame;
@@ -74,6 +75,21 @@ const Game = () => {
                             }
 
                             case "CAPTURE_MADE": {
+                                const { fromRow, fromCol, toRow, toCol, capturedPieces } = response;
+                                console.log("CAPTURE_MADE response: ", response);
+
+                                // Move the capturing piece
+                                updatedGame.board.grid[toRow][toCol] =
+                                    updatedGame.board.grid[fromRow][fromCol];
+                                updatedGame.board.grid[fromRow][fromCol] = null;
+
+                                // Remove all captured pieces
+                                if (capturedPieces && capturedPieces.length > 0) {
+                                    capturedPieces.forEach(([row, col]) => {
+                                        updatedGame.board.grid[row][col] = null;
+                                    });
+                                }
+
                                 break;
                             }
 
