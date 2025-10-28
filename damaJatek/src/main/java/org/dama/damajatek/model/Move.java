@@ -19,6 +19,9 @@ public class Move {
     private int toCol;
 
     @Builder.Default
+    private  List<int[]> path = new ArrayList<>();
+
+    @Builder.Default
     private List<int[]> capturedPieces = new ArrayList<>();
 }
 

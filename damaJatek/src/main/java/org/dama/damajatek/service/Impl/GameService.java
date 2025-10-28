@@ -224,10 +224,7 @@ public class GameService implements IGameService {
 
         for (int[] dir : directions) {
             // Skip backward moves for regular pieces
-            if (!piece.isKing()) {
-                if (piece.getColor() == PieceColor.RED && dir[0] < 0) continue;
-                if (piece.getColor() == PieceColor.BLACK && dir[0] > 0) continue;
-            }
+            if (isDirectionAllowed(piece, dir)) continue;
 
             int newRow = row + dir[0];
             int newCol = col + dir[1];
@@ -268,7 +265,6 @@ public class GameService implements IGameService {
 
         if (piece == null) return allCaptures;
 
-        // Start the recursive chain capture search
         Move initialMove = Move.builder()
                 .fromRow(row)
                 .fromCol(col)
@@ -276,6 +272,7 @@ public class GameService implements IGameService {
                 .toCol(col)
                 .build();
 
+        // Start the recursive chain capture search
         findChainCapturesRecursive(board, row, col, piece, initialMove, new HashSet<>(), allCaptures);
 
         // If no chain captures found, return empty list
@@ -309,10 +306,7 @@ public class GameService implements IGameService {
 
         for (int[] dir : directions) {
             // Skip backward moves for regular pieces
-            if (!originalPiece.isKing()) {
-                if (originalPiece.getColor() == PieceColor.RED && dir[0] < 0) continue;
-                if (originalPiece.getColor() == PieceColor.BLACK && dir[0] > 0) continue;
-            }
+            if (isDirectionAllowed(originalPiece, dir)) continue;
 
             int middleRow = currentRow + dir[0];
             int middleCol = currentCol + dir[1];
@@ -348,6 +342,13 @@ public class GameService implements IGameService {
                     // Add this new captured piece
                     newMove.getCapturedPieces().add(new int[]{middleRow, middleCol});
 
+                    // Copy previous path
+                    for (int[] step : currentMove.getPath()) {
+                        newMove.getPath().add(new int[]{step[0], step[1]});
+                    }
+
+                    newMove.getPath().add(new int[]{jumpRow, jumpCol});
+
                     // Create new set of captured positions for this branch
                     Set<String> newCaptured = new HashSet<>(capturedPositions);
                     newCaptured.add(middleKey);
@@ -368,6 +369,16 @@ public class GameService implements IGameService {
 
         // If no more captures possible from this position, add this as a complete chain
         if (!foundCapture && !currentMove.getCapturedPieces().isEmpty()) {
+
+            // Remove the last element, since we have it in the Move (the toRow, toCol part)
+            List<int[]> path = currentMove.getPath();
+            if (!path.isEmpty()) {
+                int[] last = path.getLast();
+                if (last[0] == currentMove.getToRow() && last[1] == currentMove.getToCol()) {
+                    path.removeLast();
+                }
+            }
+
             allCaptures.add(currentMove);
         }
     }
@@ -410,6 +421,17 @@ public class GameService implements IGameService {
             log.debug("Promoted {} piece to king at [{}, {}]",
                     piece.getColor(), move.getToRow(), move.getToCol());
         }
+    }
+
+    public static boolean isDirectionAllowed(Piece piece, int[] dir) {
+        // Kings can move in any direction
+        if (piece.isKing()) return false;
+
+        // Regular red pieces move "down" (positive row direction)
+        if (piece.getColor() == PieceColor.RED && dir[0] > 0) return false;
+
+        // Regular black pieces move "up" (negative row direction)
+        return piece.getColor() != PieceColor.BLACK || dir[0] >= 0;
     }
 
     private boolean isGameOver(Board board, PieceColor currentTurn) {
