@@ -1,5 +1,5 @@
 import {useParams} from "react-router-dom";
-import {useCallback, useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import ApiService from "../services/ApiService";
 import GameBoard from "../components/game/GameBoard.jsx";
 import {useSharedWebSocket} from "../contexts/WebSocketContext.jsx";
@@ -7,17 +7,9 @@ import {useSharedWebSocket} from "../contexts/WebSocketContext.jsx";
 const Game = () => {
     const { gameId } = useParams();
     const [game, setGame] = useState(null);
-    console.log("Game: ", game);
     const [selectedCell, setSelectedCell] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    // This is needed because of useState async behavior.
-    const gameRef = useRef(null);
-
-    useEffect(() => {
-        gameRef.current = game;
-    }, [game]);
 
     const { isConnected, subscribe, sendMessage } = useSharedWebSocket();
 
@@ -67,29 +59,44 @@ const Game = () => {
 
                         switch (action) {
                             case "MOVE_MADE": {
-                                const { fromRow, fromCol, toRow, toCol } = response;
-                                updatedGame.board.grid[toRow][toCol] =
-                                    updatedGame.board.grid[fromRow][fromCol];
-                                updatedGame.board.grid[fromRow][fromCol] = null;
+                                const { move } = response;
+                                console.log("CAPTURE_MADE response: ", response);
+                                updatedGame.board.grid[move.toRow][move.toCol] =
+                                    updatedGame.board.grid[move.fromRow][move.fromCol];
+                                updatedGame.board.grid[move.fromRow][move.fromCol] = null;
                                 break;
                             }
 
                             case "CAPTURE_MADE": {
-                                const { fromRow, fromCol, toRow, toCol, capturedPieces } = response;
+                                const { move } = response;
                                 console.log("CAPTURE_MADE response: ", response);
 
                                 // Move the capturing piece
-                                updatedGame.board.grid[toRow][toCol] =
-                                    updatedGame.board.grid[fromRow][fromCol];
-                                updatedGame.board.grid[fromRow][fromCol] = null;
+                                updatedGame.board.grid[move.toRow][move.toCol] =
+                                    updatedGame.board.grid[move.fromRow][move.fromCol];
+                                updatedGame.board.grid[move.fromRow][move.fromCol] = null;
 
                                 // Remove all captured pieces
-                                if (capturedPieces && capturedPieces.length > 0) {
-                                    capturedPieces.forEach(([row, col]) => {
+                                if (move.capturedPieces && move.capturedPieces.length > 0) {
+                                    move.capturedPieces.forEach(([row, col]) => {
                                         updatedGame.board.grid[row][col] = null;
                                     });
                                 }
 
+                                break;
+                            }
+
+                            case "PROMOTED_PIECE": {
+                                const { row, col, pieceColor } = response;
+                                console.log(`PROMOTED_PIECE: (${row}, ${col}) for ${pieceColor}`);
+
+                                const piece = updatedGame.board.grid[row][col];
+                                if (piece && piece.color === pieceColor) {
+                                    updatedGame.board.grid[row][col] = {
+                                        ...piece,
+                                        king: true
+                                    };
+                                }
                                 break;
                             }
 

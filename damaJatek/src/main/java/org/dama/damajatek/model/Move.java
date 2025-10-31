@@ -1,5 +1,6 @@
 package org.dama.damajatek.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Move {
     private int fromRow;
     private int fromCol;
@@ -19,7 +21,7 @@ public class Move {
     private int toCol;
 
     @Builder.Default
-    private  List<int[]> path = new ArrayList<>();
+    private List<int[]> path = new ArrayList<>();
 
     @Builder.Default
     private List<int[]> capturedPieces = new ArrayList<>();

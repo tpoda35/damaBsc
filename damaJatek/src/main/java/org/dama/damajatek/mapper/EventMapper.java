@@ -3,6 +3,7 @@ package org.dama.damajatek.mapper;
 import org.dama.damajatek.dto.game.websocket.CaptureMadeEventDto;
 import org.dama.damajatek.dto.game.websocket.MoveMadeEventDto;
 import org.dama.damajatek.dto.game.websocket.NextTurnEventDto;
+import org.dama.damajatek.dto.game.websocket.PromotedPieceEventDto;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.model.Move;
 
@@ -12,10 +13,7 @@ public class EventMapper {
 
     public static MoveMadeEventDto createMoveMadeEventDto(Move move) {
         return MoveMadeEventDto.builder()
-                .fromRow(move.getFromRow())
-                .fromCol(move.getFromCol())
-                .toRow(move.getToRow())
-                .toCol(move.getToCol())
+                .move(move)
                 .build();
     }
 
@@ -28,11 +26,15 @@ public class EventMapper {
 
     public static CaptureMadeEventDto createCaptureMadeEventDto(Move move) {
         return CaptureMadeEventDto.builder()
-                .fromRow(move.getFromRow())
-                .fromCol(move.getFromCol())
-                .toRow(move.getToRow())
-                .toCol(move.getToCol())
-                .capturedPieces(move.getCapturedPieces())
+                .move(move)
+                .build();
+    }
+
+    public static PromotedPieceEventDto createPromotedPieceEventDto(Move move, PieceColor pieceColor) {
+        return PromotedPieceEventDto.builder()
+                .row(move.getToRow())
+                .col(move.getToCol())
+                .pieceColor(pieceColor)
                 .build();
     }
 

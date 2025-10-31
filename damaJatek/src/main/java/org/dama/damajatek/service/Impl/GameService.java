@@ -6,9 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.IAppUserService;
 import org.dama.damajatek.dto.game.GameInfoDtoV1;
-import org.dama.damajatek.dto.game.websocket.GameEventDto;
-import org.dama.damajatek.dto.game.websocket.MoveMadeEventDto;
-import org.dama.damajatek.dto.game.websocket.NextTurnEventDto;
+import org.dama.damajatek.dto.game.websocket.*;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.Room;
 import org.dama.damajatek.enums.game.BotDifficulty;
@@ -126,7 +124,7 @@ public class GameService implements IGameService {
                 });
 
         applyMove(board, actualMove);
-        promoteIfKing(board, actualMove);
+        boolean wasPromoted = promoteIfKing(board, actualMove);
 
         // Switch turns
         PieceColor nextTurn = (currentTurn == PieceColor.RED)
@@ -151,11 +149,19 @@ public class GameService implements IGameService {
         List<GameEventDto> events = new ArrayList<>();
 
         if (!actualMove.getCapturedPieces().isEmpty()) {
-            GameEventDto captureEvent = EventMapper.createCaptureMadeEventDto(actualMove);
+            CaptureMadeEventDto captureEvent = EventMapper.createCaptureMadeEventDto(actualMove);
             events.add(captureEvent);
         } else {
             MoveMadeEventDto moveMadeEvent = EventMapper.createMoveMadeEventDto(actualMove);
             events.add(moveMadeEvent);
+        }
+
+        if (wasPromoted) {
+            PromotedPieceEventDto promotedEvent = EventMapper.createPromotedPieceEventDto(
+                    actualMove,
+                    board.getPiece(actualMove.getToRow(), actualMove.getToCol()).getColor()
+            );
+            events.add(promotedEvent);
         }
 
         NextTurnEventDto nextTurnEvent = EventMapper.createNextTurnEventDto(
@@ -403,10 +409,10 @@ public class GameService implements IGameService {
         }
     }
 
-    private void promoteIfKing(Board board, Move move) {
+    private boolean promoteIfKing(Board board, Move move) {
         Piece piece = board.getPiece(move.getToRow(), move.getToCol());
 
-        if (piece == null || piece.isKing()) return;
+        if (piece == null || piece.isKing()) return false;
 
         boolean shouldPromote = false;
 
@@ -421,6 +427,8 @@ public class GameService implements IGameService {
             log.debug("Promoted {} piece to king at [{}, {}]",
                     piece.getColor(), move.getToRow(), move.getToCol());
         }
+
+        return shouldPromote;
     }
 
     public static boolean isDirectionAllowed(Piece piece, int[] dir) {
