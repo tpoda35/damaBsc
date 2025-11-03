@@ -66,7 +66,7 @@ public class Room {
     }
 
     @PrePersist
-    public void Init() {
+    public void init() {
         hostReadyStatus = NOT_READY;
         opponentReadyStatus = NOT_READY;
     }

@@ -1,9 +1,7 @@
 package org.dama.damajatek.mapper;
 
-import org.dama.damajatek.dto.game.websocket.CaptureMadeEventDto;
-import org.dama.damajatek.dto.game.websocket.MoveMadeEventDto;
-import org.dama.damajatek.dto.game.websocket.NextTurnEventDto;
-import org.dama.damajatek.dto.game.websocket.PromotedPieceEventDto;
+import org.dama.damajatek.dto.game.websocket.*;
+import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.model.Move;
 
@@ -35,6 +33,31 @@ public class EventMapper {
                 .row(move.getToRow())
                 .col(move.getToCol())
                 .pieceColor(pieceColor)
+                .build();
+    }
+
+    public static GameOverEventDto createGameOverEventDto(String winnerName, GameResult gameResult) {
+        return GameOverEventDto.builder()
+                .winnerName(winnerName)
+                .gameResult(gameResult)
+                .build();
+    }
+
+    public static GameDrawEventDto createGameDrawEventDto() {
+        return GameDrawEventDto.builder().build();
+    }
+
+    public static GameDrawEventDto createGameDrawEventDto(String drawReason) {
+        return GameDrawEventDto.builder()
+                .drawReason(drawReason)
+                .build();
+    }
+
+    public static GameForfeitEventDto createGameForfeitEventDto(String winnerName, GameResult gameResult, String message) {
+        return GameForfeitEventDto.builder()
+                .winnerName(winnerName)
+                .gameResult(gameResult)
+                .message(message)
                 .build();
     }
 

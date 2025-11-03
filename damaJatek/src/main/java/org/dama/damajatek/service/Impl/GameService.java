@@ -6,10 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.IAppUserService;
 import org.dama.damajatek.dto.game.GameInfoDtoV1;
-import org.dama.damajatek.dto.game.websocket.*;
+import org.dama.damajatek.dto.game.websocket.GameEventDto;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.Room;
 import org.dama.damajatek.enums.game.BotDifficulty;
+import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.exception.auth.AccessDeniedException;
 import org.dama.damajatek.exception.game.GameAlreadyFinishedException;
@@ -36,7 +37,9 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static org.dama.damajatek.enums.game.GameStatus.FINISHED;
+import static org.dama.damajatek.enums.game.GameResult.BLACK_WIN;
+import static org.dama.damajatek.enums.game.GameResult.RED_WIN;
+import static org.dama.damajatek.enums.game.PieceColor.RED;
 
 @Slf4j
 @Service
@@ -46,7 +49,9 @@ public class GameService implements IGameService {
     private final GameRepository gameRepository;
     private final IAppUserService appUserService;
 
+    // Rule source: https://www.okosjatek.hu/custom/okosjatek/image/data/srattached/1fb12c3bdc1f524812fb6c5043d11637_D%C3%A1ma%20j%C3%A1t%C3%A9kszab%C3%A1ly.pdf
     // The forced capture rule is used, so if there's a capture, then the user only gets that move.
+    // Only the longest capture move is returned.
 
     @Transactional
     @Override
@@ -76,7 +81,7 @@ public class GameService implements IGameService {
 
         PieceColor playerColor =
                 loggedInUser.getId().equals(game.getRedPlayer().getId())
-                        ? PieceColor.RED
+                        ? RED
                         : PieceColor.BLACK;
 
         Board board = BoardSerializer.loadBoard(game);
@@ -90,28 +95,34 @@ public class GameService implements IGameService {
     @Transactional
     @Override
     public List<GameEventDto> makeMove(Long gameId, Move move, Principal principal) {
+        // Find the game with the players eagerly loaded
         Game game = findGameByIdWithPlayers(gameId);
 
+        // Auth check
         Authentication auth = (Authentication) principal;
         AppUser loggedInUser = (AppUser) auth.getPrincipal();
-
         checkUserAccessToGame(game, loggedInUser);
 
-        if (game.getStatus() == FINISHED) {
+        // Check if the game is finished
+        if (game.isFinished()) {
             throw new GameAlreadyFinishedException();
         }
 
+        // Load the board
         Board board = BoardSerializer.loadBoard(game);
         PieceColor currentTurn = game.getCurrentTurn();
 
+        // Turn validation
         if ((currentTurn == PieceColor.RED && !loggedInUser.getId().equals(game.getRedPlayer().getId())) ||
                 (currentTurn == PieceColor.BLACK && !loggedInUser.getId().equals(game.getBlackPlayer().getId()))) {
             throw new AccessDeniedException("Not your turn");
         }
 
-        // Get available moves (forced capture rule applied)
+        // Validate move
+        // Flow:
+        // Get all the valid moves and check if there's any move on that list
+        // which is equals the sent in move from the player.
         List<Move> validMoves = getAvailableMoves(board, currentTurn);
-
         Move actualMove = validMoves.stream()
                 .filter(m -> m.getFromRow() == move.getFromRow() &&
                         m.getFromCol() == move.getFromCol() &&
@@ -119,58 +130,117 @@ public class GameService implements IGameService {
                         m.getToCol() == move.getToCol())
                 .findFirst()
                 .orElseThrow(() -> {
-                    log.warn("Move not in valid moves list for game {}: {}", gameId, move);
+                    log.warn("Invalid move in game {}: {}", gameId, move);
                     return new InvalidMoveException("Invalid move - forced capture rule violation or move not available");
                 });
 
+        // Apply move and check the king promotion
         applyMove(board, actualMove);
         boolean wasPromoted = promoteIfKing(board, actualMove);
 
-        // Switch turns
-        PieceColor nextTurn = (currentTurn == PieceColor.RED)
-                ? PieceColor.BLACK
-                : PieceColor.RED;
-
-        if (isGameOver(board, nextTurn)) {
-            game.setStatus(FINISHED);
-            game.setWinner(
-                    game.getCurrentTurn() == PieceColor.RED ? game.getRedPlayer() : game.getBlackPlayer()
-            );
-            log.info("Game {} finished. Winner: {}", gameId, currentTurn);
+        // Update counters (there's a limit how much move can happen in a game)
+        // isGameOver method checks these
+        game.setTotalMoves(game.getTotalMoves() + 1);
+        if (!actualMove.getCapturedPieces().isEmpty() || wasPromoted) {
+            game.setMovesWithoutCaptureOrPromotion(0);
         } else {
-            game.setCurrentTurn(nextTurn);
+            game.setMovesWithoutCaptureOrPromotion(game.getMovesWithoutCaptureOrPromotion() + 1);
         }
 
+        // Determine next turn
+        PieceColor nextTurn = (currentTurn == PieceColor.RED) ? PieceColor.BLACK : PieceColor.RED;
+
+        // Save board state
         BoardSerializer.saveBoard(game, board);
+        gameRepository.save(game);
 
-        log.info("Move executed in game {}", gameId);
-        Game savedGame = gameRepository.save(game);
-
+        // Create a list for the websocket events
         List<GameEventDto> events = new ArrayList<>();
 
+        // Add the move or capture events
         if (!actualMove.getCapturedPieces().isEmpty()) {
-            CaptureMadeEventDto captureEvent = EventMapper.createCaptureMadeEventDto(actualMove);
-            events.add(captureEvent);
+            events.add(EventMapper.createCaptureMadeEventDto(actualMove));
         } else {
-            MoveMadeEventDto moveMadeEvent = EventMapper.createMoveMadeEventDto(actualMove);
-            events.add(moveMadeEvent);
+            events.add(EventMapper.createMoveMadeEventDto(actualMove));
         }
 
+        // Add promoted event if there was a promote
         if (wasPromoted) {
-            PromotedPieceEventDto promotedEvent = EventMapper.createPromotedPieceEventDto(
+            events.add(EventMapper.createPromotedPieceEventDto(
                     actualMove,
                     board.getPiece(actualMove.getToRow(), actualMove.getToCol()).getColor()
-            );
-            events.add(promotedEvent);
+            ));
         }
 
-        NextTurnEventDto nextTurnEvent = EventMapper.createNextTurnEventDto(
-                savedGame.getCurrentTurn(),
-                getAvailableMoves(board, nextTurn)
-        );
-        events.add(nextTurnEvent);
+        // Check for game over
+        boolean gameOver = isGameOver(board, nextTurn, game);
 
+        // If a game is over, send back an event according to the results
+        if (gameOver) {
+            if (game.getResult() == GameResult.DRAW) {
+                events.add(EventMapper.createGameDrawEventDto(game.getDrawReason()));
+            } else if (game.getWinner() != null) {
+                events.add(EventMapper.createGameOverEventDto(
+                        game.getWinner().getDisplayName(),
+                        game.getResult()
+                ));
+            } else {
+                // Defensive fallback
+                events.add(EventMapper.createGameDrawEventDto());
+            }
+        } else {
+            // Continue the game
+            game.setCurrentTurn(nextTurn);
+            events.add(EventMapper.createNextTurnEventDto(
+                    nextTurn,
+                    getAvailableMoves(board, nextTurn)
+            ));
+        }
+
+        gameRepository.save(game);
+        log.info("Move executed in game {}", gameId);
+
+        // Return the saved events to the frontend
         return events;
+    }
+
+    @Transactional
+    @Override
+    public GameEventDto forfeit(Long gameId, PieceColor pieceColor) {
+        // Find the game with players
+        Game game = findGameByIdWithPlayers(gameId);
+
+        // Get the logged-in user
+        AppUser loggedInUser = appUserService.getLoggedInUser();
+
+        // Check user access to game
+        checkUserAccessToGame(game, loggedInUser);
+
+        // Check if the game is already finished
+        if (game.isFinished()) {
+            throw new GameAlreadyFinishedException();
+        }
+
+        // Verify that the user is forfeiting their own color
+        boolean isUserColor = (pieceColor == PieceColor.RED && loggedInUser.getId().equals(game.getRedPlayer().getId())) ||
+                (pieceColor == PieceColor.BLACK && loggedInUser.getId().equals(game.getBlackPlayer().getId()));
+
+        if (!isUserColor) {
+            throw new AccessDeniedException("You can only forfeit your own game");
+        }
+
+        // Determine the winner
+        AppUser winner = (pieceColor == PieceColor.RED) ? game.getBlackPlayer() : game.getRedPlayer();
+        GameResult result = (pieceColor == PieceColor.RED) ? BLACK_WIN : RED_WIN;
+
+        // Mark game as finished
+        game.markFinished(winner, result);
+        gameRepository.save(game);
+
+        log.info("Game {} forfeited by {} ({})", gameId, loggedInUser.getDisplayName(), pieceColor);
+
+        // Return game over event
+        return EventMapper.createGameForfeitEventDto(winner.getDisplayName(), result, "Game forfeited");
     }
 
     private void checkUserAccessToGame(Game game, AppUser loggedInUser) {
@@ -187,10 +257,6 @@ public class GameService implements IGameService {
         }
     }
 
-
-
-
-
     private List<Move> getAvailableMoves(Board board, PieceColor color) {
         List<Move> captureMoves = findAllCaptureMoves(board, color);
 
@@ -203,7 +269,7 @@ public class GameService implements IGameService {
 
     // Iterates through the full table, searches for the pieces with the given color.
     // It uses the findValidMovesForPiece method, to find all the possible moves for all the pieces.
-    // It only returns valid moves, not captures.
+    // It only returns normal moves, not captures.
     private List<Move> findAllValidMoves(Board board, PieceColor color) {
         List<Move> moves = new ArrayList<>();
 
@@ -230,7 +296,7 @@ public class GameService implements IGameService {
 
         for (int[] dir : directions) {
             // Skip backward moves for regular pieces
-            if (isDirectionAllowed(piece, dir)) continue;
+            if (isDirectionNotAllowedForPiece(piece, dir)) continue;
 
             int newRow = row + dir[0];
             int newCol = col + dir[1];
@@ -250,6 +316,9 @@ public class GameService implements IGameService {
         return moves;
     }
 
+    // Iterates through the full table, searches for the pieces with the given color.
+    // It uses the findCaptureMovesForPiece method, to find all the possible capture moves for all the pieces.
+    // It only returns capture moves, not captures.
     private List<Move> findAllCaptureMoves(Board board, PieceColor color) {
         List<Move> captures = new ArrayList<>();
 
@@ -292,7 +361,7 @@ public class GameService implements IGameService {
                 .max()
                 .orElse(0);
 
-        // Only return moves with the maximum number of captures (forced capture rule)
+        // Only return moves with the maximum number of captures
         return allCaptures.stream()
                 .filter(move -> move.getCapturedPieces().size() == maxCaptures)
                 .collect(Collectors.toList());
@@ -312,7 +381,7 @@ public class GameService implements IGameService {
 
         for (int[] dir : directions) {
             // Skip backward moves for regular pieces
-            if (isDirectionAllowed(originalPiece, dir)) continue;
+            if (isDirectionNotAllowedForPiece(originalPiece, dir)) continue;
 
             int middleRow = currentRow + dir[0];
             int middleCol = currentCol + dir[1];
@@ -389,10 +458,7 @@ public class GameService implements IGameService {
         }
     }
 
-
-
-
-    // Checks if the given row&col is on the board.
+    // Checks if the given row&col is on the board
     private boolean isInBounds(int row, int col) {
         return row >= 0 && row < 8 && col >= 0 && col < 8;
     }
@@ -416,7 +482,7 @@ public class GameService implements IGameService {
 
         boolean shouldPromote = false;
 
-        if (piece.getColor() == PieceColor.RED && move.getToRow() == 7) {
+        if (piece.getColor() == RED && move.getToRow() == 7) {
             shouldPromote = true;
         } else if (piece.getColor() == PieceColor.BLACK && move.getToRow() == 0) {
             shouldPromote = true;
@@ -431,40 +497,60 @@ public class GameService implements IGameService {
         return shouldPromote;
     }
 
-    public static boolean isDirectionAllowed(Piece piece, int[] dir) {
+    private static boolean isDirectionNotAllowedForPiece(Piece piece, int[] dir) {
         // Kings can move in any direction
         if (piece.isKing()) return false;
 
-        // Regular red pieces move "down" (positive row direction)
-        if (piece.getColor() == PieceColor.RED && dir[0] > 0) return false;
-
-        // Regular black pieces move "up" (negative row direction)
-        return piece.getColor() != PieceColor.BLACK || dir[0] >= 0;
+        // For regular pieces:
+        // - RED: forward means row increasing (dir[0] > 0)
+        // - BLACK: forward means row decreasing (dir[0] < 0)
+        if (piece.getColor() == PieceColor.RED) {
+            return dir[0] <= 0; // red moves downwards (increase row)
+        } else {
+            return dir[0] >= 0; // black moves upwards (decrease row)
+        }
     }
 
-    private boolean isGameOver(Board board, PieceColor currentTurn) {
-        // Check if current player has any pieces left
-        boolean hasPieces = false;
+    private boolean isGameOver(Board board, PieceColor playerToMove, Game game) {
+        boolean playerHasPieces = false;
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 Piece piece = board.getPiece(row, col);
-                if (piece != null && piece.getColor() == currentTurn) {
-                    hasPieces = true;
+                if (piece != null && piece.getColor() == playerToMove) {
+                    playerHasPieces = true;
                     break;
                 }
             }
-            if (hasPieces) break;
+            if (playerHasPieces) break;
         }
 
-        if (!hasPieces) {
-            log.info("Game over: {} has no pieces left", currentTurn);
+        // If player has no pieces
+        if (!playerHasPieces) {
+            log.info("Game over: {} has no pieces, opponent wins", playerToMove);
+            AppUser winner = (playerToMove == PieceColor.RED) ? game.getBlackPlayer() : game.getRedPlayer();
+            game.markFinished(winner, (playerToMove == PieceColor.RED) ? BLACK_WIN : RED_WIN);
             return true;
         }
 
-        // Check if current player has any valid moves
-        List<Move> validMoves = getAvailableMoves(board, currentTurn);
+        // If playerToMove has no valid moves
+        List<Move> validMoves = getAvailableMoves(board, playerToMove);
         if (validMoves.isEmpty()) {
-            log.info("Game over: {} has no valid moves", currentTurn);
+            log.info("Game over: {} has no valid moves, loses", playerToMove);
+            AppUser winner = (playerToMove == PieceColor.RED) ? game.getBlackPlayer() : game.getRedPlayer();
+            game.markFinished(winner, (playerToMove == PieceColor.RED) ? BLACK_WIN : RED_WIN);
+            return true;
+        }
+
+        // Draw conditions
+        if (game.getMovesWithoutCaptureOrPromotion() >= 80) {
+            log.info("Game over: draw (80-move rule)");
+            game.markFinished(null, GameResult.DRAW, "80 moves without capture/promotion");
+            return true;
+        }
+
+        if (game.getTotalMoves() >= 200) {
+            log.info("Game over: draw (200 total moves)");
+            game.markFinished(null, GameResult.DRAW, "200 total moves reached");
             return true;
         }
 

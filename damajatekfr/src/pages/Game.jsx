@@ -107,15 +107,57 @@ const Game = () => {
                                 break;
                             }
 
+                            case "GAME_OVER": {
+                                const { winnerName, winnerColor } = response;
+                                console.log(`Game over! Winner: ${winnerName} (${winnerColor})`);
+
+                                updatedGame.currentTurn = null;
+                                updatedGame.allowedMoves = [];
+
+                                updatedGame.winner = { name: winnerName, color: winnerColor };
+
+                                setTimeout(() => {
+                                    alert(`🏁 Game Over!\nWinner: ${winnerName} (${winnerColor})`);
+                                }, 100);
+
+                                break;
+                            }
+
+                            case "GAME_DRAW": {
+                                const { drawReason } = response;
+
+                                updatedGame.currentTurn = null;
+                                updatedGame.allowedMoves = [];
+                                updatedGame.winner = null;
+
+                                setTimeout(() => {
+                                    alert(`🤝 Game Draw!\nReason: ${drawReason}`);
+                                }, 100);
+
+                                break;
+                            }
+
+                            case "GAME_FORFEIT": {
+                                const { winnerName, gameResult, message } = response;
+                                console.log(`Game forfeited! Winner: ${winnerName}, Result: ${gameResult}`);
+
+                                // Stop the game — disable moves
+                                updatedGame.currentTurn = null;
+                                updatedGame.allowedMoves = [];
+                                updatedGame.winner = { name: winnerName, result: gameResult };
+
+                                setTimeout(() => {
+                                    alert(`🏳️ Game Forfeit!\n${message || `${winnerName} wins by forfeit.`}`);
+                                }, 100);
+
+                                break;
+                            }
+
                             case "INVALID_MOVE": {
                                 console.warn("Invalid move detected");
                                 setSelectedCell(null);
                                 break;
                             }
-
-                            case "GAME_OVER":
-                            case "FORFEIT":
-                                break;
 
                             default:
                                 return prevGame;
@@ -181,6 +223,18 @@ const Game = () => {
         }
     };
 
+    const handleForfeit = useCallback(async () => {
+        if (!game) return;
+
+        try {
+            await ApiService.post(`/games/${gameId}/forfeit`, {
+                pieceColor: game.playerColor,
+            });
+        } catch {
+            alert("Failed to forfeit the game. Please try again.");
+        }
+    }, [game, gameId]);
+
     if (loading) return <p>Loading game...</p>;
     if (error) return <p>{error}</p>;
     if (!game) return null;
@@ -191,10 +245,17 @@ const Game = () => {
                 Game #{game.id} — You are{" "}
                 <span>{game.playerColor.toLowerCase()}</span>
             </h2>
-            <p className="mb-4">
+            <p>
                 Current turn:{" "}
-                <span>{game.currentTurn.toLowerCase()}</span>
+                <span>{game.currentTurn ? game.currentTurn.toLowerCase() : "—"}</span>
             </p>
+
+            <button
+                onClick={handleForfeit}
+                disabled={!game.currentTurn || game.winner}
+            >
+                Forfeit
+            </button>
 
             <GameBoard
                 board={game.board}
