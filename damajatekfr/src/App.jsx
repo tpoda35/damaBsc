@@ -13,13 +13,12 @@ import Game from "./pages/Game.jsx";
 
 function App() {
     const { user } = useSharedAuth();
-    const { connect, disconnect, isConnected } = useSharedWebSocket();
+    const { connect, disconnect, isConnected, subscribe } = useSharedWebSocket();
 
     const isAuthenticated = !!user;
 
     useTokenRefresh(isAuthenticated);
 
-    // Connect WebSocket when authenticated
     useEffect(() => {
         if (isAuthenticated && !isConnected) {
             connect();
@@ -27,6 +26,21 @@ function App() {
             disconnect();
         }
     }, [isAuthenticated, isConnected, connect, disconnect]);
+
+    useEffect(() => {
+        if (!isAuthenticated || !isConnected) return;
+
+        const unsubscribeErrors = subscribe('/user/queue/errors', (message) => {
+            const errorMsg = JSON.parse(message.body).message;
+
+            alert(`Error: ${errorMsg}`);
+        });
+
+        return () => {
+            if (unsubscribeErrors) unsubscribeErrors();
+        };
+    }, [isAuthenticated, isConnected, subscribe]);
+
 
     return (
         <BrowserRouter>

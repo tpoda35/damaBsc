@@ -5,19 +5,23 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dama.damajatek.enums.game.GameWsAction;
+import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.model.Move;
 
-import static org.dama.damajatek.enums.game.GameWsAction.MOVE_MADE;
+import java.util.List;
+
+import static org.dama.damajatek.enums.game.GameWsAction.NEXT_TURN;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MoveMadeEventDto implements GameEventDto {
+public class NextTurnEvent implements GameEvent {
 
     @Builder.Default
-    private GameWsAction action = MOVE_MADE;
+    private GameWsAction action = NEXT_TURN;
 
-    private Move move;
+    private PieceColor currentTurn;
+    private List<Move> allowedMoves;
 
 }

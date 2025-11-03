@@ -9,52 +9,52 @@ import java.util.List;
 
 public class EventMapper {
 
-    public static MoveMadeEventDto createMoveMadeEventDto(Move move) {
-        return MoveMadeEventDto.builder()
+    public static MoveMadeEvent createMoveMadeEvent(Move move) {
+        return MoveMadeEvent.builder()
                 .move(move)
                 .build();
     }
 
-    public static NextTurnEventDto createNextTurnEventDto(PieceColor currentTurn, List<Move> allowedMoves) {
-        return NextTurnEventDto.builder()
+    public static NextTurnEvent createNextTurnEvent(PieceColor currentTurn, List<Move> allowedMoves) {
+        return NextTurnEvent.builder()
                 .currentTurn(currentTurn)
                 .allowedMoves(allowedMoves)
                 .build();
     }
 
-    public static CaptureMadeEventDto createCaptureMadeEventDto(Move move) {
-        return CaptureMadeEventDto.builder()
+    public static CaptureMadeEvent createCaptureMadeEvent(Move move) {
+        return CaptureMadeEvent.builder()
                 .move(move)
                 .build();
     }
 
-    public static PromotedPieceEventDto createPromotedPieceEventDto(Move move, PieceColor pieceColor) {
-        return PromotedPieceEventDto.builder()
+    public static PromotedPieceEvent createPromotedPieceEvent(Move move, PieceColor pieceColor) {
+        return PromotedPieceEvent.builder()
                 .row(move.getToRow())
                 .col(move.getToCol())
                 .pieceColor(pieceColor)
                 .build();
     }
 
-    public static GameOverEventDto createGameOverEventDto(String winnerName, GameResult gameResult) {
-        return GameOverEventDto.builder()
+    public static GameOverEvent createGameOverEvent(String winnerName, GameResult gameResult) {
+        return GameOverEvent.builder()
                 .winnerName(winnerName)
                 .gameResult(gameResult)
                 .build();
     }
 
-    public static GameDrawEventDto createGameDrawEventDto() {
-        return GameDrawEventDto.builder().build();
+    public static GameDrawEvent createGameDrawEvent() {
+        return GameDrawEvent.builder().build();
     }
 
-    public static GameDrawEventDto createGameDrawEventDto(String drawReason) {
-        return GameDrawEventDto.builder()
+    public static GameDrawEvent createGameDrawEvent(String drawReason) {
+        return GameDrawEvent.builder()
                 .drawReason(drawReason)
                 .build();
     }
 
-    public static GameForfeitEventDto createGameForfeitEventDto(String winnerName, GameResult gameResult, String message) {
-        return GameForfeitEventDto.builder()
+    public static GameForfeitEvent createGameForfeitEvent(String winnerName, GameResult gameResult, String message) {
+        return GameForfeitEvent.builder()
                 .winnerName(winnerName)
                 .gameResult(gameResult)
                 .message(message)

@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.IAppUserService;
 import org.dama.damajatek.dto.game.GameInfoDtoV1;
-import org.dama.damajatek.dto.game.websocket.GameEventDto;
+import org.dama.damajatek.dto.game.websocket.GameEvent;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.Room;
 import org.dama.damajatek.enums.game.BotDifficulty;
@@ -94,7 +94,7 @@ public class GameService implements IGameService {
 
     @Transactional
     @Override
-    public List<GameEventDto> makeMove(Long gameId, Move move, Principal principal) {
+    public List<GameEvent> makeMove(Long gameId, Move move, Principal principal) {
         // Find the game with the players eagerly loaded
         Game game = findGameByIdWithPlayers(gameId);
 
@@ -155,18 +155,18 @@ public class GameService implements IGameService {
         gameRepository.save(game);
 
         // Create a list for the websocket events
-        List<GameEventDto> events = new ArrayList<>();
+        List<GameEvent> events = new ArrayList<>();
 
         // Add the move or capture events
         if (!actualMove.getCapturedPieces().isEmpty()) {
-            events.add(EventMapper.createCaptureMadeEventDto(actualMove));
+            events.add(EventMapper.createCaptureMadeEvent(actualMove));
         } else {
-            events.add(EventMapper.createMoveMadeEventDto(actualMove));
+            events.add(EventMapper.createMoveMadeEvent(actualMove));
         }
 
         // Add promoted event if there was a promote
         if (wasPromoted) {
-            events.add(EventMapper.createPromotedPieceEventDto(
+            events.add(EventMapper.createPromotedPieceEvent(
                     actualMove,
                     board.getPiece(actualMove.getToRow(), actualMove.getToCol()).getColor()
             ));
@@ -178,20 +178,20 @@ public class GameService implements IGameService {
         // If a game is over, send back an event according to the results
         if (gameOver) {
             if (game.getResult() == GameResult.DRAW) {
-                events.add(EventMapper.createGameDrawEventDto(game.getDrawReason()));
+                events.add(EventMapper.createGameDrawEvent(game.getDrawReason()));
             } else if (game.getWinner() != null) {
-                events.add(EventMapper.createGameOverEventDto(
+                events.add(EventMapper.createGameOverEvent(
                         game.getWinner().getDisplayName(),
                         game.getResult()
                 ));
             } else {
                 // Defensive fallback
-                events.add(EventMapper.createGameDrawEventDto());
+                events.add(EventMapper.createGameDrawEvent());
             }
         } else {
             // Continue the game
             game.setCurrentTurn(nextTurn);
-            events.add(EventMapper.createNextTurnEventDto(
+            events.add(EventMapper.createNextTurnEvent(
                     nextTurn,
                     getAvailableMoves(board, nextTurn)
             ));
@@ -206,7 +206,7 @@ public class GameService implements IGameService {
 
     @Transactional
     @Override
-    public GameEventDto forfeit(Long gameId, PieceColor pieceColor) {
+    public GameEvent forfeit(Long gameId, PieceColor pieceColor) {
         // Find the game with players
         Game game = findGameByIdWithPlayers(gameId);
 
@@ -240,7 +240,7 @@ public class GameService implements IGameService {
         log.info("Game {} forfeited by {} ({})", gameId, loggedInUser.getDisplayName(), pieceColor);
 
         // Return game over event
-        return EventMapper.createGameForfeitEventDto(winner.getDisplayName(), result, "Game forfeited");
+        return EventMapper.createGameForfeitEvent(winner.getDisplayName(), result, "Game forfeited");
     }
 
     private void checkUserAccessToGame(Game game, AppUser loggedInUser) {
@@ -257,6 +257,9 @@ public class GameService implements IGameService {
         }
     }
 
+    // Chains the findAllCaptureMoves and findAllValidMoves.
+    // If there's any capture, then only that returns
+    // If there's no capture, then the other valid moves returns
     private List<Move> getAvailableMoves(Board board, PieceColor color) {
         List<Move> captureMoves = findAllCaptureMoves(board, color);
 

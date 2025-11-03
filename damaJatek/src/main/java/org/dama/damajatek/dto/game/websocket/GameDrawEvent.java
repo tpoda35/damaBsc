@@ -5,19 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dama.damajatek.enums.game.GameWsAction;
-import org.dama.damajatek.model.Move;
 
-import static org.dama.damajatek.enums.game.GameWsAction.CAPTURE_MADE;
+import static org.dama.damajatek.enums.game.GameWsAction.GAME_DRAW;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CaptureMadeEventDto implements GameEventDto {
+public class GameDrawEvent implements GameEvent {
 
     @Builder.Default
-    private GameWsAction action = CAPTURE_MADE;
+    private GameWsAction action = GAME_DRAW;
 
-    private Move move;
+    private String drawReason;
 
 }

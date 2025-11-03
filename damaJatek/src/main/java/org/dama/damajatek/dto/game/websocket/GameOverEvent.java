@@ -4,19 +4,21 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.GameWsAction;
 
-import static org.dama.damajatek.enums.game.GameWsAction.GAME_DRAW;
+import static org.dama.damajatek.enums.game.GameWsAction.GAME_OVER;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GameDrawEventDto implements GameEventDto {
+public class GameOverEvent implements GameEvent {
 
     @Builder.Default
-    private GameWsAction action = GAME_DRAW;
+    private GameWsAction action = GAME_OVER;
 
-    private String drawReason;
+    private String winnerName;
+    private GameResult gameResult;
 
 }

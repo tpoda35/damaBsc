@@ -162,8 +162,6 @@ const Room = () => {
                         console.error("Invalid WS message:", e);
                     }
                 });
-
-                console.log("[WS] Subscribed to /topic/rooms/" + roomId);
             } catch (e) {
                 console.error("[WS] Failed to connect/subscribe:", e);
             }

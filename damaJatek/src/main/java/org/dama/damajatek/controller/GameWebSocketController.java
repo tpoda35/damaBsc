@@ -3,7 +3,10 @@ package org.dama.damajatek.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.dto.game.MoveDto;
-import org.dama.damajatek.dto.game.websocket.GameEventDto;
+import org.dama.damajatek.dto.game.websocket.GameEvent;
+import org.dama.damajatek.exception.auth.AccessDeniedException;
+import org.dama.damajatek.exception.game.GameAlreadyFinishedException;
+import org.dama.damajatek.exception.game.InvalidMoveException;
 import org.dama.damajatek.mapper.MoveMapper;
 import org.dama.damajatek.model.Move;
 import org.dama.damajatek.service.IGameService;
@@ -32,11 +35,25 @@ public class GameWebSocketController {
     ) {
         Move move = MoveMapper.createMove(moveDto);
 
-        List<GameEventDto> events = gameService.makeMove(gameId, move, principal);
+        try {
+            List<GameEvent> events = gameService.makeMove(gameId, move, principal);
 
-        for (GameEventDto event : events) {
-            gameWebSocketService.broadcastGameUpdate(event, principal, gameId);
+            for (GameEvent event : events) {
+                gameWebSocketService.broadcastGameUpdate(event, principal, gameId);
+            }
+
+        } catch (InvalidMoveException ex) {
+            gameWebSocketService.sendErrorToPlayer(principal, "Invalid move");
+
+        } catch (GameAlreadyFinishedException ex) {
+            gameWebSocketService.sendErrorToPlayer(principal, "Game is already finished");
+
+        } catch (AccessDeniedException ex) {
+            gameWebSocketService.sendErrorToPlayer(principal, ex.getMessage());
+
+        } catch (Exception ex) {
+            log.error("Unexpected error while making move in game {}: {}", gameId, ex.getMessage(), ex);
+            gameWebSocketService.sendErrorToPlayer(principal, "An unexpected error occurred. Please try again.");
         }
     }
-
 }
