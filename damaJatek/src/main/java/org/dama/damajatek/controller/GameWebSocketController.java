@@ -3,7 +3,7 @@ package org.dama.damajatek.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.dto.game.MoveDto;
-import org.dama.damajatek.dto.game.websocket.GameEvent;
+import org.dama.damajatek.dto.game.websocket.IGameEvent;
 import org.dama.damajatek.exception.auth.AccessDeniedException;
 import org.dama.damajatek.exception.game.GameAlreadyFinishedException;
 import org.dama.damajatek.exception.game.InvalidMoveException;
@@ -36,9 +36,9 @@ public class GameWebSocketController {
         Move move = MoveMapper.createMove(moveDto);
 
         try {
-            List<GameEvent> events = gameService.makeMove(gameId, move, principal);
+            List<IGameEvent> events = gameService.makeMove(gameId, move, principal);
 
-            for (GameEvent event : events) {
+            for (IGameEvent event : events) {
                 gameWebSocketService.broadcastGameUpdate(event, principal, gameId);
             }
 

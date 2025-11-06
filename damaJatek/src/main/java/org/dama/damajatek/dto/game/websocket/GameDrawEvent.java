@@ -12,7 +12,7 @@ import static org.dama.damajatek.enums.game.GameWsAction.GAME_DRAW;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GameDrawEvent implements GameEvent {
+public class GameDrawEvent implements IGameEvent {
 
     @Builder.Default
     private GameWsAction action = GAME_DRAW;

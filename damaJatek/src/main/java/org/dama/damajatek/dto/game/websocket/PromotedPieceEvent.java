@@ -13,7 +13,7 @@ import static org.dama.damajatek.enums.game.GameWsAction.PROMOTED_PIECE;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PromotedPieceEvent implements GameEvent {
+public class PromotedPieceEvent implements IGameEvent {
 
     @Builder.Default
     private GameWsAction action = PROMOTED_PIECE;

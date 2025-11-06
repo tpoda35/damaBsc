@@ -3,7 +3,7 @@ package org.dama.damajatek.service.Impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.dto.game.ErrorMessage;
-import org.dama.damajatek.dto.game.websocket.GameEvent;
+import org.dama.damajatek.dto.game.websocket.IGameEvent;
 import org.dama.damajatek.service.IGameWebSocketService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class GameWebSocketService implements IGameWebSocketService {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Override
-    public void broadcastGameUpdate(GameEvent event, Principal principal, Long gameId) {
+    public void broadcastGameUpdate(IGameEvent event, Principal principal, Long gameId) {
         messagingTemplate.convertAndSend("/topic/games/" + gameId, event);
     }
 

@@ -42,7 +42,6 @@ const Game = () => {
                 try {
                     const response = JSON.parse(message.body);
                     const { action } = response;
-                    console.log("Response: ", response);
 
                     setGame((prevGame) => {
                         if (!prevGame) return prevGame;
@@ -60,7 +59,7 @@ const Game = () => {
                         switch (action) {
                             case "MOVE_MADE": {
                                 const { move } = response;
-                                console.log("CAPTURE_MADE response: ", response);
+                                console.log("MOVE_MADE response: ", response);
                                 updatedGame.board.grid[move.toRow][move.toCol] =
                                     updatedGame.board.grid[move.fromRow][move.fromCol];
                                 updatedGame.board.grid[move.fromRow][move.fromCol] = null;
@@ -101,6 +100,7 @@ const Game = () => {
                             }
 
                             case "NEXT_TURN": {
+                                console.log("NEXT_TURN response: ", response);
                                 updatedGame.currentTurn = response.currentTurn;
                                 updatedGame.allowedMoves = response.allowedMoves || [];
                                 setSelectedCell(null);

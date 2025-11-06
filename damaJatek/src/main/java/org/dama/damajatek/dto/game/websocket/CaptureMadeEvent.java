@@ -13,7 +13,7 @@ import static org.dama.damajatek.enums.game.GameWsAction.CAPTURE_MADE;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CaptureMadeEvent implements GameEvent {
+public class CaptureMadeEvent implements IGameEvent {
 
     @Builder.Default
     private GameWsAction action = CAPTURE_MADE;

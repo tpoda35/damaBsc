@@ -13,7 +13,7 @@ import static org.dama.damajatek.enums.game.GameWsAction.MOVE_MADE;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MoveMadeEvent implements GameEvent {
+public class MoveMadeEvent implements IGameEvent {
 
     @Builder.Default
     private GameWsAction action = MOVE_MADE;

@@ -13,7 +13,7 @@ import static org.dama.damajatek.enums.game.GameWsAction.GAME_OVER;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GameOverEvent implements GameEvent {
+public class GameOverEvent implements IGameEvent {
 
     @Builder.Default
     private GameWsAction action = GAME_OVER;

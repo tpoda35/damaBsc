@@ -16,7 +16,7 @@ import org.dama.damajatek.exception.PasswordMismatchException;
 import org.dama.damajatek.exception.auth.AccessDeniedException;
 import org.dama.damajatek.exception.room.*;
 import org.dama.damajatek.mapper.RoomMapper;
-import org.dama.damajatek.repository.RoomRepository;
+import org.dama.damajatek.repository.IRoomRepository;
 import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.service.IRoomService;
 import org.dama.damajatek.service.IRoomWebSocketService;
@@ -40,7 +40,13 @@ import static org.dama.damajatek.enums.room.RoomWsAction.*;
 @Slf4j
 public class RoomService implements IRoomService {
 
-    private final RoomRepository roomRepository;
+    // Menu:
+    // Start -> Vs Computer, Vs Player
+        // Vs Computer -> a mini settings modal, and the game instantly loads
+        // Vs Player -> Rooms, Quick Match
+    // Settings -> Sound...
+
+    private final IRoomRepository roomRepository;
     private final PasswordEncoder passwordEncoder;
     private final IAppUserService appUserService;
     private final IGameService gameService;

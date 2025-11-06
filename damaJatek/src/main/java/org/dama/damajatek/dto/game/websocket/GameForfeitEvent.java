@@ -13,7 +13,7 @@ import static org.dama.damajatek.enums.game.GameWsAction.GAME_FORFEIT;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GameForfeitEvent implements GameEvent {
+public class GameForfeitEvent implements IGameEvent {
 
     @Builder.Default
     private GameWsAction action = GAME_FORFEIT;

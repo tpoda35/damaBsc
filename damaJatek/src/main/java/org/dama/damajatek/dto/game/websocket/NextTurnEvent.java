@@ -16,7 +16,7 @@ import static org.dama.damajatek.enums.game.GameWsAction.NEXT_TURN;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NextTurnEvent implements GameEvent {
+public class NextTurnEvent implements IGameEvent {
 
     @Builder.Default
     private GameWsAction action = NEXT_TURN;
