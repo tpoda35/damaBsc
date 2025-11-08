@@ -9,7 +9,6 @@ import org.dama.damajatek.model.Move;
 import java.util.List;
 
 public interface IGameEngine {
-    void checkUserAccessToGame(Game game, AppUser loggedInUser);
     List<Move> getAvailableMoves(Board board, PieceColor color);
     void applyMove(Board board, Move move);
     boolean promoteIfKing(Board board, Move move);

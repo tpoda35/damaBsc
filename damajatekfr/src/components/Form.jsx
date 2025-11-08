@@ -1,11 +1,11 @@
 import { useState } from "react";
 
+// Example field config for reference:
 // { label: "Password", name: "password", type: "password", placeholder: "********", required: true },
-// Important:
-// name - this will be in the response
-// type - field type
+// { label: "Favorite Color", name: "color", type: "select", options: [{ label: "Red", value: "red" }], required: true }
+
 const Form = ({ fields, onSubmit, buttonText, error, conditionalRender }) => {
-    // It creates the formData
+    // It creates the formData var "build"
     const initialState = fields.reduce((acc, field) => {
         if (field.type === "checkbox") {
             acc[field.name] = field.value || false;
@@ -29,7 +29,6 @@ const Form = ({ fields, onSubmit, buttonText, error, conditionalRender }) => {
         e.preventDefault();
 
         // If locked is true, password must be provided
-        // If there's no locked or password, the check will simply skip
         if (formData.locked && !formData.password) {
             alert("Password is required when the room is locked!");
             return;
@@ -47,19 +46,45 @@ const Form = ({ fields, onSubmit, buttonText, error, conditionalRender }) => {
 
                 return (
                     <div key={field.name} style={{ marginBottom: "1rem" }}>
-                        <label htmlFor={field.name} style={{ display: "block", marginBottom: "0.25rem" }}>
+                        <label
+                            htmlFor={field.name}
+                            style={{ display: "block", marginBottom: "0.25rem" }}
+                        >
                             {field.label || field.name}
                         </label>
-                        <input
-                            id={field.name}
-                            type={field.type}
-                            name={field.name}
-                            placeholder={field.placeholder}
-                            value={field.type !== "checkbox" ? formData[field.name] : undefined}
-                            checked={field.type === "checkbox" ? formData[field.name] : undefined}
-                            onChange={handleChange}
-                            required={field.type === "checkbox" ? false : field.required}
-                        />
+
+                        {/* Select fields */}
+                        {field.type === "select" ? (
+                            <select
+                                id={field.name}
+                                name={field.name}
+                                value={formData[field.name]}
+                                onChange={handleChange}
+                                required={field.required}
+                            >
+                                <option value="">Select an option</option>
+                                {field.options?.map((option) => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                        ) : (
+                            <input
+                                id={field.name}
+                                type={field.type}
+                                name={field.name}
+                                placeholder={field.placeholder}
+                                value={
+                                    field.type !== "checkbox" ? formData[field.name] : undefined
+                                }
+                                checked={
+                                    field.type === "checkbox" ? formData[field.name] : undefined
+                                }
+                                onChange={handleChange}
+                                required={field.type === "checkbox" ? false : field.required}
+                            />
+                        )}
                     </div>
                 );
             })}

@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.dama.damajatek.authentication.user.AppUser;
-import org.dama.damajatek.enums.game.BotDifficulty;
+import org.dama.damajatek.entity.player.Player;
 import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.GameStatus;
 import org.dama.damajatek.enums.game.PieceColor;
@@ -31,13 +30,13 @@ public class Game {
     @JoinColumn(name = "room_id")
     private Room room;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "red_player_id")
-    private AppUser redPlayer;
+    private Player redPlayer;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "black_player_id")
-    private AppUser blackPlayer;
+    private Player blackPlayer;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -55,15 +54,10 @@ public class Game {
 
     @ManyToOne
     @JoinColumn(name = "winner_id")
-    private AppUser winner;
+    private Player winner;
 
     @Lob
     private String boardState;
-
-    private Boolean vsBot;
-
-    @Enumerated(EnumType.STRING)
-    private BotDifficulty botDifficulty;
 
     @Builder.Default
     private Integer movesWithoutCaptureOrPromotion = 0;
@@ -87,13 +81,13 @@ public class Game {
         return status == GameStatus.FINISHED;
     }
 
-    public void markFinished(AppUser winner, GameResult result) {
+    public void markFinished(Player winner, GameResult result) {
         this.status = GameStatus.FINISHED;
         this.winner = winner;
         this.result = result;
     }
 
-    public void markFinished(AppUser winner, GameResult result, String drawReason) {
+    public void markFinished(Player winner, GameResult result, String drawReason) {
         this.winner = winner;
         this.result = result;
         this.status = GameStatus.FINISHED;

@@ -7,6 +7,7 @@ import {useSharedWebSocket} from "../contexts/WebSocketContext.jsx";
 const Game = () => {
     const { gameId } = useParams();
     const [game, setGame] = useState(null);
+    console.log(game);
     const [selectedCell, setSelectedCell] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

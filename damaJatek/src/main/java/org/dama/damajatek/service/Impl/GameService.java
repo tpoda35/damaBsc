@@ -9,7 +9,7 @@ import org.dama.damajatek.dto.game.GameInfoDtoV1;
 import org.dama.damajatek.dto.game.websocket.IGameEvent;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.Room;
-import org.dama.damajatek.enums.game.BotDifficulty;
+import org.dama.damajatek.entity.player.Player;
 import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.exception.auth.AccessDeniedException;
@@ -37,6 +37,8 @@ import java.util.concurrent.CompletableFuture;
 import static org.dama.damajatek.enums.game.GameResult.BLACK_WIN;
 import static org.dama.damajatek.enums.game.GameResult.RED_WIN;
 import static org.dama.damajatek.enums.game.PieceColor.RED;
+import static org.dama.damajatek.util.PlayerUtils.isHumanPlayerMatchingUser;
+import static org.dama.damajatek.util.PlayerUtils.verifyUserAccess;
 
 @Slf4j
 @Service
@@ -53,15 +55,13 @@ public class GameService implements IGameService {
 
     @Transactional
     @Override
-    public Game createGame(AppUser redPlayer, AppUser blackPlayer, Room room, boolean vsBot, BotDifficulty difficulty) {
+    public Game createGame(Player redPlayer, Player blackPlayer, Room room) {
         Board board = BoardInitializer.createStartingBoard();
 
         Game game = Game.builder()
                 .room(room)
                 .redPlayer(redPlayer)
                 .blackPlayer(blackPlayer)
-                .vsBot(vsBot)
-                .botDifficulty(difficulty)
                 .build();
 
         BoardSerializer.saveBoard(game, board);
@@ -75,10 +75,10 @@ public class GameService implements IGameService {
         Game game = findGameByIdWithPlayers(gameId);
         AppUser loggedInUser = appUserService.getLoggedInUser();
 
-        gameEngine.checkUserAccessToGame(game, loggedInUser);
+        verifyUserAccess(game, loggedInUser);
 
         PieceColor playerColor =
-                loggedInUser.getId().equals(game.getRedPlayer().getId())
+                isHumanPlayerMatchingUser(game.getRedPlayer(), loggedInUser)
                         ? RED
                         : PieceColor.BLACK;
 
@@ -99,7 +99,7 @@ public class GameService implements IGameService {
         // Auth check
         Authentication auth = (Authentication) principal;
         AppUser loggedInUser = (AppUser) auth.getPrincipal();
-        gameEngine.checkUserAccessToGame(game, loggedInUser);
+        verifyUserAccess(game, loggedInUser);
 
         // Check if the game is finished
         if (game.isFinished()) {
@@ -111,8 +111,8 @@ public class GameService implements IGameService {
         PieceColor currentTurn = game.getCurrentTurn();
 
         // Turn validation
-        if ((currentTurn == PieceColor.RED && !loggedInUser.getId().equals(game.getRedPlayer().getId())) ||
-                (currentTurn == PieceColor.BLACK && !loggedInUser.getId().equals(game.getBlackPlayer().getId()))) {
+        if ((currentTurn == PieceColor.RED && !isHumanPlayerMatchingUser(game.getRedPlayer(), loggedInUser)) ||
+                        (currentTurn == PieceColor.BLACK && !isHumanPlayerMatchingUser(game.getBlackPlayer(), loggedInUser))) {
             throw new AccessDeniedException("Not your turn");
         }
 
@@ -212,7 +212,7 @@ public class GameService implements IGameService {
         AppUser loggedInUser = appUserService.getLoggedInUser();
 
         // Check user access to game
-        gameEngine.checkUserAccessToGame(game, loggedInUser);
+        verifyUserAccess(game, loggedInUser);
 
         // Check if the game is already finished
         if (game.isFinished()) {
@@ -220,15 +220,16 @@ public class GameService implements IGameService {
         }
 
         // Verify that the user is forfeiting their own color
-        boolean isUserColor = (pieceColor == PieceColor.RED && loggedInUser.getId().equals(game.getRedPlayer().getId())) ||
-                (pieceColor == PieceColor.BLACK && loggedInUser.getId().equals(game.getBlackPlayer().getId()));
+        boolean isUserColor =
+                (pieceColor == PieceColor.RED && isHumanPlayerMatchingUser(game.getRedPlayer(), loggedInUser)) ||
+                        (pieceColor == PieceColor.BLACK && isHumanPlayerMatchingUser(game.getBlackPlayer(), loggedInUser));
 
         if (!isUserColor) {
             throw new AccessDeniedException("You can only forfeit your own game");
         }
 
         // Determine the winner
-        AppUser winner = (pieceColor == PieceColor.RED) ? game.getBlackPlayer() : game.getRedPlayer();
+        Player winner = (pieceColor == PieceColor.RED) ? game.getBlackPlayer() : game.getRedPlayer();
         GameResult result = (pieceColor == PieceColor.RED) ? BLACK_WIN : RED_WIN;
 
         // Mark game as finished

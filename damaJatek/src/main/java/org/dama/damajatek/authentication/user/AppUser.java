@@ -68,17 +68,6 @@ public class AppUser implements UserDetails {
     @ToString.Exclude
     private List<Room> joinedRooms = new ArrayList<>();
 
-    // Game part
-    @OneToMany(mappedBy = "redPlayer")
-    @JsonIgnore
-    @ToString.Exclude
-    private List<Game> gamesAsRed = new ArrayList<>();
-
-    @OneToMany(mappedBy = "blackPlayer")
-    @JsonIgnore
-    @ToString.Exclude
-    private List<Game> gamesAsBlack = new ArrayList<>();
-
     @CreationTimestamp
     @Column(updatable = false)
     private ZonedDateTime createdAt;

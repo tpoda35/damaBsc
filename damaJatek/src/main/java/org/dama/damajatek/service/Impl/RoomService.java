@@ -12,9 +12,11 @@ import org.dama.damajatek.dto.room.RoomInfoDtoV1;
 import org.dama.damajatek.dto.room.RoomInfoDtoV2;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.Room;
+import org.dama.damajatek.entity.player.Player;
 import org.dama.damajatek.exception.PasswordMismatchException;
 import org.dama.damajatek.exception.auth.AccessDeniedException;
 import org.dama.damajatek.exception.room.*;
+import org.dama.damajatek.mapper.PlayerMapper;
 import org.dama.damajatek.mapper.RoomMapper;
 import org.dama.damajatek.repository.IRoomRepository;
 import org.dama.damajatek.service.IGameService;
@@ -30,7 +32,6 @@ import org.springframework.stereotype.Service;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
-import static org.dama.damajatek.enums.game.BotDifficulty.EASY;
 import static org.dama.damajatek.enums.room.ReadyStatus.NOT_READY;
 import static org.dama.damajatek.enums.room.ReadyStatus.READY;
 import static org.dama.damajatek.enums.room.RoomWsAction.*;
@@ -193,24 +194,24 @@ public class RoomService implements IRoomService {
 
         if (room.isFullyReady()) {
             // Game start logic
-            AppUser redPlayer;
-            AppUser blackPlayer;
+            Player redPlayer;
+            Player blackPlayer;
 
             // This logic will be used temporarily
             Random random = new Random();
             int number = random.nextInt(2) + 1;
             if (number == 1) {
-                blackPlayer = room.getHost();
-                redPlayer = room.getOpponent();
+                blackPlayer = PlayerMapper.createHumanPlayer(room.getHost());
+                redPlayer = PlayerMapper.createHumanPlayer(room.getOpponent());
             } else {
-                blackPlayer = room.getOpponent();
-                redPlayer = room.getHost();
+                blackPlayer = PlayerMapper.createHumanPlayer(room.getOpponent());
+                redPlayer = PlayerMapper.createHumanPlayer(room.getHost());
             }
 
             room.setStarted(true);
             roomRepository.save(room);
 
-            Game game = gameService.createGame(redPlayer, blackPlayer, room, false, EASY);
+            Game game = gameService.createGame(redPlayer, blackPlayer, room);
             roomWebSocketService.broadcastRoomUpdate(START, game.getId(), "/topic/rooms/" + roomId);
         } else {
             log.warn("Game start blocked for room(id: {}): hostReadyStatus={}, opponentReadyStatus={}",

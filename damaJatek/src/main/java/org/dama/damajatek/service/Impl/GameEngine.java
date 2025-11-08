@@ -2,11 +2,10 @@ package org.dama.damajatek.service.Impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.entity.Game;
+import org.dama.damajatek.entity.player.Player;
 import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.PieceColor;
-import org.dama.damajatek.exception.auth.AccessDeniedException;
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Move;
 import org.dama.damajatek.model.Piece;
@@ -27,21 +26,6 @@ import static org.dama.damajatek.enums.game.PieceColor.RED;
 @Service
 @RequiredArgsConstructor
 public class GameEngine implements IGameEngine {
-
-    @Override
-    public void checkUserAccessToGame(Game game, AppUser loggedInUser) {
-        Long userId = loggedInUser.getId();
-
-        boolean isBlackPlayer = game.getBlackPlayer() != null &&
-                userId.equals(game.getBlackPlayer().getId());
-        boolean isRedPlayer = game.getRedPlayer() != null &&
-                userId.equals(game.getRedPlayer().getId());
-
-        if (!isBlackPlayer && !isRedPlayer) {
-            log.warn("Unauthorized access to game(id: {}) from user(id: {}).", game.getId(), userId);
-            throw new AccessDeniedException("You are not a participant in this game");
-        }
-    }
 
     // Chains the findAllCaptureMoves and findAllValidMoves.
     // If there's any capture, then only that returns
@@ -320,7 +304,7 @@ public class GameEngine implements IGameEngine {
         // If player has no pieces
         if (!playerHasPieces) {
             log.info("Game over: {} has no pieces, opponent wins", playerToMove);
-            AppUser winner = (playerToMove == PieceColor.RED) ? game.getBlackPlayer() : game.getRedPlayer();
+            Player winner = (playerToMove == PieceColor.RED) ? game.getBlackPlayer() : game.getRedPlayer();
             game.markFinished(winner, (playerToMove == PieceColor.RED) ? BLACK_WIN : RED_WIN);
             return true;
         }
@@ -329,7 +313,7 @@ public class GameEngine implements IGameEngine {
         List<Move> validMoves = getAvailableMoves(board, playerToMove);
         if (validMoves.isEmpty()) {
             log.info("Game over: {} has no valid moves, loses", playerToMove);
-            AppUser winner = (playerToMove == PieceColor.RED) ? game.getBlackPlayer() : game.getRedPlayer();
+            Player winner = (playerToMove == PieceColor.RED) ? game.getBlackPlayer() : game.getRedPlayer();
             game.markFinished(winner, (playerToMove == PieceColor.RED) ? BLACK_WIN : RED_WIN);
             return true;
         }
@@ -349,5 +333,4 @@ public class GameEngine implements IGameEngine {
 
         return false;
     }
-
 }
