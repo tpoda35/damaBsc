@@ -3,6 +3,7 @@ import {useNavigate} from "react-router-dom";
 import Button from "../Button.jsx";
 import Modal from "../Modal.jsx";
 import Form from "../Form.jsx";
+import ApiService from "../../services/ApiService.js";
 
 const GameMenu = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,14 +17,16 @@ const GameMenu = () => {
 
     const handleCreateAIGame = async (formData) => {
         try {
+            const gameId = await ApiService.post("/games/ai/start", formData);
             setIsModalOpen(false);
+            navigate(`/games/${gameId}`);
         } catch (err) {
             setError(err.message || "Failed to create room");
         }
     };
 
     const fields = [
-        { label: "Difficulty", name: "color", type: "select", required: true, options: [
+        { label: "Difficulty", name: "botDifficulty", type: "select", required: true, options: [
                 { label: "Easy", value: "EASY" },
                 { label: "Medium", value: "MEDIUM" },
                 { label: "Hard", value: "HARD" },

@@ -28,5 +28,15 @@ public class BoardSerializer {
             throw new RuntimeException("Failed to save board", e);
         }
     }
+
+    public static Board copy(Board board) {
+        try {
+            String json = objectMapper.writeValueAsString(board);
+            return objectMapper.readValue(json, Board.class);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to clone board: {}", e.getMessage());
+            throw new RuntimeException("Failed to clone board", e);
+        }
+    }
 }
 

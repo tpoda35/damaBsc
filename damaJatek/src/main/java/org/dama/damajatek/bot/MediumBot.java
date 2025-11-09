@@ -5,16 +5,15 @@ import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Move;
 import org.dama.damajatek.service.IGameEngine;
+import org.dama.damajatek.util.BoardSerializer;
 
 import java.util.List;
 
-import static org.dama.damajatek.util.BoardSerializer.copy;
-
 @RequiredArgsConstructor
-public class EasyBot implements IBotStrategy {
+public class MediumBot implements IBotStrategy {
 
     private final IGameEngine gameEngine;
-    private static final int MAX_DEPTH = 2;
+    private static final int MAX_DEPTH = 4;
 
     @Override
     public Move chooseMove(Board board, PieceColor color) {
@@ -25,11 +24,10 @@ public class EasyBot implements IBotStrategy {
         int bestValue = Integer.MIN_VALUE;
 
         for (Move move : moves) {
-            Board simulated = copy(board);
+            Board simulated = BoardSerializer.copy(board);
             gameEngine.applyMove(simulated, move);
             gameEngine.promoteIfKing(simulated, move);
 
-            // Start minimax, with depth 1, since we already did the dept 0
             int value = minimax(simulated, opposite(color), 1, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, color);
             if (value > bestValue) {
                 bestValue = value;
@@ -48,13 +46,10 @@ public class EasyBot implements IBotStrategy {
         }
 
         List<Move> moves = gameEngine.getAvailableMoves(board, turn);
-
-        // If it's the maximizing players turn, try to maximize the eval
-        // If it's the other players turn, then it minimizes it
         if (turn == maximizingColor) {
             int maxEval = Integer.MIN_VALUE;
             for (Move move : moves) {
-                Board copy = copy(board);
+                Board copy = BoardSerializer.copy(board);
                 gameEngine.applyMove(copy, move);
                 gameEngine.promoteIfKing(copy, move);
 
@@ -67,7 +62,7 @@ public class EasyBot implements IBotStrategy {
         } else {
             int minEval = Integer.MAX_VALUE;
             for (Move move : moves) {
-                Board copy = copy(board);
+                Board copy = BoardSerializer.copy(board);
                 gameEngine.applyMove(copy, move);
                 gameEngine.promoteIfKing(copy, move);
 
@@ -102,5 +97,5 @@ public class EasyBot implements IBotStrategy {
                 ? (redScore - blackScore)
                 : (blackScore - redScore);
     }
-
 }
+
