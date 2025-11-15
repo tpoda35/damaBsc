@@ -246,7 +246,6 @@ public class GameEngine implements IGameEngine {
         // Remove captured pieces
         for (int[] captured : move.getCapturedPieces()) {
             board.removePiece(captured[0], captured[1]);
-            log.info("Captured piece at [{}, {}]", captured[0], captured[1]);
         }
     }
 
@@ -266,8 +265,6 @@ public class GameEngine implements IGameEngine {
 
         if (shouldPromote) {
             piece.setKing(true);
-            log.debug("Promoted {} piece to king at [{}, {}]",
-                    piece.getColor(), move.getToRow(), move.getToCol());
         }
 
         return shouldPromote;
