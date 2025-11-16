@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class TranspositionEntry {
 
-    private int value;
-    private int depth;
+    int value;
+    int depth;
+    int flag; // 0 = exact, 1 = lowerbound, 2 = upperbound
 
 }

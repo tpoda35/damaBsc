@@ -144,7 +144,7 @@ public class EasyBot implements IBotStrategy {
         for (int oldHash : recentStates) {
             if (oldHash == hash) {
                 // Most recent repetition gets highest penalty
-                penalty = Math.max(1, MAX_HISTORY - distance);
+                penalty = Math.max(2, (MAX_HISTORY - distance) * 2);
                 break;
             }
             distance++;

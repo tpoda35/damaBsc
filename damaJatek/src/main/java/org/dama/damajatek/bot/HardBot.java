@@ -18,52 +18,30 @@ import static org.dama.damajatek.util.BotUtils.opposite;
 public class HardBot implements IBotStrategy {
 
     private final IGameEngine gameEngine;
-    private static final int MAX_DEPTH = 9; // Maximum depth for minimax search, iterative deep. starts from 1 and climbs to this value
-    private static final int MAX_TRANSPOSITION_SIZE = 100000; // Cache size limit
+    private static final int MAX_DEPTH = 6;
+    private static final int ENDGAME_DEPTH = 8;
 
-    // Table for storing board hash (eval + depth)
-    // Allows reusing computed minimax values from earlier iterations
-    private final Map<Integer, TranspositionEntry> transposition = new HashMap<>();
-
-    private final Queue<Integer> recentStates = new LinkedList<>(); // For repetition check
-    private static final int MAX_HISTORY = 6; // Of recentStates
+    private final Map<Integer, TranspositionEntry> transpositionTable = new HashMap<>();
+    private final Queue<Integer> recentStates = new LinkedList<>();
+    private static final int MAX_HISTORY = 10;
 
     @Override
     public Move chooseMove(Board board, PieceColor color) {
         List<Move> moves = gameEngine.getAvailableMoves(board, color);
         if (moves.isEmpty()) return null;
 
-        // If only one move exists, no need to search
         if (moves.size() == 1) {
             recordBoardState(board, moves.getFirst());
             return moves.getFirst();
         }
 
-        // Clear transposition table if it gets too large
-        if (transposition.size() > MAX_TRANSPOSITION_SIZE) transposition.clear();
+        int searchDepth = getAdaptiveDepth(board);
 
-        // Compute best move using iterative deepening
-        Move bestMove = iterativeDeepening(board, color, moves);
+        moves = orderMoves(board, moves);
 
-        // Record the resulting board state to avoid repetition
-        if (bestMove != null) recordBoardState(board, bestMove);
-
-        return bestMove != null ? bestMove : moves.getFirst();
-    }
-
-    private Move iterativeDeepening(Board board, PieceColor color, List<Move> moves) {
         Move bestMove = null;
-        int bestValue = Integer.MIN_VALUE;
 
-        // Sort initial moves by heuristic
-        // This improves pruning
-        moves.sort((m1, m2) -> Integer.compare(
-                evaluateMoveQuality(board, m2),
-                evaluateMoveQuality(board, m1)
-        ));
-
-        // Each iteration uses results from the previous iteration to reorder moves
-        for (int depth = 1; depth <= MAX_DEPTH; depth++) {
+        for (int depth = 1; depth <= searchDepth; depth++) {
             int currentBest = Integer.MIN_VALUE;
             Move currentBestMove = null;
 
@@ -81,51 +59,102 @@ public class HardBot implements IBotStrategy {
                 }
             }
 
-            // Update best move if we found a better one
-            if (currentBest > bestValue || bestMove == null) {
-                bestValue = currentBest;
-                bestMove = currentBestMove;
-            }
-
-            // Move best move to front so next iteration searches it first
-            // This improves pruning
             if (currentBestMove != null) {
-                moves.remove(currentBestMove);
-                moves.addFirst(currentBestMove);
+                bestMove = currentBestMove;
             }
         }
 
-        return bestMove;
+        if (bestMove != null) recordBoardState(board, bestMove);
+
+        return bestMove != null ? bestMove : moves.getFirst();
+    }
+
+    private int getAdaptiveDepth(Board board) {
+        int pieceCount = countTotalPieces(board);
+
+        // Endgame: fewer pieces, search deeper
+        if (pieceCount <= 6) return ENDGAME_DEPTH;
+        if (pieceCount <= 10) return MAX_DEPTH + 1;
+        return MAX_DEPTH;
+    }
+
+    private int countTotalPieces(Board board) {
+        int count = 0;
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                if (board.getPiece(r, c) != null) count++;
+            }
+        }
+        return count;
+    }
+
+    private List<Move> orderMoves(Board board, List<Move> moves) {
+        // Score each move for ordering
+        List<ScoredMove> scoredMoves = new ArrayList<>();
+
+        for (Move move : moves) {
+            int score = evaluateMoveQuality(board, move);
+            scoredMoves.add(new ScoredMove(move, score));
+        }
+
+        // Sort in descending order (best moves first)
+        scoredMoves.sort((m1, m2) -> Integer.compare(m2.score, m1.score));
+
+        List<Move> orderedMoves = new ArrayList<>();
+        for (ScoredMove sm : scoredMoves) {
+            orderedMoves.add(sm.move);
+        }
+        return orderedMoves;
+    }
+
+    private static class ScoredMove {
+        Move move;
+        int score;
+
+        ScoredMove(Move move, int score) {
+            this.move = move;
+            this.score = score;
+        }
     }
 
     private int evaluateMoveQuality(Board board, Move move) {
         int score = 0;
 
-        // Evaluate captures if there's any
+        // Captures are highest priority
         if (!move.getCapturedPieces().isEmpty()) {
             for (int[] captured : move.getCapturedPieces()) {
                 Piece capturedPiece = board.getPiece(captured[0], captured[1]);
-                if (capturedPiece != null) score += capturedPiece.isKing() ? 50 : 20; // King captures worth significantly more
+                if (capturedPiece != null) {
+                    score += capturedPiece.isKing() ? 100 : 50;
+                }
             }
         }
 
-        // Promotion bonus
+        // King promotion
         if (move.getToRow() == 0 || move.getToRow() == 7) {
-            Piece movingPiece = board.getPiece(move.getFromRow(), move.getFromCol());
-            if (movingPiece != null && !movingPiece.isKing()) score += 30;
+            score += 40;
         }
 
-        // Center control
-        double centerDist = Math.abs(move.getToRow() - 3.5) + Math.abs(move.getToCol() - 3.5);
-        score += (int)((7 - centerDist) * 2);
-
-        // Forward advancement (non-king pieces)
+        // Strategic positioning
         Piece movingPiece = board.getPiece(move.getFromRow(), move.getFromCol());
-        if (movingPiece != null && !movingPiece.isKing()) {
-            int advancement = (movingPiece.getColor() == PieceColor.RED)
-                    ? (move.getFromRow() - move.getToRow())
-                    : (move.getToRow() - move.getFromRow());
-            if (advancement > 0) score += advancement * 5;
+        if (movingPiece != null) {
+            // Center control (more valuable for kings)
+            int centerDistance = Math.abs(move.getToRow() - 3) + Math.abs(move.getToCol() - 3);
+            score += movingPiece.isKing() ? (8 - centerDistance) : (6 - centerDistance);
+
+            // Forward progression for non-kings
+            if (!movingPiece.isKing()) {
+                int advancement = (movingPiece.getColor() == PieceColor.RED)
+                        ? (move.getFromRow() - move.getToRow())
+                        : (move.getToRow() - move.getFromRow());
+                score += advancement * 5;
+            }
+
+            // Defensive positioning (back row protection for non-kings)
+            if (!movingPiece.isKing() &&
+                    (move.getToRow() == 0 || move.getToRow() == 7)) {
+                score += 3;
+            }
         }
 
         return score;
@@ -139,128 +168,159 @@ public class HardBot implements IBotStrategy {
         int hash = boardHash(next);
         recentStates.add(hash);
 
-        if (recentStates.size() > MAX_HISTORY) recentStates.poll();
+        if (recentStates.size() > MAX_HISTORY) {
+            recentStates.poll();
+        }
     }
 
     private int minimax(Board board, PieceColor turn, int depth, int maxDepth,
                         int alpha, int beta, PieceColor maximizingColor) {
 
-        int hash = boardHash(board);
+        int boardHash = boardHash(board);
 
         // Check transposition table
-        // Only use if from equal or deeper search
-        TranspositionEntry entry = transposition.get(hash);
-        if (entry != null && entry.getDepth() >= (maxDepth - depth)) return entry.getValue();
+        TranspositionEntry entry = transpositionTable.get(boardHash);
+        if (entry != null && entry.getDepth() >= (maxDepth - depth)) {
+            if (entry.getFlag() == 0) return entry.getValue(); // Exact value
+            if (entry.getFlag() == 1) alpha = Math.max(alpha, entry.getValue()); // Lower bound
+            if (entry.getFlag() == 2) beta = Math.min(beta, entry.getValue()); // Upper bound
+            if (alpha >= beta) return entry.getValue();
+        }
 
         List<Move> moves = gameEngine.getAvailableMoves(board, turn);
 
-        // Terminal node
         if (depth >= maxDepth || moves.isEmpty()) {
             int eval = evaluateBoard(board, maximizingColor);
-            transposition.put(hash, new TranspositionEntry(eval, maxDepth - depth));
+            transpositionTable.put(boardHash, new TranspositionEntry(eval, maxDepth - depth, 0));
             return eval;
         }
 
-        // Sort moves for better pruning
-        moves.sort((m1, m2) -> Integer.compare(
-                evaluateMoveQuality(board, m2),
-                evaluateMoveQuality(board, m1)
-        ));
+        // Move ordering for better pruning
+        moves = orderMoves(board, moves);
 
-        int result;
         if (turn == maximizingColor) {
-            // Max player
-            result = Integer.MIN_VALUE;
+            int maxEval = Integer.MIN_VALUE;
+            int originalAlpha = alpha;
+
             for (Move move : moves) {
                 Board copy = copy(board);
                 gameEngine.applyMove(copy, move);
                 gameEngine.promoteIfKing(copy, move);
 
                 int eval = minimax(copy, opposite(turn), depth + 1, maxDepth, alpha, beta, maximizingColor);
-                result = Math.max(result, eval);
+                maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
-
-                if (beta <= alpha) break; // Prune
+                if (beta <= alpha) break; // Beta cutoff
             }
+
+            // Store in transposition table
+            int flag = maxEval <= originalAlpha ? 2 : (maxEval >= beta ? 1 : 0);
+            transpositionTable.put(boardHash, new TranspositionEntry(maxEval, maxDepth - depth, flag));
+
+            return maxEval;
         } else {
-            // Min player
-            result = Integer.MAX_VALUE;
+            int minEval = Integer.MAX_VALUE;
+            int originalBeta = beta;
+
             for (Move move : moves) {
                 Board copy = copy(board);
                 gameEngine.applyMove(copy, move);
                 gameEngine.promoteIfKing(copy, move);
 
                 int eval = minimax(copy, opposite(turn), depth + 1, maxDepth, alpha, beta, maximizingColor);
-                result = Math.min(result, eval);
+                minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
-
-                if (beta <= alpha) break; // Prune
+                if (beta <= alpha) break; // Alpha cutoff
             }
-        }
 
-        // Save result in transposition table
-        transposition.put(hash, new TranspositionEntry(result, maxDepth - depth));
-        return result;
+            // Store in transposition table
+            int flag = minEval >= originalBeta ? 1 : (minEval <= alpha ? 2 : 0);
+            transpositionTable.put(boardHash, new TranspositionEntry(minEval, maxDepth - depth, flag));
+
+            return minEval;
+        }
     }
 
     private int evaluateBoard(Board board, PieceColor color) {
-        int red = 0, black = 0;
+        int redScore = 0;
+        int blackScore = 0;
+
+        int redPieces = 0, blackPieces = 0;
+        int redKings = 0, blackKings = 0;
 
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
-                var p = board.getPiece(r, c);
-                if (p == null) continue;
+                Piece piece = board.getPiece(r, c);
+                if (piece == null) continue;
 
-                int value = p.isKing() ? 5 : 2;
+                int value = piece.isKing() ? 10 : 3;
 
-                // Bonus for center control
-                if (r >= 2 && r <= 5 && c >= 2 && c <= 5)
+                // Positional bonuses
+                // Center control (stronger for kings)
+                if (r >= 2 && r <= 5 && c >= 2 && c <= 5) {
+                    value += piece.isKing() ? 2 : 1;
+                }
+
+                // Advancement bonus for non-kings
+                if (!piece.isKing()) {
+                    int advancement = (piece.getColor() == PieceColor.RED) ? (7 - r) : r;
+                    value += advancement / 2;
+                }
+
+                // Edge protection for non-kings in defensive positions
+                if (!piece.isKing() && (c == 0 || c == 7)) {
+                    value += 1;
+                }
+
+                // Back row bonus (defensive strength)
+                if ((piece.getColor() == PieceColor.RED && r == 7) ||
+                        (piece.getColor() == PieceColor.BLACK && r == 0)) {
                     value += 2;
+                }
 
-                // Bonus for approaching promotion
-                if (!p.isKing())
-                    value += (p.getColor() == PieceColor.RED ? (7 - r) : r);
-
-                // Penalize threatened pieces
-                if (isThreatened(board, r, c, p.getColor()))
-                    value -= (p.isKing() ? 4 : 2);
-
-                if (p.getColor() == PieceColor.RED) red += value;
-                else black += value;
+                if (piece.getColor() == PieceColor.RED) {
+                    redScore += value;
+                    redPieces++;
+                    if (piece.isKing()) redKings++;
+                } else {
+                    blackScore += value;
+                    blackPieces++;
+                    if (piece.isKing()) blackKings++;
+                }
             }
         }
 
-        // Add mobility (number of moves available)
-        red += gameEngine.getAvailableMoves(board, PieceColor.RED).size();
-        black += gameEngine.getAvailableMoves(board, PieceColor.BLACK).size();
+        // Material advantage bonus
+        int myPieces = (color == PieceColor.RED) ? redPieces : blackPieces;
+        int oppPieces = (color == PieceColor.RED) ? blackPieces : redPieces;
+        int materialAdvantage = (myPieces - oppPieces) * 5;
 
-        // Penalize repetition to avoid loops
+        // King advantage in endgame
+        int myKings = (color == PieceColor.RED) ? redKings : blackKings;
+        int oppKings = (color == PieceColor.RED) ? blackKings : redKings;
+        int kingAdvantage = (myKings - oppKings) * 8;
+
+        int baseValue = (color == PieceColor.RED)
+                ? (redScore - blackScore)
+                : (blackScore - redScore);
+
+        int totalValue = baseValue + materialAdvantage + kingAdvantage;
+
+        // Repetition penalty
         int hash = boardHash(board);
         int penalty = 0;
         int distance = 0;
 
-        for (int h : recentStates) {
-            if (h == hash) {
-                // Most recent repetition gets highest penalty
-                penalty = Math.max(1, MAX_HISTORY - distance);
+        for (int oldHash : recentStates) {
+            if (oldHash == hash) {
+                penalty = (MAX_HISTORY - distance) * 2;
                 break;
             }
             distance++;
         }
 
-        return (color == PieceColor.RED ? red - black : black - red) - penalty;
-    }
+        totalValue -= penalty;
 
-    // Checks if any enemy move contains this square as a captured piece
-    private boolean isThreatened(Board board, int r, int c, PieceColor color) {
-        PieceColor enemy = opposite(color);
-        List<Move> enemyMoves = gameEngine.getAvailableMoves(board, enemy);
-
-        for (Move m : enemyMoves) {
-            for (int[] cp : m.getCapturedPieces()) {
-                if (cp[0] == r && cp[1] == c) return true;
-            }
-        }
-        return false;
+        return totalValue;
     }
 }
