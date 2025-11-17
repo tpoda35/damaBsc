@@ -6,7 +6,7 @@ import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.IAppUserService;
 import org.dama.damajatek.dto.game.AiGameCreateDto;
 import org.dama.damajatek.dto.game.ForfeitRequest;
-import org.dama.damajatek.dto.game.GameInfoDtoV1;
+import org.dama.damajatek.dto.game.GameInfoDto;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.player.Player;
 import org.dama.damajatek.mapper.PlayerMapper;
@@ -29,7 +29,7 @@ public class GameController {
     private final IAppUserService appUserService;
 
     @GetMapping("/{gameId}")
-    public CompletableFuture<GameInfoDtoV1> getGame(@PathVariable("gameId") Long gameId) {
+    public CompletableFuture<GameInfoDto> getGame(@PathVariable("gameId") Long gameId) {
         return gameService.getGame(gameId);
     }
 

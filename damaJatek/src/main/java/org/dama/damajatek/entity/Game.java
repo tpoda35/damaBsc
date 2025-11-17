@@ -10,7 +10,11 @@ import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.GameStatus;
 import org.dama.damajatek.enums.game.PieceColor;
 
+import java.time.OffsetDateTime;
+
+import static java.time.ZoneOffset.UTC;
 import static org.dama.damajatek.enums.game.GameResult.UNDECIDED;
+import static org.dama.damajatek.enums.game.GameStatus.FINISHED;
 import static org.dama.damajatek.enums.game.GameStatus.IN_PROGRESS;
 import static org.dama.damajatek.enums.game.PieceColor.BLACK;
 
@@ -65,6 +69,11 @@ public class Game {
     @Builder.Default
     private Integer totalMoves = 0;
 
+    @Column(nullable = false, updatable = false)
+    private OffsetDateTime startTime;
+
+    private OffsetDateTime endTime;
+
     @Version
     private Long version;
 
@@ -75,22 +84,25 @@ public class Game {
         if (result == null) result = UNDECIDED;
         if (movesWithoutCaptureOrPromotion == null) movesWithoutCaptureOrPromotion = 0;
         if (totalMoves == null) totalMoves = 0;
+        if (startTime == null) startTime = OffsetDateTime.now(UTC);
     }
 
     public boolean isFinished() {
-        return status == GameStatus.FINISHED;
+        return status == FINISHED;
     }
 
     public void markFinished(Player winner, GameResult result) {
-        this.status = GameStatus.FINISHED;
+        this.status = FINISHED;
         this.winner = winner;
         this.result = result;
+        this.endTime = OffsetDateTime.now(UTC);
     }
 
     public void markFinished(Player winner, GameResult result, String drawReason) {
         this.winner = winner;
         this.result = result;
-        this.status = GameStatus.FINISHED;
+        this.status = FINISHED;
         this.drawReason = drawReason;
+        this.endTime = OffsetDateTime.now(UTC);
     }
 }

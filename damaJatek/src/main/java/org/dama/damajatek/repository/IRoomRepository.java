@@ -22,4 +22,8 @@ public interface IRoomRepository extends JpaRepository<Room, Long> {
             "WHERE r.started = false AND" +
             " r.host = :user OR r.opponent = :user")
     Optional<Room> findByHostOrOpponent(@Param("user") AppUser user);
+
+    Integer countByHostId(Long hostId);
+    Integer countByOpponentId(Long opponentId);
+
 }

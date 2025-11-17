@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.IAppUserService;
-import org.dama.damajatek.dto.game.GameInfoDtoV1;
+import org.dama.damajatek.dto.game.GameHistoryDto;
+import org.dama.damajatek.dto.game.GameInfoDto;
 import org.dama.damajatek.dto.game.MoveResult;
 import org.dama.damajatek.dto.game.websocket.IGameEvent;
 import org.dama.damajatek.entity.Game;
@@ -27,6 +28,8 @@ import org.dama.damajatek.service.IBotService;
 import org.dama.damajatek.service.IGameEngine;
 import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.service.IMoveProcessor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -34,12 +37,12 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.security.Principal;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.dama.damajatek.enums.game.GameResult.BLACK_WIN;
-import static org.dama.damajatek.enums.game.GameResult.RED_WIN;
+import static org.dama.damajatek.enums.game.GameResult.*;
 import static org.dama.damajatek.enums.game.PieceColor.RED;
 import static org.dama.damajatek.util.BoardInitializer.createStartingBoard;
 import static org.dama.damajatek.util.BoardSerializer.loadBoard;
@@ -90,7 +93,7 @@ public class GameService implements IGameService {
     @Async
     @Transactional
     @Override
-    public CompletableFuture<GameInfoDtoV1> getGame(Long gameId) {
+    public CompletableFuture<GameInfoDto> getGame(Long gameId) {
         Game game = findGameByIdWithPlayers(gameId);
         AppUser loggedInUser = appUserService.getLoggedInUser();
 
@@ -107,6 +110,29 @@ public class GameService implements IGameService {
         return CompletableFuture.completedFuture(
                 GameMapper.createGameInfoDtoV1(game, board, validMoves, playerColor)
         );
+    }
+
+    @Async
+    @Transactional
+    @Override
+    public CompletableFuture<Page<GameHistoryDto>> getGameHistory() {
+        AppUser loggedInUser = appUserService.getLoggedInUser();
+
+        Page<Game> games = gameRepository.findByPlayerId(
+                loggedInUser.getId(),
+                PageRequest.of(0, 50)
+        );
+
+        Page<GameHistoryDto> dtoPage = games.map(game -> {
+            OffsetDateTime gameTime = null;
+            if (game.getStartTime() != null && game.getEndTime() != null) {
+                gameTime = game.getEndTime().minusNanos(game.getStartTime().toInstant().toEpochMilli() * 1_000_000L);
+            }
+
+            return GameMapper.createGameHistoryDtoV1(game, gameTime);
+        });
+
+        return CompletableFuture.completedFuture(dtoPage);
     }
 
     // Here I used principal, since this is called with websocket and there's no jwt
@@ -189,9 +215,15 @@ public class GameService implements IGameService {
             throw new AccessDeniedException("You can only forfeit your own game");
         }
 
-        // Determine the winner
-        Player winner = (pieceColor == PieceColor.RED) ? game.getBlackPlayer() : game.getRedPlayer();
-        GameResult result = (pieceColor == PieceColor.RED) ? BLACK_WIN : RED_WIN;
+        // winner
+        Player winner = (pieceColor == PieceColor.RED)
+                ? game.getBlackPlayer()
+                : game.getRedPlayer();
+
+        // result (who forfeited)
+        GameResult result = (pieceColor == PieceColor.RED)
+                ? RED_FORFEIT
+                : BLACK_FORFEIT;
 
         // Mark game as finished
         game.markFinished(winner, result);

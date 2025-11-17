@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.player.Player;
 import org.dama.damajatek.enums.game.GameResult;
+import org.dama.damajatek.enums.game.GameStatus;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Move;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static org.dama.damajatek.enums.game.GameResult.BLACK_WIN;
 import static org.dama.damajatek.enums.game.GameResult.RED_WIN;
+import static org.dama.damajatek.enums.game.GameStatus.FINISHED;
 import static org.dama.damajatek.enums.game.PieceColor.RED;
 
 @Slf4j

@@ -8,15 +8,14 @@ const Home = () => {
 
     return (
         <div>
-            {/*{!user ? (*/}
-            {/*    <h2>Login or Register to play.</h2>*/}
-            {/*) : (*/}
-            {/*    <div>*/}
-            {/*        <h2>Welcome back, {user.displayName || "Player"}!</h2>*/}
-            {/*        <GameMenu />*/}
-            {/*    </div>*/}
-            {/*)}*/}
-            <GameMenu />
+            {!user ? (
+                <h2>Login or Register to play.</h2>
+            ) : (
+                <div>
+                    <h2>Welcome back, {user.displayName || "Player"}!</h2>
+                    <GameMenu />
+                </div>
+            )}
         </div>
     );
 };

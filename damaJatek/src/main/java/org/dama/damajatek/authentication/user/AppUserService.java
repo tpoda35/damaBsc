@@ -2,13 +2,20 @@ package org.dama.damajatek.authentication.user;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.dama.damajatek.dto.appUser.AppUserProfileDto;
 import org.dama.damajatek.exception.PasswordMismatchException;
 import org.dama.damajatek.exception.auth.UserNotLoggedInException;
 import org.dama.damajatek.exception.auth.WrongPasswordException;
+import org.dama.damajatek.repository.IGameRepository;
+import org.dama.damajatek.repository.IRoomRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -16,10 +23,11 @@ public class AppUserService implements IAppUserService {
 
     private final PasswordEncoder passwordEncoder;
     private final AppUserRepository appUserRepository;
+    private final IRoomRepository roomRepository;
+    private final IGameRepository gameRepository;
 
     @Transactional
     public void changePassword(ChangePasswordRequest request) {
-
         AppUser user = getLoggedInUser();
 
         // check if the current password is correct
@@ -48,4 +56,32 @@ public class AppUserService implements IAppUserService {
 
         return (AppUser) authentication.getPrincipal();
     }
+
+    @Transactional
+    @Async
+    @Override
+    public CompletableFuture<AppUserProfileDto> getProfileInfo() {
+        AppUser loggedInUser = getLoggedInUser();
+
+//        Integer hostedRooms = roomRepository.countByHostId(loggedInUser.getId());
+//        Integer joinedRooms = roomRepository.countByOpponentId(loggedInUser.getId());
+//        Integer wins = gameRepository.countByWinnerUserId(loggedInUser.getId());
+//        Integer loses = gameRepository.countByLoserUserId(loggedInUser.getId());
+
+//        AppUserProfileDto profileDto = AppUserProfileDto.builder()
+//                .id(loggedInUser.getId())
+//                .displayName(loggedInUser.getDisplayName())
+//                .email(loggedInUser.getEmail())
+//                .hostedRooms(hostedRooms)
+//                .joinedRooms(joinedRooms)
+//                .wins(wins)
+//                .loses(loses)
+//                .createdAt(loggedInUser.getCreatedAt())
+//                .updatedAt(loggedInUser.getUpdatedAt())
+//                .build();
+//
+//        return CompletableFuture.completedFuture(profileDto);
+        return null;
+    }
+
 }

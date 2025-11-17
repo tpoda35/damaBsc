@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GameInfoDtoV1 {
+public class GameInfoDto {
 
     private Long id;
     private Board board;
