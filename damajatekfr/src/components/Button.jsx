@@ -1,18 +1,14 @@
 import React from "react";
+import styles from "./Button.module.css";
 
-const Button = ({ onClick, children, type = "button", style = {}, disabled = false }) => {
-    // const baseStyle = {
-    //     padding: "8px 16px",
-    //     backgroundColor: disabled ? "#ccc" : "#007bff",
-    //     color: "white",
-    //     border: "none",
-    //     borderRadius: "4px",
-    //     cursor: disabled ? "not-allowed" : "pointer",
-    //     ...style, // allow overrides
-    // };
-
+const Button = ({ onClick, children, type = "button", variant = "primary", disabled = false }) => {
     return (
-        <button type={type} onClick={onClick} style={style} disabled={disabled}>
+        <button
+            type={type}
+            onClick={onClick}
+            className={`${styles.button} ${styles[variant]}`}
+            disabled={disabled}
+        >
             {children}
         </button>
     );

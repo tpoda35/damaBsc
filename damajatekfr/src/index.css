@@ -4,13 +4,22 @@
 }
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--grey-light);
 
-  color-scheme: light dark;
+  /*color-scheme: light dark;  */
+  color-scheme: light;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --primary: #F47C26;
+  --primary-dark: #D3621F;
+  --primary-light: #F9B27C;
+
+  --white: #FFFFFF;
+  --grey-light: #F2F2F2;
+  --text-dark: #1E1E1E;
 }

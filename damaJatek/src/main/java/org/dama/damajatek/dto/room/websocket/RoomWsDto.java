@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.dama.damajatek.dto.appUser.AppUserInfoDtoV1;
+import org.dama.damajatek.dto.appUser.AppUserGameDto;
 import org.dama.damajatek.enums.room.RoomWsAction;
 
 @Data
@@ -20,7 +20,7 @@ public class RoomWsDto {
     @NotNull
     private RoomWsAction action;
 
-    private AppUserInfoDtoV1 player;
+    private AppUserGameDto player;
 
     private Long gameId;
 

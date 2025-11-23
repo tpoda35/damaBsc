@@ -6,12 +6,14 @@ import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.IAppUserService;
 import org.dama.damajatek.dto.game.AiGameCreateDto;
 import org.dama.damajatek.dto.game.ForfeitRequest;
+import org.dama.damajatek.dto.game.GameHistoryDto;
 import org.dama.damajatek.dto.game.GameInfoDto;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.player.Player;
 import org.dama.damajatek.mapper.PlayerMapper;
 import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.service.Impl.GameWebSocketService;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -67,6 +69,11 @@ public class GameController {
 
         Game game = gameService.createGame(redPlayer, blackPlayer, null);
         return game.getId();
+    }
+
+    @GetMapping("/game-history")
+    public CompletableFuture<Page<GameHistoryDto>> getGameHistory() {
+        return gameService.getGameHistory();
     }
 
 }

@@ -11,8 +11,8 @@ const GameMenu = () => {
 
     const navigate = useNavigate();
 
-    const handleRedirect = () => {
-        navigate("/vsPlayer");
+    const handleRoomsRedirect = () => {
+        navigate("/rooms");
     };
 
     const handleCreateAIGame = async (formData) => {
@@ -39,7 +39,7 @@ const GameMenu = () => {
             <Button
                 onClick={() => setIsModalOpen(true)}
             >
-                Vs Computer
+                Play vs AI
             </Button>
 
             <Modal
@@ -55,7 +55,7 @@ const GameMenu = () => {
                 />
             </Modal>
 
-            <Button onClick={handleRedirect}>Vs Player</Button>
+            <Button onClick={handleRoomsRedirect}>Play vs Humans</Button>
         </div>
     );
 };

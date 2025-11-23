@@ -2,13 +2,15 @@ package org.dama.damajatek.authentication.user;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.dama.damajatek.dto.appUser.AppUserProfileDto;
+import lombok.extern.slf4j.Slf4j;
+import org.dama.damajatek.dto.AppUserInfoDto;
+import org.dama.damajatek.dto.appUser.AppUserGameStats;
 import org.dama.damajatek.exception.PasswordMismatchException;
 import org.dama.damajatek.exception.auth.UserNotLoggedInException;
 import org.dama.damajatek.exception.auth.WrongPasswordException;
+import org.dama.damajatek.mapper.AppUserMapper;
 import org.dama.damajatek.repository.IGameRepository;
 import org.dama.damajatek.repository.IRoomRepository;
-import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AppUserService implements IAppUserService {
 
     private final PasswordEncoder passwordEncoder;
@@ -60,28 +63,26 @@ public class AppUserService implements IAppUserService {
     @Transactional
     @Async
     @Override
-    public CompletableFuture<AppUserProfileDto> getProfileInfo() {
+    public CompletableFuture<AppUserInfoDto> getProfileInfo() {
         AppUser loggedInUser = getLoggedInUser();
+        Long userId = loggedInUser.getId();
 
-//        Integer hostedRooms = roomRepository.countByHostId(loggedInUser.getId());
-//        Integer joinedRooms = roomRepository.countByOpponentId(loggedInUser.getId());
-//        Integer wins = gameRepository.countByWinnerUserId(loggedInUser.getId());
-//        Integer loses = gameRepository.countByLoserUserId(loggedInUser.getId());
+        int hostedRooms = roomRepository.countByHostId(userId);
+        int joinedRooms = roomRepository.countByOpponentId(userId);
 
-//        AppUserProfileDto profileDto = AppUserProfileDto.builder()
-//                .id(loggedInUser.getId())
-//                .displayName(loggedInUser.getDisplayName())
-//                .email(loggedInUser.getEmail())
-//                .hostedRooms(hostedRooms)
-//                .joinedRooms(joinedRooms)
-//                .wins(wins)
-//                .loses(loses)
-//                .createdAt(loggedInUser.getCreatedAt())
-//                .updatedAt(loggedInUser.getUpdatedAt())
-//                .build();
-//
-//        return CompletableFuture.completedFuture(profileDto);
-        return null;
+        int vsAiWins = gameRepository.countWinsVsAI(userId);
+        int vsAiLoses = gameRepository.countLossesVsAI(userId);
+
+        int vsPlayerWins = gameRepository.countWinsVsPlayer(userId);
+        int vsPlayerLoses = gameRepository.countLossesVsPlayer(userId);
+
+        AppUserGameStats gameStats = new AppUserGameStats(
+                hostedRooms, joinedRooms, vsAiWins, vsAiLoses, vsPlayerWins, vsPlayerLoses
+        );
+
+        AppUserInfoDto appUserInfoDto = AppUserMapper.createAppUserInfoDto(loggedInUser, gameStats);
+        log.info("Kutya: {}", appUserInfoDto);
+        return CompletableFuture.completedFuture(appUserInfoDto);
     }
 
 }

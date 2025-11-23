@@ -11,11 +11,13 @@ import java.util.Optional;
 
 @Repository
 public interface IRoomRepository extends JpaRepository<Room, Long> {
+
     @Query("SELECT r FROM Room r " +
             "LEFT JOIN FETCH r.host " +
             "LEFT JOIN FETCH r.opponent " +
             "WHERE r.id = :roomId")
     Optional<Room> findByIdWithUsers(@Param("roomId") Long roomId);
+
     @Query("SELECT r FROM Room r " +
             "LEFT JOIN FETCH r.host " +
             "LEFT JOIN FETCH r.opponent " +

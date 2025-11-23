@@ -10,7 +10,7 @@ import org.dama.damajatek.enums.room.ReadyStatus;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AppUserInfoDtoV1 {
+public class AppUserGameDto {
 
     private Long id;
     private String displayName;

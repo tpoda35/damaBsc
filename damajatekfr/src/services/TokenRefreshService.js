@@ -18,6 +18,7 @@ class TokenRefreshService {
         this.TOKEN_REFRESH_INTERVAL = 25 * 60 * 1000;
     }
 
+
     // Start the refresh timer
     start() {
         // Clear any existing timer

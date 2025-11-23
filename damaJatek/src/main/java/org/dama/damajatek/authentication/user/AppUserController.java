@@ -1,9 +1,11 @@
 package org.dama.damajatek.authentication.user;
 
 import lombok.RequiredArgsConstructor;
-import org.dama.damajatek.dto.UserInfoDto;
+import org.dama.damajatek.dto.AppUserInfoDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -21,13 +23,7 @@ public class AppUserController {
     }
 
     @GetMapping
-    public UserInfoDto getUserInfo() {
-        AppUser appUser = appUserService.getLoggedInUser();
-
-        return UserInfoDto.builder()
-                .displayName(appUser.getDisplayName())
-                .userId(appUser.getId())
-                .createdAt(appUser.getCreatedAt())
-                .build();
+    public CompletableFuture<AppUserInfoDto> getUserInfo() {
+        return appUserService.getProfileInfo();
     }
 }

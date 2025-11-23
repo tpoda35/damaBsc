@@ -10,7 +10,6 @@ import {useSharedWebSocket} from "./contexts/WebSocketContext.jsx";
 import useTokenRefresh from "./hooks/useTokenRefresh.js";
 import {useEffect} from "react";
 import Game from "./pages/Game.jsx";
-import VsPlayer from "./components/gameMenu/VsPlayer.jsx";
 import Profile from "./pages/Profile.jsx";
 
 function App() {
@@ -49,7 +48,6 @@ function App() {
             <Routes>
                 <Route element={<Layout />}>
                     <Route path="/" element={<Home />} />
-                    <Route path="/vsPlayer" element={<VsPlayer />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/rooms" element={<Rooms />} />
                     <Route path="/rooms/:roomId" element={<Room />} />

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.dama.damajatek.dto.appUser.AppUserInfoDtoV1;
+import org.dama.damajatek.dto.appUser.AppUserGameDto;
 
 @Data
 @AllArgsConstructor
@@ -16,7 +16,7 @@ public class RoomInfoDtoV1 {
     private String name;
 
     private Boolean isHost;
-    private AppUserInfoDtoV1 host;
-    private AppUserInfoDtoV1 opponent;
+    private AppUserGameDto host;
+    private AppUserGameDto opponent;
 
 }
