@@ -1,25 +1,29 @@
-.home {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 80vh;
-    font-family: 'Inter', sans-serif;
-    color: var(--text-dark);
-    padding: 2rem;
+.pageWrapper {
+    position: relative;
+    width: 100%;
+    height: 92.5vh;
+    overflow: hidden;
 }
 
-.hero h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
+.canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.uiOverlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+.hero h2, .dashboard h2 {
+    margin: 0 0 15px 0;
+    font-size: 1.3rem;
 }
 
 .buttons {
     display: flex;
-    gap: 1rem;
-    justify-content: center;
-}
-
-.dashboard h2 {
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
+    flex-direction: column;
+    gap: 10px;
 }

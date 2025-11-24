@@ -1,9 +1,10 @@
 import React, {useState} from "react";
 import {useNavigate} from "react-router-dom";
-import Button from "../Button.jsx";
-import Modal from "../Modal.jsx";
-import Form from "../Form.jsx";
-import ApiService from "../../services/ApiService.js";
+import Button from "./Button.jsx";
+import Modal from "./Modal.jsx";
+import Form from "./Form.jsx";
+import ApiService from "../services/ApiService.js";
+import styles from "./GameMenu.module.css";
 
 const GameMenu = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,7 +36,7 @@ const GameMenu = () => {
     ];
 
     return (
-        <div>
+        <div className={styles.buttons}>
             <Button
                 onClick={() => setIsModalOpen(true)}
             >

@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
 import ApiService from "../services/ApiService";
 import { useSharedAuth } from "../contexts/AuthContext.jsx";
+import styles from "./Profile.module.css";
 
 const Profile = () => {
     const { user, fetchUser } = useSharedAuth();
-    console.log(user);
-
     const [gameHistory, setGameHistory] = useState([]);
-    console.log('GameHisotrs', gameHistory);
-
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -25,17 +22,14 @@ const Profile = () => {
         const loadAll = async () => {
             try {
                 setLoading(true);
-
-                await fetchUser();        // loads user info dto into user
-                await fetchGameHistory(); // loads history
-
+                await fetchUser();
+                await fetchGameHistory();
             } catch (err) {
                 setError(err.message || "Failed to load profile");
             } finally {
                 setLoading(false);
             }
         };
-
         loadAll();
     }, [fetchUser]);
 
@@ -43,30 +37,25 @@ const Profile = () => {
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
     return (
-        <div style={{ padding: "1rem", maxWidth: "900px", margin: "0 auto" }}>
-
-            {/* ===================== USER PROFILE ===================== */}
+        <div className={styles.profileContainer}>
             {user && (
-                <div style={{ background: "#f5f5f5", padding: "1rem", borderRadius: "8px", marginBottom: "2rem" }}>
+                <div className={styles.userCard}>
                     <h2>User Profile</h2>
-
-                    <p><strong>ID:</strong> {user.id}</p>
                     <p><strong>Name:</strong> {user.displayName}</p>
                     <p><strong>Email:</strong> {user.email}</p>
-
                     <p><strong>Created At:</strong> {new Date(user.createdAt).toLocaleString()}</p>
                     <p><strong>Updated At:</strong> {new Date(user.updatedAt).toLocaleString()}</p>
 
                     <hr />
 
                     <h3>Room Stats</h3>
-                    <ul>
+                    <ul className={styles.statsList}>
                         <li>Hosted Rooms: {user.hostedRoomNum}</li>
                         <li>Joined Rooms: {user.joinedRoomNum}</li>
                     </ul>
 
                     <h3>Vs AI Stats</h3>
-                    <ul>
+                    <ul className={styles.statsList}>
                         <li>Games: {user.vsAiGames}</li>
                         <li>Wins: {user.vsAiWins}</li>
                         <li>Losses: {user.vsAiLoses}</li>
@@ -74,7 +63,7 @@ const Profile = () => {
                     </ul>
 
                     <h3>Vs Player Stats</h3>
-                    <ul>
+                    <ul className={styles.statsList}>
                         <li>Games: {user.vsPlayerGames}</li>
                         <li>Wins: {user.vsPlayerWins}</li>
                         <li>Losses: {user.vsPlayerLoses}</li>
@@ -82,19 +71,17 @@ const Profile = () => {
                     </ul>
 
                     <h3>Overall</h3>
-                    <ul>
+                    <ul className={styles.statsList}>
                         <li>Total Games: {user.overallGames}</li>
                         <li>Overall Winrate: {user.overallWinrate}%</li>
                     </ul>
                 </div>
             )}
 
-            {/* ===================== GAME HISTORY ===================== */}
-            <div>
+            <div className={styles.gameHistory}>
                 <h2>Game History</h2>
-
                 {gameHistory.length === 0 ? (
-                    <p>No games played yet.</p>
+                    <p className={styles.noGames}>No games played yet.</p>
                 ) : (
                     <table>
                         <thead>
@@ -118,8 +105,7 @@ const Profile = () => {
                                 <td>
                                     {game.startTime && game.endTime
                                         ? `${Math.round(
-                                            (new Date(game.endTime) -
-                                                new Date(game.startTime)) / 1000
+                                            (new Date(game.endTime) - new Date(game.startTime)) / 1000
                                         )} sec`
                                         : "-"}
                                 </td>

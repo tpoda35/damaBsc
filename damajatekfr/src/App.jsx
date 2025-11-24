@@ -11,6 +11,7 @@ import useTokenRefresh from "./hooks/useTokenRefresh.js";
 import {useEffect} from "react";
 import Game from "./pages/Game.jsx";
 import Profile from "./pages/Profile.jsx";
+import Background from "./components/Background.jsx";
 
 function App() {
     const { user } = useSharedAuth();
@@ -44,20 +45,23 @@ function App() {
 
 
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route element={<Layout />}>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/rooms" element={<Rooms />} />
-                    <Route path="/rooms/:roomId" element={<Room />} />
-                    <Route path="/games/:gameId" element={<Game />} />
-                </Route>
+        <>
+            <Background />
+            <BrowserRouter>
+                <Routes>
+                    <Route element={<Layout />}>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/rooms" element={<Rooms />} />
+                        <Route path="/rooms/:roomId" element={<Room />} />
+                        <Route path="/games/:gameId" element={<Game />} />
+                    </Route>
 
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-            </Routes>
-        </BrowserRouter>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                </Routes>
+            </BrowserRouter>
+        </>
     );
 }
 
