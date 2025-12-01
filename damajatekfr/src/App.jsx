@@ -11,7 +11,6 @@ import useTokenRefresh from "./hooks/useTokenRefresh.js";
 import {useEffect} from "react";
 import Game from "./pages/Game.jsx";
 import Profile from "./pages/Profile.jsx";
-import Background from "./components/Background.jsx";
 
 function App() {
     const { user } = useSharedAuth();
@@ -46,7 +45,6 @@ function App() {
 
     return (
         <>
-            <Background />
             <BrowserRouter>
                 <Routes>
                     <Route element={<Layout />}>
