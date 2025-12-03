@@ -4,13 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.dto.AppUserInfoDto;
-import org.dama.damajatek.dto.appUser.AppUserGameStats;
 import org.dama.damajatek.exception.PasswordMismatchException;
 import org.dama.damajatek.exception.auth.UserNotLoggedInException;
 import org.dama.damajatek.exception.auth.WrongPasswordException;
-import org.dama.damajatek.mapper.AppUserMapper;
-import org.dama.damajatek.repository.IGameRepository;
-import org.dama.damajatek.repository.IRoomRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,8 +22,7 @@ public class AppUserService implements IAppUserService {
 
     private final PasswordEncoder passwordEncoder;
     private final AppUserRepository appUserRepository;
-    private final IRoomRepository roomRepository;
-    private final IGameRepository gameRepository;
+    private final IAppUserCacheService appUserCacheService;
 
     @Transactional
     public void changePassword(ChangePasswordRequest request) {
@@ -60,29 +55,16 @@ public class AppUserService implements IAppUserService {
         return (AppUser) authentication.getPrincipal();
     }
 
-    @Transactional
-    @Async
     @Override
+    @Async
+    @Transactional
     public CompletableFuture<AppUserInfoDto> getProfileInfo() {
         AppUser loggedInUser = getLoggedInUser();
         Long userId = loggedInUser.getId();
 
-        int hostedRooms = roomRepository.countByHostId(userId);
-        int joinedRooms = roomRepository.countByOpponentId(userId);
+        AppUserInfoDto dto = appUserCacheService.loadProfileInfo(userId, loggedInUser);
 
-        int vsAiWins = gameRepository.countWinsVsAI(userId);
-        int vsAiLoses = gameRepository.countLossesVsAI(userId);
-
-        int vsPlayerWins = gameRepository.countWinsVsPlayer(userId);
-        int vsPlayerLoses = gameRepository.countLossesVsPlayer(userId);
-
-        AppUserGameStats gameStats = new AppUserGameStats(
-                hostedRooms, joinedRooms, vsAiWins, vsAiLoses, vsPlayerWins, vsPlayerLoses
-        );
-
-        AppUserInfoDto appUserInfoDto = AppUserMapper.createAppUserInfoDto(loggedInUser, gameStats);
-        log.info("Kutya: {}", appUserInfoDto);
-        return CompletableFuture.completedFuture(appUserInfoDto);
+        return CompletableFuture.completedFuture(dto);
     }
 
 }
