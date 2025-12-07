@@ -22,10 +22,12 @@ public class AppUserInfoDto {
 
     private Integer vsAiWins;
     private Integer vsAiLoses;
+    private Integer vsAiDraws;
     private Integer vsAiGames;
 
     private Integer vsPlayerWins;
     private Integer vsPlayerLoses;
+    private Integer vsPlayerDraws;
     private Integer vsPlayerGames;
 
     private Integer overallGames;

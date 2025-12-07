@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
+import org.dama.damajatek.authentication.user.IAppUserCacheService;
 import org.dama.damajatek.authentication.user.IAppUserService;
 import org.dama.damajatek.dto.game.GameHistoryDto;
 import org.dama.damajatek.dto.game.GameInfoDto;
@@ -42,7 +43,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.dama.damajatek.enums.game.GameResult.*;
 import static org.dama.damajatek.enums.game.PieceColor.RED;
 import static org.dama.damajatek.util.BoardInitializer.createStartingBoard;
 import static org.dama.damajatek.util.BoardSerializer.loadBoard;
@@ -60,6 +60,7 @@ public class GameService implements IGameService {
     private final IGameEngine gameEngine;
     private final IBotService botService;
     private final IMoveProcessor moveProcessor;
+    private final IAppUserCacheService appUserCacheService;
 
     // Rule source: https://www.okosjatek.hu/custom/okosjatek/image/data/srattached/1fb12c3bdc1f524812fb6c5043d11637_D%C3%A1ma%20j%C3%A1t%C3%A9kszab%C3%A1ly.pdf
     // The forced capture rule is used, so if there's a capture, then the user only gets that move.
@@ -192,16 +193,12 @@ public class GameService implements IGameService {
     @Transactional
     @Override
     public IGameEvent forfeit(Long gameId, PieceColor pieceColor) {
-        // Find the game with players
         Game game = findGameByIdWithPlayers(gameId);
 
-        // Get the logged-in user
         AppUser loggedInUser = appUserService.getLoggedInUser();
 
-        // Check user access to game
         verifyUserAccess(game, loggedInUser);
 
-        // Check if the game is already finished
         if (game.isFinished()) {
             throw new GameAlreadyFinishedException();
         }
@@ -215,24 +212,27 @@ public class GameService implements IGameService {
             throw new AccessDeniedException("You can only forfeit your own game");
         }
 
-        // winner
+        // Determine winner and result
         Player winner = (pieceColor == PieceColor.RED)
                 ? game.getBlackPlayer()
                 : game.getRedPlayer();
 
-        // result (who forfeited)
         GameResult result = (pieceColor == PieceColor.RED)
-                ? RED_FORFEIT
-                : BLACK_FORFEIT;
+                ? GameResult.RED_FORFEIT
+                : GameResult.BLACK_FORFEIT;
 
-        // Mark game as finished
         game.markFinished(winner, result);
         gameRepository.save(game);
 
         log.info("Game {} forfeited by {} ({})", gameId, loggedInUser.getDisplayName(), pieceColor);
 
-        // Return game over event
-        return EventMapper.createGameForfeitEvent(winner.getDisplayName(), result, "Game forfeited");
+        appUserCacheService.evictPlayers(game);
+
+        return EventMapper.createGameForfeitEvent(
+                winner.getDisplayName(),
+                result,
+                "Game forfeited"
+        );
     }
 
     private Game findGameByIdWithPlayers(Long gameId) {

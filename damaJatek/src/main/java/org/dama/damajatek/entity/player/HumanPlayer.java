@@ -21,4 +21,9 @@ public class HumanPlayer extends Player {
     public String getDisplayName() {
         return user != null ? user.getDisplayName() : "Unknown Player";
     }
+
+    @Override
+    public Long getAppUserId() {
+        return user != null ? user.getId() : null;
+    }
 }

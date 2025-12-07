@@ -1,4 +1,4 @@
-package org.dama.damajatek.authentication.config;
+package org.dama.damajatek.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
@@ -20,7 +20,7 @@ public class CacheConfig {
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
         cacheManager.setCacheNames(List.of(
-                "userCache"
+                "userProfileCache"
         ));
         cacheManager.setCaffeine(caffeineCacheBuilder());
         cacheManager.setAllowNullValues(false);

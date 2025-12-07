@@ -17,10 +17,12 @@ public class AppUserMapper {
 
                 .vsAiWins(stats.vsAiWins())
                 .vsAiLoses(stats.vsAiLoses())
+                .vsAiDraws(stats.vsAiDraws())
                 .vsAiGames(stats.vsAiGames())
 
                 .vsPlayerWins(stats.vsPlayerWins())
                 .vsPlayerLoses(stats.vsPlayerLoses())
+                .vsPlayerDraws(stats.vsPlayerDraws())
                 .vsPlayerGames(stats.vsPlayerGames())
 
                 .overallGames(stats.overallGames())

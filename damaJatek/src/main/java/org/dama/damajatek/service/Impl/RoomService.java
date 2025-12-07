@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.AppUserRepository;
+import org.dama.damajatek.authentication.user.IAppUserCacheService;
 import org.dama.damajatek.authentication.user.IAppUserService;
 import org.dama.damajatek.dto.room.RoomCreateDto;
 import org.dama.damajatek.dto.room.RoomInfoDtoV1;
@@ -41,18 +42,13 @@ import static org.dama.damajatek.enums.room.RoomWsAction.*;
 @Slf4j
 public class RoomService implements IRoomService {
 
-    // Menu:
-    // Start -> Vs Computer, Vs Player
-        // Vs Computer -> a mini settings modal, and the game instantly loads
-        // Vs Player -> Rooms, Quick Match
-    // Settings -> Sound...
-
     private final IRoomRepository roomRepository;
     private final PasswordEncoder passwordEncoder;
     private final IAppUserService appUserService;
     private final IGameService gameService;
     private final IRoomWebSocketService roomWebSocketService;
     private final AppUserRepository appUserRepository;
+    private final IAppUserCacheService appUserCacheService;
 
     // Lock handling, also set database restr. with flyway
     @Transactional
@@ -65,6 +61,9 @@ public class RoomService implements IRoomService {
                 : null;
 
         Room room = RoomMapper.createRoom(roomCreateDto, host, encodedPassword);
+
+        appUserCacheService.evictProfileCache(host.getId());
+
         return roomRepository.save(room).getId();
     }
 
@@ -99,6 +98,8 @@ public class RoomService implements IRoomService {
                     OPPONENT_JOIN,
                     "/topic/rooms/" + roomId
             );
+
+            appUserCacheService.evictProfileCache(loggedInUser.getId());
 
             return roomId;
         } catch (OptimisticLockException e) {

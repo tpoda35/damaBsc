@@ -19,4 +19,7 @@ public abstract class Player {
     private Long id;
 
     public abstract String getDisplayName();
+
+    public abstract Long getAppUserId();
+
 }

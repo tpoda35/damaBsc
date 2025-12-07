@@ -5,6 +5,7 @@ import styles from "./Profile.module.css";
 
 const Profile = () => {
     const { user, fetchUser } = useSharedAuth();
+    console.log(user);
     const [gameHistory, setGameHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -59,6 +60,7 @@ const Profile = () => {
                         <li>Games: {user.vsAiGames}</li>
                         <li>Wins: {user.vsAiWins}</li>
                         <li>Losses: {user.vsAiLoses}</li>
+                        <li>Draws: {user.vsAiDraws}</li>
                         <li>Winrate: {user.vsBotWinrate}%</li>
                     </ul>
 
@@ -67,6 +69,7 @@ const Profile = () => {
                         <li>Games: {user.vsPlayerGames}</li>
                         <li>Wins: {user.vsPlayerWins}</li>
                         <li>Losses: {user.vsPlayerLoses}</li>
+                        <li>Draws: {user.vsPlayerDraws}</li>
                         <li>Winrate: {user.vsPlayerWinrate}%</li>
                     </ul>
 
@@ -100,7 +103,7 @@ const Profile = () => {
                                 <td>{game.redPlayer.displayName}</td>
                                 <td>{game.blackPlayer.displayName}</td>
                                 <td>{game.result}</td>
-                                <td>{game.winner.displayName}</td>
+                                <td>{game.winner ? game.winner.displayName : "---"}</td>
                                 <td>{game.totalMoves}</td>
                                 <td>
                                     {game.startTime && game.endTime

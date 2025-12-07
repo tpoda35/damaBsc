@@ -5,32 +5,47 @@ public record AppUserGameStats(
         int joinedRooms,
         int vsAiWins,
         int vsAiLoses,
+        int vsAiDraws,
         int vsPlayerWins,
-        int vsPlayerLoses
+        int vsPlayerLoses,
+        int vsPlayerDraws
 ) {
+
+    // Total games including draws
     public int vsAiGames() {
-        return vsAiWins + vsAiLoses;
+        return vsAiWins + vsAiLoses + vsAiDraws;
     }
 
     public int vsPlayerGames() {
-        return vsPlayerWins + vsPlayerLoses;
+        return vsPlayerWins + vsPlayerLoses + vsPlayerDraws;
     }
-    
+
     public int overallGames() {
         return vsAiGames() + vsPlayerGames();
     }
 
+    // Winrate with draws counted as half-win
     public int vsBotWinrate() {
-        return vsAiGames() == 0 ? 0 : (vsAiWins * 100) / vsAiGames();
+        int total = vsAiGames();
+        if (total == 0) return 0;
+
+        double rate = (vsAiWins + 0.5 * vsAiDraws) * 100.0 / total;
+        return (int) Math.round(rate);
     }
 
     public int vsPlayerWinrate() {
-        return vsPlayerGames() == 0 ? 0 : (vsPlayerWins * 100) / vsPlayerGames();
+        int total = vsPlayerGames();
+        if (total == 0) return 0;
+
+        double rate = (vsPlayerWins + 0.5 * vsPlayerDraws) * 100.0 / total;
+        return (int) Math.round(rate);
     }
 
     public int overallWinrate() {
-        return overallGames() == 0
-                ? 0
-                : ((vsAiWins + vsPlayerWins) * 100) / overallGames();
+        int total = overallGames();
+        if (total == 0) return 0;
+
+        double rate = (vsAiWins + 0.5 * vsAiDraws + vsPlayerWins + 0.5 * vsPlayerDraws) * 100.0 / total;
+        return (int) Math.round(rate);
     }
 }

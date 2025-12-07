@@ -1,6 +1,7 @@
 package org.dama.damajatek.service.Impl;
 
 import lombok.RequiredArgsConstructor;
+import org.dama.damajatek.authentication.user.IAppUserCacheService;
 import org.dama.damajatek.dto.game.MoveResult;
 import org.dama.damajatek.dto.game.websocket.IGameEvent;
 import org.dama.damajatek.entity.Game;
@@ -24,6 +25,7 @@ public class MoveProcessor implements IMoveProcessor {
 
     private final IGameEngine gameEngine;
     private final IGameRepository gameRepository;
+    private final IAppUserCacheService appUserCacheService;
 
     // There's no validation, so the full request needs to be validated before this
     public MoveResult processMove(Game game, Board board, Move move) {
@@ -73,6 +75,8 @@ public class MoveProcessor implements IMoveProcessor {
             } else {
                 events.add(EventMapper.createGameDrawEvent());
             }
+
+            appUserCacheService.evictPlayers(game);
         } else {
             game.setCurrentTurn(nextTurn);
             events.add(EventMapper.createNextTurnEvent(

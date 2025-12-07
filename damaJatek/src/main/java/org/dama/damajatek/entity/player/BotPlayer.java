@@ -20,4 +20,9 @@ public class BotPlayer extends Player {
     public String getDisplayName() {
         return "Bot (" + difficulty.name() + ")";
     }
+
+    @Override
+    public Long getAppUserId() {
+        return null;
+    }
 }
