@@ -1,0 +1,13 @@
+input, select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+div {
+    margin-bottom: 1rem;
+}

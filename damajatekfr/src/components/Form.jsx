@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import "./Form.module.css"
+
 // Example field config for reference:
 // { label: "Password", name: "password", type: "password", placeholder: "********", required: true },
 // { label: "Favorite Color", name: "color", type: "select", options: [{ label: "Red", value: "red" }], required: true }
