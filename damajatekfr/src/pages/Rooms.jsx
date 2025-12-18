@@ -3,9 +3,12 @@ import {useNavigate} from "react-router-dom";
 import ApiService from "../services/ApiService";
 import Modal from "../components/Modal";
 import Form from "../components/Form.jsx";
+import styles from './Rooms.module.css';
+import Button from "../components/Button.jsx";
 
 const Rooms = () => {
     const [rooms, setRooms] = useState(null);
+    console.log('Rooms: ', rooms);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,6 +68,7 @@ const Rooms = () => {
 
     const fields = [
         { label: "Room name", name: "name", type: "text", placeholder: "MyRoom123", required: true },
+        { label: "Room description", name: "description", type: "text", placeholder: "MyRoomDescription123", required: false },
         { label: "Locked", name: "locked", type: "checkbox", required: true },
         { label: "Password", name: "password", type: "password", placeholder: "********", required: true },
     ];
@@ -75,18 +79,43 @@ const Rooms = () => {
     const roomList = rooms?.content || [];
 
     return (
-        <div>
-            <button onClick={handleHostRoom}>Host room</button>
+        <div className={styles.rooms}>
+            {/* Header */}
+            <div className={styles.header}>
+                <h2 className={styles.title}>Room list</h2>
+
+                <Button
+                    onClick={handleHostRoom}
+                    children="Host room"
+                />
+            </div>
 
             {roomList.length === 0 ? (
-                <div>No rooms available</div>
+                <div className={styles.empty}>No rooms available</div>
             ) : (
-                <ul>
+                <ul className={styles.roomList}>
                     {roomList.map((room) => (
-                        <li key={room.id}>
-                            {room.name || `Room ${room.id}`} -{" "}
-                            {room.content || "No content"}
-                            <button onClick={() => handleJoinRoom(room)}>Join</button>
+                        <li className={styles.roomCard} key={room.id}>
+                            <div>
+                                <strong className={styles.roomTitle}>
+                                    {room.name || `Room ${room.id}`}
+                                    {room.locked && <i className="fa fa-lock" aria-hidden="true"></i>}
+                                </strong>
+                                <div className={styles.roomDesc}>
+                                    {room.description || "No description"}
+                                </div>
+                            </div>
+
+                            <div className={styles.roomMeta}>
+                                <span className={styles.players}>
+                                    {room.playerCount}/2
+                                </span>
+
+                                    <Button
+                                        onClick={() => handleJoinRoom(room)}
+                                        children="Join room"
+                                    />
+                                </div>
                         </li>
                     ))}
                 </ul>
@@ -103,7 +132,6 @@ const Rooms = () => {
                     buttonText="Host"
                     error={error}
                     conditionalRender={(formData, field) => {
-                        // Only show password field if locked is true
                         if (field.name === "password") return formData.locked;
                         return true;
                     }}

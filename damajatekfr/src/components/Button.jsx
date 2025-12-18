@@ -1,12 +1,21 @@
 import React from "react";
 import styles from "./Button.module.css";
 
-const Button = ({ onClick, children, type = "button", variant = "primary", disabled = false }) => {
+const Button = ({
+                    onClick,
+                    children,
+                    type = "button",
+                    variant = "primary",
+                    disabled = false,
+                    fullWidth = false,
+                }) => {
     return (
         <button
             type={type}
             onClick={onClick}
-            className={`${styles.button} ${styles[variant]}`}
+            className={`${styles.button} ${styles[variant]} ${
+                fullWidth ? styles.fullWidth : ""
+            }`}
             disabled={disabled}
         >
             {children}
@@ -15,3 +24,4 @@ const Button = ({ onClick, children, type = "button", variant = "primary", disab
 };
 
 export default Button;
+

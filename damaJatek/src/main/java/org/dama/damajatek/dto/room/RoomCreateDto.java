@@ -14,6 +14,7 @@ public class RoomCreateDto {
 
     @NotBlank(message = "Room name cannot be blank.")
     private String name;
+    private String description;
 
     private Boolean locked;
     private String password;

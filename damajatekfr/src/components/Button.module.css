@@ -1,14 +1,17 @@
 .button {
-    padding: 0.8rem 1.8rem;
-    border: none;
+    padding: 0.8rem 1.2rem;
     border-radius: 6px;
-    cursor: pointer;
+    border: none;
     font-size: 1rem;
-    font-weight: 600;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
 }
 
-/* Primary Button */
+.fullWidth {
+    width: 100%;
+}
+
 .primary {
     background-color: var(--primary);
     color: var(--white);
@@ -16,10 +19,8 @@
 
 .primary:hover:not(:disabled) {
     background-color: var(--primary-dark);
-    transform: translateY(-1px);
 }
 
-/* Light Button */
 .light {
     background-color: var(--primary-light);
     color: var(--white);
@@ -27,12 +28,9 @@
 
 .light:hover:not(:disabled) {
     background-color: var(--primary);
-    transform: translateY(-1px);
 }
 
-/* Disabled */
 .button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
-    transform: none;
 }

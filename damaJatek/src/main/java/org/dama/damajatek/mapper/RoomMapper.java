@@ -14,6 +14,7 @@ public class RoomMapper {
     public static Room createRoom(RoomCreateDto roomCreateDto, AppUser host, String encodedPassword) {
         return Room.builder()
                 .name(roomCreateDto.getName())
+                .description(roomCreateDto.getDescription())
                 .locked(roomCreateDto.getLocked())
                 .password(encodedPassword)
                 .host(host)
@@ -34,6 +35,7 @@ public class RoomMapper {
         return RoomInfoDtoV2.builder()
                 .id(room.getId())
                 .name(room.getName())
+                .description(room.getDescription())
                 .playerCount(room.getOpponent() != null ? 2 : 1)
                 .locked(room.getLocked())
                 .build();

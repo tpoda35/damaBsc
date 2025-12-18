@@ -1,0 +1,60 @@
+.rooms {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+}
+
+.title {
+    margin: 0;
+    font-size: 1.6rem;
+}
+
+.empty {
+    text-align: center;
+    padding: 40px;
+    background: var(--grey-light);
+    border-radius: 12px;
+    font-size: 0.95rem;
+}
+
+.roomList {
+    display: grid;
+    gap: 16px;
+}
+
+.roomCard {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.roomDesc {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.roomMeta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.players {
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: var(--grey-light);
+    padding: 6px 12px;
+    border-radius: 999px;
+}

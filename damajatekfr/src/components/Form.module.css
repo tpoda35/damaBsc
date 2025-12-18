@@ -1,13 +1,38 @@
-input, select {
-    width: 100%;
-    box-sizing: border-box;
+.formField {
+    margin-bottom: 1rem;
 }
 
-label {
+.formLabel {
     display: block;
     margin-bottom: 0.25rem;
 }
 
-div {
-    margin-bottom: 1rem;
+.formInput,
+.formSelect {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    margin-top: 0.25rem;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background-color: var(--grey-light);
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.formInput:focus,
+.formSelect:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(244, 124, 38, 0.2);
+    background-color: var(--white);
+}
+
+.buttonWrapper {
+    text-align: center;
+}
+
+.error {
+    color: red;
+    text-align: center;
+    margin-bottom: 10px;
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import Piece from "./Piece";
-import "../../styles/GameBoard.css";
+import "./GameBoard.css";
 
 const BoardCell = ({
                        row,

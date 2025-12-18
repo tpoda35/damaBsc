@@ -1,5 +1,5 @@
 import React from "react";
-import "../../styles/GameBoard.css";
+import "./GameBoard.css";
 
 const Piece = ({ color, isKing }) => {
     const pieceClass = `piece ${color.toLowerCase()} ${isKing ? "king" : ""}`;

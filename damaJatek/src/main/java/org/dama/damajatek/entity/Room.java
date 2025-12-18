@@ -34,6 +34,8 @@ public class Room {
     @Column(nullable = false)
     private String name;
 
+    private String description;
+
     // If this is true, then the room requires password
     private Boolean locked;
 

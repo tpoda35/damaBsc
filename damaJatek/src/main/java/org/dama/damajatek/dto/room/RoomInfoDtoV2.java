@@ -13,6 +13,7 @@ public class RoomInfoDtoV2 {
 
     private Long id;
     private String name;
+    private String description;
     private int playerCount;
     private boolean locked;
 
