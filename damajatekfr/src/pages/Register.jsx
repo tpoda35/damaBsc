@@ -3,6 +3,8 @@ import {useNavigate} from "react-router-dom";
 import {useSharedAuth} from "../contexts/AuthContext";
 import Form from "../components/Form.jsx";
 import './Auth.css';
+import {toast} from "react-toastify";
+import {getErrorMessage} from "../utils/getErrorMessage.js";
 
 const Register = () => {
     const { register } = useSharedAuth();
@@ -13,11 +15,10 @@ const Register = () => {
         setError("");
         try {
             await register(data);
+            toast.success("Registration successful");
             navigate("/");
         } catch (err) {
-            // console.log("Register error: ", err);
-            // console.log("Register errorMsg: ", err.message);
-            setError(err.message);
+            setError(getErrorMessage(err, "Registration failed"));
         }
     };
 

@@ -11,6 +11,7 @@ import useTokenRefresh from "./hooks/useTokenRefresh.js";
 import {useEffect} from "react";
 import Game from "./pages/Game.jsx";
 import Profile from "./pages/Profile.jsx";
+import {Bounce, ToastContainer} from "react-toastify";
 
 function App() {
     const { user } = useSharedAuth();
@@ -46,6 +47,21 @@ function App() {
     return (
         <>
             <BrowserRouter>
+                <ToastContainer
+                    style={{ top: '80px' }}
+                    position="top-left"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick={false}
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="light"
+                    transition={Bounce}
+                />
+
                 <Routes>
                     <Route element={<Layout />}>
                         <Route path="/" element={<Home />} />

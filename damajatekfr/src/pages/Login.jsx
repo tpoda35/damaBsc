@@ -3,6 +3,8 @@ import Form from "../components/Form.jsx";
 import { useState } from "react";
 import  "./Auth.css";
 import {useNavigate} from "react-router-dom";
+import {toast} from "react-toastify";
+import {getErrorMessage} from "../utils/getErrorMessage.js";
 
 const Login = () => {
     const { login } = useSharedAuth();
@@ -14,9 +16,10 @@ const Login = () => {
         setError("");
         try {
             await login(data);
+            toast.success("Login successful");
             navigate("/");
         } catch (err) {
-            setError(err.message);
+            setError(getErrorMessage(err, "Login failed"));
         }
     };
 

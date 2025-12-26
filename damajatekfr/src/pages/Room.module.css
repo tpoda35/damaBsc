@@ -1,0 +1,83 @@
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 24px;
+    background: var(--white);
+    color: var(--text-dark);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.title {
+    font-size: 1.9rem;
+    font-weight: 700;
+    margin-bottom: 28px;
+    text-align: center;
+    color: var(--primary-dark);
+}
+
+.playersSection {
+    background: var(--grey-light);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 28px;
+}
+
+.playersTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    color: var(--text-dark);
+}
+
+.playersGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.playerCard {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 18px;
+    border-left: 6px solid var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.playerName {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.status {
+    font-size: 0.95rem;
+}
+
+.statusReady {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.statusNotReady {
+    color: var(--primary-dark);
+}
+
+.statusWaiting {
+    color: #888;
+    font-style: italic;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+    margin-bottom: 22px;
+}
+
+.info {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #555;
+}

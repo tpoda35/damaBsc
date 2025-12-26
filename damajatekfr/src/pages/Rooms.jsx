@@ -5,6 +5,8 @@ import Modal from "../components/Modal";
 import Form from "../components/Form.jsx";
 import styles from './Rooms.module.css';
 import Button from "../components/Button.jsx";
+import {toast} from "react-toastify";
+import {getErrorMessage} from "../utils/getErrorMessage.js";
 
 const Rooms = () => {
     const [rooms, setRooms] = useState(null);
@@ -23,7 +25,7 @@ const Rooms = () => {
                 const rooms = await ApiService.get("/rooms");
                 setRooms(rooms);
             } catch (err) {
-                setError(err.message || "Failed to fetch rooms");
+                setError(getErrorMessage(err, "Failed to fetch rooms"));
             } finally {
                 setLoading(false);
             }
@@ -51,7 +53,8 @@ const Rooms = () => {
 
             navigate(`/rooms/${joinedRoomId}`);
         } catch (err) {
-            setError(err.message || "Failed to join room");
+            setError(getErrorMessage(err, "Failed to join room"));
+            toast.error(getErrorMessage(err, "Failed to join room"));
         }
     };
 
@@ -62,7 +65,8 @@ const Rooms = () => {
             setIsModalOpen(false);
             navigate(`/rooms/${roomId}`);
         } catch (err) {
-            setError(err.message || "Failed to create room");
+            setError(getErrorMessage(err, "Failed to create room"));
+            toast.error(getErrorMessage(err, "Failed to create room"));
         }
     };
 
@@ -74,7 +78,6 @@ const Rooms = () => {
     ];
 
     if (loading) return <div>Loading rooms...</div>;
-    if (error) return <div>Error: {error}</div>;
 
     const roomList = rooms?.content || [];
 

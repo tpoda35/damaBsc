@@ -6,6 +6,7 @@ import org.dama.damajatek.dto.room.RoomCreateDto;
 import org.dama.damajatek.dto.room.RoomInfoDtoV1;
 import org.dama.damajatek.dto.room.RoomInfoDtoV2;
 import org.dama.damajatek.entity.Room;
+import org.dama.damajatek.enums.room.ReadyStatus;
 
 import static org.dama.damajatek.enums.room.ReadyStatus.NOT_READY;
 
@@ -26,8 +27,8 @@ public class RoomMapper {
                 .id(room.getId())
                 .name(room.getName())
                 .isHost(isHost)
-                .host(createAppUserInfoDtoV1(host))
-                .opponent(createAppUserInfoDtoV1(opponent))
+                .host(createAppUserInfoDtoV1(host, room.getHostReadyStatus()))
+                .opponent(createAppUserInfoDtoV1(opponent, room.getOpponentReadyStatus()))
                 .build();
     }
 
@@ -41,7 +42,7 @@ public class RoomMapper {
                 .build();
     }
 
-    private static AppUserGameDto createAppUserInfoDtoV1(AppUser appUser) {
+    private static AppUserGameDto createAppUserInfoDtoV1(AppUser appUser, ReadyStatus readyStatus) {
         if (appUser == null) {
             return null;
         }
@@ -49,7 +50,7 @@ public class RoomMapper {
         return AppUserGameDto.builder()
                 .id(appUser.getId())
                 .displayName(appUser.getDisplayName())
-                .readyStatus(NOT_READY)
+                .readyStatus(readyStatus)
                 .build();
     }
 

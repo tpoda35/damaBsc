@@ -2,10 +2,13 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ApiService from "../services/ApiService";
 import { useSharedWebSocket } from "../contexts/WebSocketContext.jsx";
+import styles from './Room.module.css';
+import Button from "../components/Button.jsx";
 
 const Room = () => {
     const { roomId } = useParams();
     const [room, setRoom] = useState(null);
+    console.log('Room: ', room);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const hasLeftRoom = useRef(false);
@@ -55,8 +58,8 @@ const Room = () => {
             setLoading(true);
             setError(null);
             try {
-                const data = await ApiService.get(`/rooms/${roomId}`);
-                setRoom(data);
+                const room = await ApiService.get(`/rooms/${roomId}`);
+                setRoom(room);
             } catch (err) {
                 setError(err.message || "Failed to fetch room info");
             } finally {
@@ -189,7 +192,7 @@ const Room = () => {
         };
     }, [roomId]);
 
-    // Browser close/reload - use sendBeacon
+    // Browser close/reload
     useEffect(() => {
         if (!roomId) return;
 
@@ -224,46 +227,85 @@ const Room = () => {
     const { id, name, host, opponent, isHost } = room;
 
     return (
-        <div>
-            <h2>Room: {name || `Room ${id}`}</h2>
+        <div className={styles.container}>
+            <h2 className={styles.title}>
+                Room: {name || `Room ${id}`}
+            </h2>
 
-            <div>
-                <h3>Players</h3>
+            <div className={styles.playersSection}>
+                <h3 className={styles.playersTitle}>Players</h3>
 
-                <div>
-                    <div>
-                        <strong>Host:</strong> {host?.displayName || "Unknown"}
-                        <div>Status: {host?.readyStatus || "NOT_READY"}</div>
+                <div className={styles.playersGrid}>
+                    <div className={styles.playerCard}>
+                        <div className={styles.playerName}>
+                            Host: {host?.displayName || "Unknown"}
+                        </div>
+                        <div
+                            className={`${styles.status} ${
+                                host?.readyStatus === "READY"
+                                    ? styles.statusReady
+                                    : styles.statusNotReady
+                            }`}
+                        >
+                            Status: {host?.readyStatus || "NOT_READY"}
+                        </div>
                     </div>
 
-                    <div>
-                        <strong>Opponent:</strong>{" "}
-                        {opponent ? opponent.displayName : "Waiting for opponent..."}
-                        <div>Status: {opponent?.readyStatus || "N/A"}</div>
+                    <div className={styles.playerCard}>
+                        <div className={styles.playerName}>
+                            Opponent:{" "}
+                            {opponent ? opponent.displayName : "Waiting for opponent..."}
+                        </div>
+                        <div
+                            className={`${styles.status} ${
+                                opponent?.readyStatus === "READY"
+                                    ? styles.statusReady
+                                    : opponent
+                                        ? styles.statusNotReady
+                                        : styles.statusWaiting
+                            }`}
+                        >
+                            Status: {opponent?.readyStatus || "N/A"}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div>
-                <button onClick={handleToggleReady}>
-                    {isHost
-                        ? (host?.readyStatus === "READY" ? "Unready" : "Ready")
-                        : (opponent?.readyStatus === "READY" ? "Unready" : "Ready")
-                    }
-                </button>
+            <div className={styles.actions}>
+                <Button
+                    onClick={handleToggleReady}
+                    children={
+                    isHost
+                        ? host?.readyStatus === "READY"
+                            ? "Unready"
+                            : "Ready"
+                        : opponent?.readyStatus === "READY"
+                            ? "Unready"
+                            : "Ready"
+                }
+                />
 
                 {isHost && opponent && (
-                    <button onClick={handleKickOpponent}>Kick Opponent</button>
+                    <Button
+                        onClick={handleKickOpponent}
+                        children="Kick Opponent"
+                    />
                 )}
 
-                <button onClick={handleLeaveRoom}>Leave Room</button>
+                <Button
+                    onClick={handleLeaveRoom}
+                    children="Leave Room"
+                />
 
                 {isHost && (
-                    <button onClick={handleStartGame}>Start Game</button>
+                    <Button
+                        onClick={handleStartGame}
+                        children="Start Game"
+                    />
                 )}
             </div>
 
-            <div>
+            <div className={styles.info}>
                 Waiting for both players to be ready...
             </div>
         </div>
