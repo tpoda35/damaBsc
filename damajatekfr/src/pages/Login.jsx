@@ -29,7 +29,6 @@ const Login = () => {
         { label: "Password", name: "password", type: "password", placeholder: "********", required: true,}
     ];
 
-
     return (
         <div className="auth-container">
             <div className="auth-card">

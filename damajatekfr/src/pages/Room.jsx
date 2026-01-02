@@ -1,16 +1,16 @@
-import { useEffect, useState, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import {useEffect, useRef, useState} from "react";
+import {useNavigate, useParams} from "react-router-dom";
 import ApiService from "../services/ApiService";
-import { useSharedWebSocket } from "../contexts/WebSocketContext.jsx";
+import {useSharedWebSocket} from "../contexts/WebSocketContext.jsx";
 import styles from './Room.module.css';
 import Button from "../components/Button.jsx";
+import Loader from "../components/Loader.jsx";
+import {withToastError} from "../utils/withToastError.js";
 
 const Room = () => {
     const { roomId } = useParams();
     const [room, setRoom] = useState(null);
-    console.log('Room: ', room);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const hasLeftRoom = useRef(false);
 
     const ws = useSharedWebSocket();
@@ -21,47 +21,48 @@ const Room = () => {
         hasLeftRoom.current = true;
 
         try {
-            await ApiService.post(`/rooms/${roomId}/leave`);
+            await withToastError(
+                () => ApiService.post(`/rooms/${roomId}/leave`),
+                "Failed to leave room"
+            );
             navigate("/rooms");
-        } catch (err) {
-            setError(err.message || "Failed to leave room");
+        } catch {
             hasLeftRoom.current = false;
         }
     };
 
     const handleKickOpponent = async () => {
-        try {
-            await ApiService.post(`/rooms/${roomId}/kick`);
-        } catch (err) {
-            setError(err.message || "Failed to kick opponent");
-        }
+        await withToastError(
+            () => ApiService.post(`/rooms/${roomId}/kick`),
+            "Failed to kick opponent"
+        );
     };
 
     const handleToggleReady = async () => {
-        try {
-            await ApiService.post(`/rooms/${roomId}/ready`);
-        } catch (err) {
-            setError(err.message || "Failed to toggle ready status");
-        }
+        await withToastError(
+            () => ApiService.post(`/rooms/${roomId}/ready`),
+            "Failed to toggle ready status"
+        );
     };
 
     const handleStartGame = async () => {
-        try {
-            await ApiService.post(`/rooms/${roomId}/start`);
-        } catch (err) {
-            setError(err.message || "Failed to start game");
-        }
+        await withToastError(
+            () => ApiService.post(`/rooms/${roomId}/start`),
+            "Failed to start game"
+        );
     };
 
     useEffect(() => {
         const fetchRoom = async () => {
             setLoading(true);
-            setError(null);
             try {
-                const room = await ApiService.get(`/rooms/${roomId}`);
-                setRoom(room);
-            } catch (err) {
-                setError(err.message || "Failed to fetch room info");
+                const fetchedRoom = await withToastError(
+                    () => ApiService.get(`/rooms/${roomId}`),
+                    "Failed to fetch room info"
+                );
+                setRoom(fetchedRoom);
+            } catch {
+                setRoom(null);
             } finally {
                 setLoading(false);
             }
@@ -183,11 +184,12 @@ const Room = () => {
     // React unmount (navigation within app)
     useEffect(() => {
         if (!roomId) return;
-
         return () => {
             if (!hasLeftRoom.current) {
                 hasLeftRoom.current = true;
-                ApiService.post(`/rooms/${roomId}/leave`).catch(() => {});
+                ApiService.post(`/rooms/${roomId}/leave`).catch(err =>
+                    console.warn("Failed to auto-leave room:", err)
+                );
             }
         };
     }, [roomId]);
@@ -220,9 +222,18 @@ const Room = () => {
         };
     }, [roomId]);
 
-    if (loading) return <div>Loading room...</div>;
-    if (error) return <div>Error: {error}</div>;
-    if (!room) return <div>Room not found</div>;
+    if (loading) return <Loader />;
+
+    if (!room) {
+        return (
+            <div className={styles.container}>
+                <h2>Room not found</h2>
+                <Button onClick={() => navigate("/rooms")}>
+                    Back to Rooms
+                </Button>
+            </div>
+        );
+    }
 
     const { id, name, host, opponent, isHost } = room;
 

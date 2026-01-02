@@ -1,23 +1,39 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useSharedAuth } from "../contexts/AuthContext";
 import styles from "./Navbar.module.css";
 
 const Navbar = () => {
     const { user, logout } = useSharedAuth();
 
+    const linkClass = ({ isActive }) =>
+        isActive ? `${styles.active}` : undefined;
+
     return (
         <nav className={styles.navbar}>
-            <Link to="/">Home</Link>
+            <NavLink to="/" className={linkClass}>
+                Home
+            </NavLink>
+
             {!user ? (
                 <>
-                    <Link to="/login">Login</Link>
-                    <Link to="/register">Register</Link>
+                    <NavLink to="/login" className={linkClass}>
+                        Login
+                    </NavLink>
+                    <NavLink to="/register" className={linkClass}>
+                        Register
+                    </NavLink>
                 </>
             ) : (
                 <>
-                    <Link to="/profile">Profile</Link>
-                    <Link to="/rooms">Rooms</Link>
-                    <Link to="/friends">Friends</Link>
+                    <NavLink to="/profile" className={linkClass}>
+                        Profile
+                    </NavLink>
+                    <NavLink to="/rooms" className={linkClass}>
+                        Rooms
+                    </NavLink>
+                    <NavLink to="/friends" className={linkClass}>
+                        Friends
+                    </NavLink>
                     <button onClick={logout}>Logout</button>
                 </>
             )}

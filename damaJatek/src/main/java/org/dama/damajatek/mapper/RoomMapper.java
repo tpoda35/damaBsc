@@ -8,8 +8,6 @@ import org.dama.damajatek.dto.room.RoomInfoDtoV2;
 import org.dama.damajatek.entity.Room;
 import org.dama.damajatek.enums.room.ReadyStatus;
 
-import static org.dama.damajatek.enums.room.ReadyStatus.NOT_READY;
-
 public class RoomMapper {
 
     public static Room createRoom(RoomCreateDto roomCreateDto, AppUser host, String encodedPassword) {

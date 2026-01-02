@@ -1,38 +1,44 @@
-import {useEffect, useState} from "react";
-import {useNavigate} from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ApiService from "../services/ApiService";
 import Modal from "../components/Modal";
 import Form from "../components/Form.jsx";
 import styles from './Rooms.module.css';
 import Button from "../components/Button.jsx";
-import {toast} from "react-toastify";
-import {getErrorMessage} from "../utils/getErrorMessage.js";
+import { toast } from "react-toastify";
+import { getErrorMessage } from "../utils/getErrorMessage.js";
+import Loader from "../components/Loader.jsx";
+import { withToastError } from "../utils/withToastError.js";
 
 const Rooms = () => {
-    const [rooms, setRooms] = useState(null);
-    console.log('Rooms: ', rooms);
+    const [roomsPage, setRoomsPage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [pageNum, setPageNum] = useState(0);
+    const [pageSize] = useState(6);
 
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchRooms = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const rooms = await ApiService.get("/rooms");
-                setRooms(rooms);
-            } catch (err) {
-                setError(getErrorMessage(err, "Failed to fetch rooms"));
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchRooms = async (page = 0, size = 10) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await withToastError(
+                () => ApiService.get(`/rooms?pageNum=${page}&pageSize=${size}`),
+                "Failed to fetch rooms"
+            );
+            setRoomsPage(data);
+        } catch (err) {
+            setError(getErrorMessage(err, "Failed to fetch rooms"));
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        fetchRooms();
-    }, []);
+    useEffect(() => {
+        fetchRooms(pageNum, pageSize);
+    }, [pageNum, pageSize]);
 
     const handleHostRoom = () => {
         setIsModalOpen(true);
@@ -53,19 +59,16 @@ const Rooms = () => {
 
             navigate(`/rooms/${joinedRoomId}`);
         } catch (err) {
-            setError(getErrorMessage(err, "Failed to join room"));
             toast.error(getErrorMessage(err, "Failed to join room"));
         }
     };
 
     const handleCreateRoom = async (formData) => {
         try {
-            console.log("formData: ", formData);
             const roomId = await ApiService.post("/rooms", formData);
             setIsModalOpen(false);
             navigate(`/rooms/${roomId}`);
         } catch (err) {
-            setError(getErrorMessage(err, "Failed to create room"));
             toast.error(getErrorMessage(err, "Failed to create room"));
         }
     };
@@ -77,51 +80,71 @@ const Rooms = () => {
         { label: "Password", name: "password", type: "password", placeholder: "********", required: true },
     ];
 
-    if (loading) return <div>Loading rooms...</div>;
+    if (loading) return <Loader />;
 
-    const roomList = rooms?.content || [];
+    const roomList = roomsPage?.content || [];
+    const totalPages = roomsPage?.totalPages || 1;
 
     return (
         <div className={styles.rooms}>
-            {/* Header */}
             <div className={styles.header}>
                 <h2 className={styles.title}>Room list</h2>
-
-                <Button
-                    onClick={handleHostRoom}
-                    children="Host room"
-                />
+                <Button onClick={handleHostRoom} children="Host room" />
             </div>
 
             {roomList.length === 0 ? (
                 <div className={styles.empty}>No rooms available</div>
             ) : (
-                <ul className={styles.roomList}>
-                    {roomList.map((room) => (
-                        <li className={styles.roomCard} key={room.id}>
-                            <div>
-                                <strong className={styles.roomTitle}>
-                                    {room.name || `Room ${room.id}`}
-                                    {room.locked && <i className="fa fa-lock" aria-hidden="true"></i>}
-                                </strong>
-                                <div className={styles.roomDesc}>
-                                    {room.description || "No description"}
+                <>
+                    <ul className={styles.roomList}>
+                        {roomList.map((room) => (
+                            <li className={styles.roomCard} key={room.id}>
+                                <div>
+                                    <strong className={styles.roomTitle}>
+                                        {room.name || `Room ${room.id}`}
+                                    </strong>
+                                    <div className={styles.roomDesc}>
+                                        {room.description || "No description"}
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className={styles.roomMeta}>
-                                <span className={styles.players}>
-                                    {room.playerCount}/2
-                                </span>
+                                <div className={styles.roomMeta}>
+                                    {room.locked && (
+                                        <span className={styles.infoBox}>
+                                            <i className="fa fa-lock" aria-hidden="true"></i>
+                                        </span>
+                                    )}
+
+                                    <span className={styles.infoBox}>
+                                        {room.playerCount}/2
+                                    </span>
 
                                     <Button
                                         onClick={() => handleJoinRoom(room)}
                                         children="Join room"
                                     />
                                 </div>
-                        </li>
-                    ))}
-                </ul>
+                            </li>
+                        ))}
+                    </ul>
+
+                    {/* Pagination */}
+                    <div className={styles.pagination}>
+                        <Button
+                            onClick={() => setPageNum((prev) => Math.max(prev - 1, 0))}
+                            disabled={pageNum === 0}
+                            children="Prev"
+                        />
+                        <span className={styles.pageInfo}>
+                            Page {pageNum + 1} of {totalPages}
+                        </span>
+                        <Button
+                            onClick={() => setPageNum((prev) => Math.min(prev + 1, totalPages - 1))}
+                            disabled={pageNum + 1 >= totalPages}
+                            children="Next"
+                        />
+                    </div>
+                </>
             )}
 
             <Modal

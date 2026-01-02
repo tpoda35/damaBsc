@@ -51,10 +51,24 @@
     gap: 14px;
 }
 
-.players {
+.infoBox {
     font-size: 0.85rem;
     font-weight: 500;
     background: var(--grey-light);
     padding: 6px 12px;
     border-radius: 999px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.pageInfo {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
 }

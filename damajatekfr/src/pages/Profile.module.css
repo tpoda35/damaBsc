@@ -50,3 +50,17 @@ table th, table td {
     font-style: italic;
     color: #666;
 }
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.pageInfo {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+}

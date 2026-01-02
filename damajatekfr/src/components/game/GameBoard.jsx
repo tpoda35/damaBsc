@@ -19,8 +19,10 @@ const GameBoard = ({
     const isHighlighted = (row, col) =>
         movesForSelected.some((m) => m.toRow === row && m.toCol === col);
 
+    const shouldRotate = playerColor.toLowerCase() === 'black';
+
     return (
-        <div className="board">
+        <div className={`board ${shouldRotate ? '' : 'rotated'}`}>
             {board.grid.map((rowData, rowIndex) =>
                 rowData.map((piece, colIndex) => {
                     const canSelect =

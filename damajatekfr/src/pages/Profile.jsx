@@ -2,13 +2,17 @@ import { useEffect, useState } from "react";
 import ApiService from "../services/ApiService";
 import { useSharedAuth } from "../contexts/AuthContext.jsx";
 import styles from "./Profile.module.css";
+import Loader from "../components/Loader.jsx";
+import Button from "../components/Button.jsx";
 
 const Profile = () => {
     const { user, fetchUser } = useSharedAuth();
-    console.log(user);
     const [gameHistory, setGameHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const [pageNum, setPageNum] = useState(0);
+    const [pageSize] = useState(5);
 
     const fetchGameHistory = async () => {
         try {
@@ -34,7 +38,7 @@ const Profile = () => {
         loadAll();
     }, [fetchUser]);
 
-    if (loading) return <p>Loading profile...</p>;
+    if (loading) return <Loader />;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
     return (
@@ -86,36 +90,61 @@ const Profile = () => {
                 {gameHistory.length === 0 ? (
                     <p className={styles.noGames}>No games played yet.</p>
                 ) : (
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Red Player</th>
-                            <th>Black Player</th>
-                            <th>Result</th>
-                            <th>Winner</th>
-                            <th>Total Moves</th>
-                            <th>Game Time</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {gameHistory.map((game) => (
-                            <tr key={game.id}>
-                                <td>{game.redPlayer.displayName}</td>
-                                <td>{game.blackPlayer.displayName}</td>
-                                <td>{game.result}</td>
-                                <td>{game.winner ? game.winner.displayName : "---"}</td>
-                                <td>{game.totalMoves}</td>
-                                <td>
-                                    {game.startTime && game.endTime
-                                        ? `${Math.round(
-                                            (new Date(game.endTime) - new Date(game.startTime)) / 1000
-                                        )} sec`
-                                        : "-"}
-                                </td>
+                    <>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Red Player</th>
+                                <th>Black Player</th>
+                                <th>Result</th>
+                                <th>Winner</th>
+                                <th>Total Moves</th>
+                                <th>Game Time</th>
                             </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            {gameHistory
+                                .slice(pageNum * pageSize, (pageNum + 1) * pageSize)
+                                .map((game) => (
+                                    <tr key={game.id}>
+                                        <td>{game.redPlayer.displayName}</td>
+                                        <td>{game.blackPlayer.displayName}</td>
+                                        <td>{game.result}</td>
+                                        <td>{game.winner ? game.winner.displayName : "---"}</td>
+                                        <td>{game.totalMoves}</td>
+                                        <td>
+                                            {game.startTime && game.endTime
+                                                ? `${Math.round(
+                                                    (new Date(game.endTime) - new Date(game.startTime)) / 1000
+                                                )} sec`
+                                                : "-"}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        {/* Pagination Controls */}
+                        <div className={styles.pagination}>
+                            <Button
+                                onClick={() => setPageNum((prev) => Math.max(prev - 1, 0))}
+                                disabled={pageNum === 0}
+                                children="Prev"
+                            />
+                            <span className={styles.pageInfo}>
+                    Page {pageNum + 1} of {Math.ceil(gameHistory.length / pageSize)}
+                </span>
+                            <Button
+                                onClick={() =>
+                                    setPageNum((prev) =>
+                                        Math.min(prev + 1, Math.ceil(gameHistory.length / pageSize) - 1)
+                                    )
+                                }
+                                disabled={pageNum + 1 >= Math.ceil(gameHistory.length / pageSize)}
+                                children="Next"
+                            />
+                        </div>
+                    </>
                 )}
             </div>
         </div>

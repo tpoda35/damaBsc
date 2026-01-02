@@ -3,13 +3,16 @@ import {useCallback, useEffect, useState} from "react";
 import ApiService from "../services/ApiService";
 import GameBoard from "../components/game/GameBoard.jsx";
 import {useSharedWebSocket} from "../contexts/WebSocketContext.jsx";
+import Loader from "../components/Loader.jsx";
+import {toast} from "react-toastify";
+
+import styles from './Game.module.css';
 
 const Game = () => {
     const { gameId } = useParams();
     const [game, setGame] = useState(null);
     const [selectedCell, setSelectedCell] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     const { isConnected, subscribe, sendMessage } = useSharedWebSocket();
 
@@ -21,7 +24,7 @@ const Game = () => {
             const data = await ApiService.get(`/games/${gameId}`);
             setGame(data);
         } catch (err) {
-            setError(err.message || "Failed to fetch game info");
+            toast.error(err.message || "Failed to fetch game info");
         } finally {
             setLoading(false);
         }
@@ -235,12 +238,11 @@ const Game = () => {
         }
     }, [game, gameId]);
 
-    if (loading) return <p>Loading game...</p>;
-    if (error) return <p>{error}</p>;
+    if (loading) return <Loader />;
     if (!game) return null;
 
     return (
-        <div>
+        <div className={styles.mainContainer}>
             <h2>
                 Game #{game.id} — You are{" "}
                 <span>{game.playerColor.toLowerCase()}</span>
