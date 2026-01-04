@@ -217,6 +217,10 @@ public class GameService implements IGameService {
                 ? game.getBlackPlayer()
                 : game.getRedPlayer();
 
+        PieceColor winnerColor = (pieceColor == PieceColor.RED)
+                ? PieceColor.BLACK
+                : PieceColor.RED;
+
         GameResult result = (pieceColor == PieceColor.RED)
                 ? GameResult.RED_FORFEIT
                 : GameResult.BLACK_FORFEIT;
@@ -230,6 +234,7 @@ public class GameService implements IGameService {
 
         return EventMapper.createGameForfeitEvent(
                 winner.getDisplayName(),
+                winnerColor,
                 result,
                 "Game forfeited"
         );

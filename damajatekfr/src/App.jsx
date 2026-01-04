@@ -12,6 +12,7 @@ import {useEffect} from "react";
 import Game from "./pages/Game.jsx";
 import Profile from "./pages/Profile.jsx";
 import {Bounce, ToastContainer} from "react-toastify";
+import GameEnded from "./pages/GameEnded.jsx";
 
 function App() {
     const { user } = useSharedAuth();
@@ -69,6 +70,7 @@ function App() {
                         <Route path="/rooms" element={<Rooms />} />
                         <Route path="/rooms/:roomId" element={<Room />} />
                         <Route path="/games/:gameId" element={<Game />} />
+                        <Route path="/game-ended" element={<GameEnded />} />
                     </Route>
 
                     <Route path="/login" element={<Login />} />

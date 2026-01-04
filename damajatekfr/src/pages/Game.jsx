@@ -1,4 +1,4 @@
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {useCallback, useEffect, useState} from "react";
 import ApiService from "../services/ApiService";
 import GameBoard from "../components/game/GameBoard.jsx";
@@ -7,14 +7,30 @@ import Loader from "../components/Loader.jsx";
 import {toast} from "react-toastify";
 
 import styles from './Game.module.css';
+import Button from "../components/Button.jsx";
 
 const Game = () => {
     const { gameId } = useParams();
     const [game, setGame] = useState(null);
+    console.log('Game: ', game);
     const [selectedCell, setSelectedCell] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const navigate = useNavigate();
+
     const { isConnected, subscribe, sendMessage } = useSharedWebSocket();
+
+    useEffect(() => {
+        if (game?.winner) {
+            navigate("/game-ended", {
+                state: {
+                    winner: game.winner,
+                    playerColor: game.playerColor,
+                    gameId: game.id,
+                },
+            });
+        }
+    }, [game?.id, game?.winner, navigate]);
 
     const fetchGame = useCallback(async () => {
         if (!gameId) return;
@@ -111,13 +127,12 @@ const Game = () => {
                             }
 
                             case "GAME_OVER": {
-                                const { winnerName, winnerColor } = response;
+                                const { winnerName, winnerColor, gameResult } = response;
                                 console.log(`Game over! Winner: ${winnerName} (${winnerColor})`);
 
                                 updatedGame.currentTurn = null;
                                 updatedGame.allowedMoves = [];
-
-                                updatedGame.winner = { name: winnerName, color: winnerColor };
+                                updatedGame.winner = { name: winnerName, color: winnerColor, result: gameResult };
 
                                 setTimeout(() => {
                                     alert(`🏁 Game Over!\nWinner: ${winnerName} (${winnerColor})`);
@@ -141,13 +156,13 @@ const Game = () => {
                             }
 
                             case "GAME_FORFEIT": {
-                                const { winnerName, gameResult, message } = response;
+                                const { winnerName, winnerColor, gameResult, message } = response;
                                 console.log(`Game forfeited! Winner: ${winnerName}, Result: ${gameResult}`);
 
                                 // Stop the game — disable moves
                                 updatedGame.currentTurn = null;
                                 updatedGame.allowedMoves = [];
-                                updatedGame.winner = { name: winnerName, result: gameResult };
+                                updatedGame.winner = { name: winnerName, color: winnerColor, result: gameResult };
 
                                 setTimeout(() => {
                                     alert(`🏳️ Game Forfeit!\n${message || `${winnerName} wins by forfeit.`}`);
@@ -243,21 +258,34 @@ const Game = () => {
 
     return (
         <div className={styles.mainContainer}>
-            <h2>
-                Game #{game.id} — You are{" "}
-                <span>{game.playerColor.toLowerCase()}</span>
-            </h2>
-            <p>
-                Current turn:{" "}
-                <span>{game.currentTurn ? game.currentTurn.toLowerCase() : "—"}</span>
-            </p>
+            <div className={styles.header}>
+                <h2>
+                    You are{" "}
+                    <span
+                        className={`${styles.playerColor} ${styles[game.playerColor.toLowerCase()]}`}
+                    >
+                {game.playerColor.toLowerCase()}
+            </span>
+                </h2>
 
-            <button
-                onClick={handleForfeit}
-                disabled={!game.currentTurn || game.winner}
-            >
-                Forfeit
-            </button>
+                <p className={styles.turnInfo}>
+                    Current turn:{" "}
+                    <span
+                        className={`${styles.turnColor} ${
+                            game.currentTurn ? styles[game.currentTurn.toLowerCase()] : ""
+                        }`}
+                    >
+                {game.currentTurn ? game.currentTurn.toLowerCase() : "-"}
+            </span>
+                </p>
+
+                <Button
+                    className={styles.forfeitButton}
+                    onClick={handleForfeit}
+                    disabled={!game.currentTurn || game.winner}
+                    children="Forfeit"
+                />
+            </div>
 
             <GameBoard
                 board={game.board}

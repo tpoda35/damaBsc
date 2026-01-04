@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.GameWsAction;
+import org.dama.damajatek.enums.game.PieceColor;
 
 import static org.dama.damajatek.enums.game.GameWsAction.GAME_FORFEIT;
 
@@ -19,6 +20,7 @@ public class GameForfeitEvent implements IGameEvent {
     private GameWsAction action = GAME_FORFEIT;
 
     private String winnerName;
+    private PieceColor winnerColor;
     private GameResult gameResult;
     private String message;
 

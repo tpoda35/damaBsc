@@ -36,9 +36,10 @@ public class EventMapper {
                 .build();
     }
 
-    public static GameOverEvent createGameOverEvent(String winnerName, GameResult gameResult) {
+    public static GameOverEvent createGameOverEvent(String winnerName, PieceColor winnerColor, GameResult gameResult) {
         return GameOverEvent.builder()
                 .winnerName(winnerName)
+                .winnerColor(winnerColor)
                 .gameResult(gameResult)
                 .build();
     }
@@ -53,9 +54,10 @@ public class EventMapper {
                 .build();
     }
 
-    public static GameForfeitEvent createGameForfeitEvent(String winnerName, GameResult gameResult, String message) {
+    public static GameForfeitEvent createGameForfeitEvent(String winnerName, PieceColor winnerColor, GameResult gameResult, String message) {
         return GameForfeitEvent.builder()
                 .winnerName(winnerName)
+                .winnerColor(winnerColor)
                 .gameResult(gameResult)
                 .message(message)
                 .build();

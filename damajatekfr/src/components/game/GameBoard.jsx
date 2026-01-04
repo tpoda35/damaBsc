@@ -2,6 +2,11 @@ import React from "react";
 import BoardCell from "./BoardCell";
 import "./GameBoard.css";
 
+// TODO:
+// - css for the game part
+// - after game redirection
+// - game loading, stats menu, game messages
+
 const GameBoard = ({
                        board,
                        allowedMoves,

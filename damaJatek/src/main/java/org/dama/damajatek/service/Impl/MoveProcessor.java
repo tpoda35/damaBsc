@@ -5,6 +5,7 @@ import org.dama.damajatek.authentication.user.IAppUserCacheService;
 import org.dama.damajatek.dto.game.MoveResult;
 import org.dama.damajatek.dto.game.websocket.IGameEvent;
 import org.dama.damajatek.entity.Game;
+import org.dama.damajatek.entity.player.Player;
 import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.mapper.EventMapper;
@@ -68,8 +69,11 @@ public class MoveProcessor implements IMoveProcessor {
             if (game.getResult() == GameResult.DRAW) {
                 events.add(EventMapper.createGameDrawEvent(game.getDrawReason()));
             } else if (game.getWinner() != null) {
+                PieceColor winnerColor = getWinnerColor(game);
+
                 events.add(EventMapper.createGameOverEvent(
                         game.getWinner().getDisplayName(),
+                        winnerColor,
                         game.getResult()
                 ));
             } else {
@@ -91,4 +95,22 @@ public class MoveProcessor implements IMoveProcessor {
         return new MoveResult(events, nextTurn, gameOver);
     }
 
+    private PieceColor getWinnerColor(Game game) {
+        Player winner = game.getWinner();
+        if (winner == null) {
+            return null;
+        }
+
+        Long winnerId = winner.getId();
+
+        if (winnerId.equals(game.getRedPlayer().getId())) {
+            return PieceColor.RED;
+        }
+
+        if (winnerId.equals(game.getBlackPlayer().getId())) {
+            return PieceColor.BLACK;
+        }
+
+        throw new IllegalStateException("Winner is not part of the game");
+    }
 }

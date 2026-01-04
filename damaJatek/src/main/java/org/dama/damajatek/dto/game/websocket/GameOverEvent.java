@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.GameWsAction;
+import org.dama.damajatek.enums.game.PieceColor;
 
 import static org.dama.damajatek.enums.game.GameWsAction.GAME_OVER;
 
@@ -19,6 +20,7 @@ public class GameOverEvent implements IGameEvent {
     private GameWsAction action = GAME_OVER;
 
     private String winnerName;
+    private PieceColor winnerColor;
     private GameResult gameResult;
 
 }
