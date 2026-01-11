@@ -31,6 +31,7 @@ import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.service.IMoveProcessor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -61,6 +63,7 @@ public class GameService implements IGameService {
     private final IBotService botService;
     private final IMoveProcessor moveProcessor;
     private final IAppUserCacheService appUserCacheService;
+    private final TaskScheduler taskScheduler;
 
     // Rule source: https://www.okosjatek.hu/custom/okosjatek/image/data/srattached/1fb12c3bdc1f524812fb6c5043d11637_D%C3%A1ma%20j%C3%A1t%C3%A9kszab%C3%A1ly.pdf
     // The forced capture rule is used, so if there's a capture, then the user only gets that move.
@@ -183,7 +186,10 @@ public class GameService implements IGameService {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                botService.playBotTurnAsync(gameId);
+                taskScheduler.schedule(
+                        () -> botService.playBotTurnAsync(gameId),
+                        Instant.now().plusMillis(1800)
+                );
             }
         });
 

@@ -20,7 +20,6 @@
 .title {
     font-size: 2rem;
     font-weight: 800;
-    margin: 0;
 }
 
 .subtitle {
@@ -34,35 +33,9 @@
     font-weight: 600;
 }
 
-.white {
-    color: var(--text-dark);
-}
-
-.black {
-    color: var(--primary-dark);
-}
-
 .actions {
     display: flex;
     gap: 1rem;
     justify-content: center;
     margin-top: 2rem;
-}
-
-.actions button {
-    padding: 0.6rem 1.4rem;
-    border-radius: 10px;
-    border: none;
-    font-weight: 700;
-    cursor: pointer;
-    background: var(--grey-light);
-}
-
-.primary {
-    background: linear-gradient(
-            135deg,
-            var(--primary),
-            var(--primary-dark)
-    );
-    color: var(--white);
 }

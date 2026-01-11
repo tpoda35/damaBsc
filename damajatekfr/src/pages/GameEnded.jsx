@@ -1,22 +1,22 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./GameEnded.module.css";
+import Button from "../components/Button.jsx";
 
 export default function GameEnded() {
     const navigate = useNavigate();
     const { state } = useLocation();
-    console.log('State: ', state);
 
     if (!state) {
         navigate("/");
         return null;
     }
 
-    const { gameId, playerColor, winner } = state;
+    const { gameId, playerColor, winner, drawReason, draw } = state;
+
+    const isDraw = draw === true;
 
     const result = winner?.result;
     const opponentColor = playerColor === "RED" ? "BLACK" : "RED";
-
-    const isDraw = result === "DRAW";
 
     const playerWon =
         result === `${playerColor}_WIN` ||
@@ -34,8 +34,9 @@ export default function GameEnded() {
     const subtitle = playerForfeited
         ? "You forfeited the game"
         : isDraw
-            ? "No winner this time"
+            ? drawReason ?? "No winner this time"
             : `Winner: ${winner.name}`;
+
 
     return (
         <div className={styles.container}>
@@ -50,18 +51,10 @@ export default function GameEnded() {
                     {subtitle}
                 </p>
 
-                <div className={styles.actions}>
-                    <button onClick={() => navigate("/")}>
-                        Back to Lobby
-                    </button>
-
-                    <button
-                        className={styles.primary}
-                        onClick={() => navigate("/new-game")}
-                    >
-                        New Game
-                    </button>
-                </div>
+                <Button
+                    onClick={() => navigate("/")}
+                    children="Back to Lobby"
+                />
             </div>
         </div>
     );

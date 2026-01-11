@@ -1,5 +1,6 @@
 import React from "react";
 import Piece from "./Piece";
+import { AnimatePresence } from "framer-motion";
 import "./GameBoard.css";
 
 const BoardCell = ({
@@ -24,9 +25,17 @@ const BoardCell = ({
     return (
         <div
             className={cellClass}
-            onClick={() => onClick(row, col)} // always call onClick
+            onClick={() => onClick(row, col)}
         >
-            {piece && <Piece color={piece.color} isKing={piece.king} />}
+            <AnimatePresence mode="popLayout">
+                {piece && (
+                    <Piece
+                        color={piece.color}
+                        isKing={piece.king}
+                        pieceId={piece.id}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 };

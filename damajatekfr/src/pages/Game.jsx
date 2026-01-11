@@ -12,7 +12,6 @@ import Button from "../components/Button.jsx";
 const Game = () => {
     const { gameId } = useParams();
     const [game, setGame] = useState(null);
-    console.log('Game: ', game);
     const [selectedCell, setSelectedCell] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -20,17 +19,40 @@ const Game = () => {
 
     const { isConnected, subscribe, sendMessage } = useSharedWebSocket();
 
+    const initializePieceIds = (board) => {
+        let redCount = 0;
+        let blackCount = 0;
+
+        return {
+            ...board,
+            grid: board.grid.map(row =>
+                row.map(piece => {
+                    if (!piece) return null;
+                    if (piece.id) return piece;
+
+                    const count = piece.color.toLowerCase() === 'red' ? redCount++ : blackCount++;
+                    return {
+                        ...piece,
+                        id: `${piece.color.toLowerCase()}-${count}`
+                    };
+                })
+            )
+        };
+    };
+
     useEffect(() => {
-        if (game?.winner) {
+        if (game?.winner || game?.draw) {
             navigate("/game-ended", {
                 state: {
                     winner: game.winner,
                     playerColor: game.playerColor,
                     gameId: game.id,
+                    drawReason: game.drawReason,
+                    draw: game.draw
                 },
             });
         }
-    }, [game?.id, game?.winner, navigate]);
+    }, [game?.id, game?.winner, game?.draw, navigate]);
 
     const fetchGame = useCallback(async () => {
         if (!gameId) return;
@@ -38,7 +60,10 @@ const Game = () => {
         setLoading(true);
         try {
             const data = await ApiService.get(`/games/${gameId}`);
-            setGame(data);
+            setGame({
+                ...data,
+                board: initializePieceIds(data.board)
+            });
         } catch (err) {
             toast.error(err.message || "Failed to fetch game info");
         } finally {
@@ -79,41 +104,199 @@ const Game = () => {
                             case "MOVE_MADE": {
                                 const { move } = response;
                                 console.log("MOVE_MADE response: ", response);
-                                updatedGame.board.grid[move.toRow][move.toCol] =
-                                    updatedGame.board.grid[move.fromRow][move.fromCol];
+
+                                // CRITICAL: Preserve the piece ID when moving
+                                updatedGame.board.grid[move.toRow][move.toCol] = updatedGame.board.grid[move.fromRow][move.fromCol];
                                 updatedGame.board.grid[move.fromRow][move.fromCol] = null;
                                 break;
                             }
 
                             case "CAPTURE_MADE": {
                                 const { move } = response;
-                                console.log("CAPTURE_MADE response: ", response);
+                                console.log("CAPTURE_MADE response:", move);
 
-                                // Move the capturing piece
-                                updatedGame.board.grid[move.toRow][move.toCol] =
-                                    updatedGame.board.grid[move.fromRow][move.fromCol];
+                                // Get the moving piece
+                                const movingPiece = updatedGame.board.grid[move.fromRow][move.fromCol];
+
+                                if (!movingPiece) {
+                                    console.error("No piece found at capture start position");
+                                    return prevGame;
+                                }
+
+                                // Store animation data
+                                const animationId = `capture-${Date.now()}`;
+
+                                // IMPORTANT: Don't remove captured pieces immediately - remove them during animation
+                                // Store captured pieces for removal during animation
+                                const capturedPositions = move.capturedPieces || [];
+
+                                // Clear the starting position
                                 updatedGame.board.grid[move.fromRow][move.fromCol] = null;
 
-                                // Remove all captured pieces
-                                if (move.capturedPieces && move.capturedPieces.length > 0) {
-                                    move.capturedPieces.forEach(([row, col]) => {
-                                        updatedGame.board.grid[row][col] = null;
+                                // Build complete animation path
+                                const animationPath = [];
+
+                                // Add all intermediate jumps from move.path
+                                if (move.path && move.path.length > 0) {
+                                    // For each intermediate position, we'll animate through it
+                                    move.path.forEach(([row, col], index) => {
+                                        animationPath.push({
+                                            row,
+                                            col,
+                                            duration: 300,
+                                            pause: index < move.path.length - 1 ? 500 : 0,
+                                            removeCapturedAtThisStep: index // Remove captured pieces at each jump step
+                                        });
                                     });
                                 }
 
-                                break;
+                                // Always add final destination
+                                animationPath.push({
+                                    row: move.toRow,
+                                    col: move.toCol,
+                                    duration: 300,
+                                    pause: 0,
+                                    removeCapturedAtThisStep: move.path ? move.path.length : 0
+                                });
+
+                                // Create animation state
+                                updatedGame.animation = {
+                                    type: 'CAPTURE',
+                                    pieceId: movingPiece.id,
+                                    animationId: animationId,
+                                    path: animationPath,
+                                    currentStep: 0,
+                                    piece: movingPiece,
+                                    finalPosition: {
+                                        row: move.toRow,
+                                        col: move.toCol,
+                                        piece: movingPiece
+                                    },
+                                    capturedPositions: capturedPositions,
+                                    removedCapturedPieces: [] // Track which pieces we've already removed
+                                };
+
+                                // Start animation sequence
+                                const animateStep = (stepIndex) => {
+                                    if (stepIndex >= animationPath.length) {
+                                        // Animation complete - place piece at final position
+                                        setTimeout(() => {
+                                            setGame(prev => {
+                                                if (!prev || !prev.animation || prev.animation.animationId !== animationId) {
+                                                    return prev;
+                                                }
+
+                                                const newGrid = prev.board.grid.map(row => [...row]);
+                                                const { row: finalRow, col: finalCol, piece } = prev.animation.finalPosition;
+
+                                                // Remove any remaining captured pieces
+                                                prev.animation.capturedPositions.forEach(([r, c]) => {
+                                                    newGrid[r][c] = null;
+                                                });
+
+                                                // Place the piece at final position
+                                                newGrid[finalRow][finalCol] = piece;
+
+                                                return {
+                                                    ...prev,
+                                                    board: { ...prev.board, grid: newGrid },
+                                                    animation: null
+                                                };
+                                            });
+                                        }, 100);
+
+                                        return;
+                                    }
+
+                                    // Update current step in animation
+                                    setTimeout(() => {
+                                        setGame(prev => {
+                                            if (!prev || !prev.animation || prev.animation.animationId !== animationId) {
+                                                return prev;
+                                            }
+
+                                            // Move to next step
+                                            const newAnimation = {
+                                                ...prev.animation,
+                                                currentStep: stepIndex
+                                            };
+
+                                            // Temporarily place piece at current step position for Framer Motion
+                                            const newGrid = prev.board.grid.map(row => [...row]);
+                                            const currentPos = animationPath[stepIndex];
+                                            newGrid[currentPos.row][currentPos.col] = prev.animation.piece;
+
+                                            // Remove from previous position
+                                            if (stepIndex > 0) {
+                                                const prevPos = animationPath[stepIndex - 1];
+                                                newGrid[prevPos.row][prevPos.col] = null;
+                                            }
+
+                                            // Remove captured pieces at this step if needed
+                                            const removeIndex = currentPos.removeCapturedAtThisStep;
+                                            if (removeIndex >= 0 && removeIndex < prev.animation.capturedPositions.length) {
+                                                const [r, c] = prev.animation.capturedPositions[removeIndex];
+                                                newGrid[r][c] = null;
+                                                newAnimation.removedCapturedPieces = [...prev.animation.removedCapturedPieces, [r, c]];
+                                            }
+
+                                            return {
+                                                ...prev,
+                                                board: { ...prev.board, grid: newGrid },
+                                                animation: newAnimation
+                                            };
+                                        });
+
+                                        // Schedule pause at this position (except for final position)
+                                        const currentStep = animationPath[stepIndex];
+                                        const pauseTime = currentStep.pause;
+
+                                        // Move to next step after pause
+                                        setTimeout(() => {
+                                            animateStep(stepIndex + 1);
+                                        }, pauseTime);
+
+                                    }, stepIndex === 0 ? 0 : animationPath[stepIndex - 1].duration);
+                                };
+
+                                // Start animation
+                                animateStep(0);
+
+                                return updatedGame;
                             }
+
 
                             case "PROMOTED_PIECE": {
                                 const { row, col, pieceColor } = response;
                                 console.log(`PROMOTED_PIECE: (${row}, ${col}) for ${pieceColor}`);
 
-                                const piece = updatedGame.board.grid[row][col];
-                                if (piece && piece.color === pieceColor) {
-                                    updatedGame.board.grid[row][col] = {
-                                        ...piece,
+                                // Check if this is the piece that was just captured/animated
+                                if (updatedGame.animation &&
+                                    updatedGame.animation.type === 'CAPTURE' &&
+                                    updatedGame.animation.finalPosition.row === row &&
+                                    updatedGame.animation.finalPosition.col === col) {
+
+                                    // Update the piece in the animation state
+                                    updatedGame.animation.piece = {
+                                        ...updatedGame.animation.piece,
                                         king: true
                                     };
+                                    updatedGame.animation.finalPosition.piece = {
+                                        ...updatedGame.animation.finalPosition.piece,
+                                        king: true
+                                    };
+                                } else {
+                                    // Normal promotion (not part of a capture animation)
+                                    const piece = updatedGame.board.grid[row][col];
+                                    if (piece && piece.color === pieceColor) {
+                                        // CRITICAL: Preserve the piece ID when promoting
+                                        updatedGame.board.grid[row][col] = {
+                                            ...piece,
+                                            king: true
+                                        };
+                                    } else {
+                                        console.warn(`No piece found at (${row}, ${col}) for promotion, or color mismatch`);
+                                    }
                                 }
                                 break;
                             }
@@ -134,39 +317,29 @@ const Game = () => {
                                 updatedGame.allowedMoves = [];
                                 updatedGame.winner = { name: winnerName, color: winnerColor, result: gameResult };
 
-                                setTimeout(() => {
-                                    alert(`🏁 Game Over!\nWinner: ${winnerName} (${winnerColor})`);
-                                }, 100);
-
                                 break;
                             }
 
                             case "GAME_DRAW": {
                                 const { drawReason } = response;
+                                console.log(`Game draw! Draw reason: ${drawReason}`);
 
                                 updatedGame.currentTurn = null;
                                 updatedGame.allowedMoves = [];
                                 updatedGame.winner = null;
-
-                                setTimeout(() => {
-                                    alert(`🤝 Game Draw!\nReason: ${drawReason}`);
-                                }, 100);
+                                updatedGame.drawReason = drawReason;
+                                updatedGame.draw = true;
 
                                 break;
                             }
 
                             case "GAME_FORFEIT": {
-                                const { winnerName, winnerColor, gameResult, message } = response;
+                                const { winnerName, winnerColor, gameResult } = response;
                                 console.log(`Game forfeited! Winner: ${winnerName}, Result: ${gameResult}`);
 
-                                // Stop the game — disable moves
                                 updatedGame.currentTurn = null;
                                 updatedGame.allowedMoves = [];
                                 updatedGame.winner = { name: winnerName, color: winnerColor, result: gameResult };
-
-                                setTimeout(() => {
-                                    alert(`🏳️ Game Forfeit!\n${message || `${winnerName} wins by forfeit.`}`);
-                                }, 100);
 
                                 break;
                             }
@@ -226,7 +399,6 @@ const Game = () => {
                 return;
             }
 
-            // Prepare MoveDto
             const moveDto = {
                 fromRow: selectedCell.row,
                 fromCol: selectedCell.col,
@@ -249,7 +421,7 @@ const Game = () => {
                 pieceColor: game.playerColor,
             });
         } catch {
-            alert("Failed to forfeit the game. Please try again.");
+            toast.error("Failed to forfeit the game. Please try again.");
         }
     }, [game, gameId]);
 
