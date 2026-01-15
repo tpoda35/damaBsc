@@ -1,18 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 html, body, #root {
   height: 100%;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   font-family: 'Inter', sans-serif;
-  background-color: var(--grey-light);
-
-  /*color-scheme: light dark;  */
   color-scheme: light;
 
   font-synthesis: none;
@@ -20,11 +22,76 @@ html, body, #root {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --primary: #F47C26;
-  --primary-dark: #D3621F;
-  --primary-light: #F9B27C;
-
+  /* Base colors */
   --white: #FFFFFF;
-  --grey-light: #F2F2F2;
-  --text-dark: #1E1E1E;
+  --black: #000000;
+
+  /* Grays */
+  --gray-50:  #F8F9FA;
+  --gray-100: #E9ECEF;
+  --gray-200: #DEE2E6;
+  --gray-300: #CED4DA;
+  --gray-400: #ADB5BD;
+  --gray-500: #6C757D;
+  --gray-600: #495057;
+  --gray-700: #343A40;
+  --gray-800: #212529;
+
+  /* Primary */
+  --primary: #2F9E44;
+
+  /* Status colors */
+  --success: #2F9E44;
+  --warning: #F59F00;
+  --error:   #FA5252;
+  --info:    #339AF0;
+
+  /* Backgrounds */
+  --bg-page: var(--gray-50);
+  --bg-surface: var(--white);
+  --bg-muted: var(--gray-100);
+  --bg-hover: var(--gray-200);
+  --bg-disabled: var(--gray-100);
+
+  /* Borders */
+  --border-light: var(--gray-200);
+  --border-default: var(--gray-300);
+  --border-strong: var(--gray-400);
+  --border-focus: var(--primary);
+
+  /* Text */
+  --text-primary: var(--gray-800);
+  --text-secondary: var(--gray-600);
+  --text-muted: var(--gray-500);
+  --text-disabled: var(--gray-400);
+  --text-inverse: var(--white);
+  --text-link: var(--primary);
+
+  /* Focus & selection */
+  --focus-ring: rgba(47, 158, 68, 0.35);
+
+  /* Primary button */
+  --btn-primary-bg: var(--primary);
+  --btn-primary-text: var(--text-inverse);
+  --btn-primary-hover: #2B8A3E;
+  --btn-primary-light: #8CE99A;
+
+  /* Secondary / light button */
+  --btn-light-bg: var(--bg-surface);
+  --btn-light-text: var(--primary);
+  --btn-light-hover: var(--bg-hover);
+
+  /* Disabled button */
+  --btn-disabled-bg: var(--bg-disabled);
+  --btn-disabled-text: var(--text-disabled);
+
+  /* Status buttons */
+  --btn-success-bg: var(--success);
+  --btn-success-text: var(--text-inverse);
+  --btn-warning-bg: var(--warning);
+  --btn-warning-text: var(--text-inverse);
+  --btn-error-bg: var(--error);
+  --btn-error-text: var(--text-inverse);
+  --btn-info-bg: var(--info);
+  --btn-info-text: var(--text-inverse);
 }

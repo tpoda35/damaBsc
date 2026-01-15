@@ -15,6 +15,8 @@ const Game = () => {
     const [selectedCell, setSelectedCell] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    console.log("ReRender Game - ", gameId);
+
     const navigate = useNavigate();
 
     const { isConnected, subscribe, sendMessage } = useSharedWebSocket();
@@ -366,52 +368,50 @@ const Game = () => {
         return () => unsub();
     }, [isConnected, gameId, subscribe]);
 
-    const handleCellClick = (row, col) => {
-        if (!game) {
-            console.log("No game state available");
-            return;
-        }
+    const handleCellClick = useCallback(
+        (row, col) => {
+            if (!game) return;
 
-        const cellPiece = game.board.grid[row][col];
+            const cellPiece = game.board.grid[row][col];
 
-        if (!selectedCell && cellPiece && cellPiece.color === game.playerColor) {
-            setSelectedCell({ row, col });
-            return;
-        }
-
-        if (selectedCell) {
-            if (game.currentTurn !== game.playerColor) {
-                setSelectedCell(null);
+            if (!selectedCell && cellPiece && cellPiece.color === game.playerColor) {
+                setSelectedCell({ row, col });
                 return;
             }
 
-            const isMoveAllowed = game.allowedMoves.some(
-                (move) => {
-                    return move.fromRow === selectedCell.row &&
+            if (selectedCell) {
+                if (game.currentTurn !== game.playerColor) {
+                    setSelectedCell(null);
+                    return;
+                }
+
+                const isMoveAllowed = game.allowedMoves.some(
+                    move =>
+                        move.fromRow === selectedCell.row &&
                         move.fromCol === selectedCell.col &&
                         move.toRow === row &&
-                        move.toCol === col;
+                        move.toCol === col
+                );
+
+                if (!isMoveAllowed) {
+                    setSelectedCell(null);
+                    return;
                 }
-            );
 
-            if (!isMoveAllowed) {
+                const moveDto = {
+                    fromRow: selectedCell.row,
+                    fromCol: selectedCell.col,
+                    toRow: row,
+                    toCol: col,
+                };
+
+                sendMessage(`/app/games/${gameId}/move`, JSON.stringify(moveDto));
                 setSelectedCell(null);
-                return;
             }
+        },
+        [game, selectedCell, sendMessage, gameId]
+    );
 
-            const moveDto = {
-                fromRow: selectedCell.row,
-                fromCol: selectedCell.col,
-                toRow: row,
-                toCol: col,
-            };
-
-            const destination = `/app/games/${gameId}/move`;
-            sendMessage(destination, JSON.stringify(moveDto));
-
-            setSelectedCell(null);
-        }
-    };
 
     const handleForfeit = useCallback(async () => {
         if (!game) return;

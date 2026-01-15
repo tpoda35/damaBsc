@@ -6,31 +6,56 @@
     cursor: pointer;
     transition: 0.2s;
     white-space: nowrap;
+    font-family: inherit;
 }
 
 .fullWidth {
     width: 100%;
 }
 
+/* Variants */
 .primary {
-    background-color: var(--primary);
-    color: var(--white);
+    background-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
 }
 
 .primary:hover:not(:disabled) {
-    background-color: var(--primary-dark);
+    background-color: var(--btn-primary-hover);
 }
 
 .light {
-    background-color: var(--primary-light);
-    color: var(--white);
+    background-color: var(--btn-light-bg);
+    color: var(--btn-light-text);
 }
 
 .light:hover:not(:disabled) {
-    background-color: var(--primary);
+    background-color: var(--btn-light-hover);
 }
 
+/* Disabled */
 .button:disabled {
-    background-color: #ccc;
+    background-color: var(--btn-disabled-bg);
+    color: var(--btn-disabled-text);
     cursor: not-allowed;
+}
+
+/* Status buttons */
+.success {
+    background-color: var(--btn-success-bg);
+    color: var(--btn-success-text);
+}
+
+.warning {
+    background-color: var(--btn-warning-bg);
+    color: var(--btn-warning-text);
+}
+
+.error {
+    background-color: var(--btn-error-bg);
+    color: var(--btn-error-text);
+}
+
+.info {
+    background-color: var(--btn-info-bg);
+    color: var(--btn-info-text);
 }

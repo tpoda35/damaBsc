@@ -1,0 +1,102 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-default);
+    border-radius: 20px;
+
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.navbar-logo-btn {
+    font-family: "Dancing Script", cursive;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 2.2rem;
+
+    text-decoration: none;
+    user-select: none;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--text-primary);
+}
+
+/* Button */
+.navbar-button-container {
+    display: flex;
+}
+
+.navbar-button {
+    padding: 1rem 1rem;
+    text-decoration: none;
+    font: inherit;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    user-select: none;
+
+    color: var(--text-secondary);
+
+    transition: all .2s;
+}
+
+.navbar-button:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.navbar-button-active {
+    background-color: var(--bg-hover);
+    color: var(--primary);
+}
+
+.navbar-button-active:hover {
+    background-color: var(--bg-hover);
+    color: var(--primary);
+}
+
+/* Dropdown */
+.navbar-dropdown {
+    position: relative;
+}
+
+.navbar-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--bg-muted);
+    border-radius: 6px;
+    padding: 6px 0;
+    min-width: 160px;
+    z-index: 1000;
+}
+
+.navbar-dropdown-item {
+    width: 100%;
+    padding: 10px 14px;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    transition: all .2s;
+}
+
+.navbar-dropdown-item:hover {
+    background: var(--btn-light-hover);
+}
+

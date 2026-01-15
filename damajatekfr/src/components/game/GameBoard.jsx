@@ -9,6 +9,8 @@ const GameBoard = ({
                        onCellClick,
                        playerColor,
                    }) => {
+    console.log("ReRender GameBoard");
+
     const movesForSelected = selectedCell
         ? allowedMoves.filter(
             (m) =>

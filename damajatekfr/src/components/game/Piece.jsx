@@ -1,30 +1,35 @@
-import React from "react";
-import {motion} from "framer-motion";
+import React, { memo } from "react";
+import { motion } from "framer-motion";
 import "./GameBoard.css";
-import './Piece.css';
+import "./Piece.css";
 
 const Piece = ({ color, isKing, pieceId }) => {
-    const pieceClass = `piece ${color.toLowerCase()} ${isKing ? "king" : ""}`;
+    const pieceClass = `piece ${color.toLowerCase()} ${
+        isKing ? "king" : ""
+    }`;
 
-    // Use pieceId to track the same piece across moves
-    // This ensures smooth sliding even when position changes
+    console.log("ReRender Piece - ", pieceId);
+
     return (
         <motion.div
             layoutId={`piece-${pieceId}`}
             className={pieceClass}
-            initial={{ scale: 1, opacity: 0.5 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 1, opacity: 0.5 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{
                 layout: {
                     type: "spring",
                     stiffness: 200,
                     damping: 30,
-                    mass: 0.8
-                }
+                    mass: 0.8,
+                },
+                opacity: {
+                    duration: 0.2,
+                },
             }}
         />
     );
 };
 
-export default Piece;
+export default memo(Piece);

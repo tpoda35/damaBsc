@@ -1,0 +1,115 @@
+.profile {
+    padding: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.profile-default-data {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1rem 0;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-default);
+}
+
+/* User card */
+.profile-card {
+    background-color: var(--bg-page);
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.profile-card h3 {
+    margin-top: .75rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    padding-bottom: 0.25rem;
+    text-align: center;
+}
+
+.profile-card p {
+    margin: 0.3rem 0;
+}
+
+.profile-default-data p {
+    flex: 1 1 45%;
+    margin: 0;
+}
+
+/* Stats list */
+.profile-stats-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: .75rem;
+}
+
+.profile-stats-list li {
+    background: var(--bg-disabled);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    flex: 1 1 120px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+/* Game history */
+.profile-game-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.profile-game-table th,
+.profile-game-table td {
+    text-align: center;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid var(--border-default);
+}
+
+.profile-game-table th {
+    background: var(--bg-disabled);
+}
+
+.profile-game-table tr:hover td {
+    background: #f9f9f9;
+}
+
+.profile-no-games {
+    font-style: italic;
+    color: #777;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+/* Pagination */
+.profile-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.profile-page-info {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #555;
+}
+
+/*@media screen and (max-width: 768px) {*/
+/*    .statsList {*/
+/*        flex-direction: column;*/
+/*    }*/
+
+/*    .gameTable th, .gameTable td {*/
+/*        font-size: 0.85rem;*/
+/*        padding: 0.5rem 0.25rem;*/
+/*    }*/
+/*}*/

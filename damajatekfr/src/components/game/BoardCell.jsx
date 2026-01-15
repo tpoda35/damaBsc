@@ -12,6 +12,8 @@ const BoardCell = ({
                        isHighlighted,
                        canSelect,
                    }) => {
+    console.log("ReRender BoardCell");
+
     const isDark = (row + col) % 2 === 1;
 
     const cellClass = `
@@ -27,12 +29,13 @@ const BoardCell = ({
             className={cellClass}
             onClick={() => onClick(row, col)}
         >
-            <AnimatePresence mode="popLayout">
+            <AnimatePresence>
                 {piece && (
                     <Piece
+                        key={`piece-${piece.id}`} // Use piece.id as key, not position
                         color={piece.color}
                         isKing={piece.king}
-                        pieceId={piece.id}
+                        pieceId={piece.id} // Pass the unique piece ID
                     />
                 )}
             </AnimatePresence>
@@ -40,4 +43,4 @@ const BoardCell = ({
     );
 };
 
-export default BoardCell;
+export default React.memo(BoardCell);

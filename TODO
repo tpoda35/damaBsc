@@ -1,0 +1,17 @@
+- Front-end redesign
+- Dáma szabályok oldal
+- Game loading animáció
+- Statok game végén
+- Room chat
+- Profilkép
+- Leütött dáma bábu számláló
+- Auth baj, unauth kéréseknél nem jó a handling
+- WebSocket room list
+- Room kidobás és tiltás
+- Emote game közben
+
+Front-end redesign haladás:
+    - Index kész
+    - Navbar kész
+    - Home kész
+    - Profile kész

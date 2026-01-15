@@ -1,0 +1,23 @@
+.scene {
+    position: relative;
+    width: 320px;
+    height: 280px;
+    margin: 0 auto 25px;
+    perspective: 800px;
+}
+
+.piece {
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    will-change: transform, opacity;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+}
+
+.black {
+    background: radial-gradient(circle at top left, #555, #111 75%);
+}
+.red {
+    background: radial-gradient(circle at top left, #ff5c5c, #a80000 70%);
+}
