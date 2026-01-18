@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dama.damajatek.entity.player.Player;
+import org.dama.damajatek.entity.room.Room;
 import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.GameStatus;
 import org.dama.damajatek.enums.game.PieceColor;

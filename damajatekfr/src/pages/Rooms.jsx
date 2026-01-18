@@ -100,9 +100,7 @@ const Rooms = () => {
                         {roomList.map((room) => (
                             <li className={styles.roomCard} key={room.id}>
                                 <div>
-                                    <strong className={styles.roomTitle}>
-                                        {room.name || `Room ${room.id}`}
-                                    </strong>
+                                    <strong>{room.name || `Room ${room.id}`}</strong>
                                     <div className={styles.roomDesc}>
                                         {room.description || "No description"}
                                     </div>
@@ -128,7 +126,6 @@ const Rooms = () => {
                         ))}
                     </ul>
 
-                    {/* Pagination */}
                     <div className={styles.pagination}>
                         <Button
                             onClick={() => setPageNum((prev) => Math.max(prev - 1, 0))}

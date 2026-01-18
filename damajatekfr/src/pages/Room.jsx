@@ -6,6 +6,7 @@ import styles from './Room.module.css';
 import Button from "../components/Button.jsx";
 import Loader from "../components/Loader.jsx";
 import {withToastError} from "../utils/withToastError.js";
+import RoomChat from "../components/RoomChat.jsx";
 
 const Room = () => {
     const { roomId } = useParams();
@@ -281,6 +282,15 @@ const Room = () => {
                     </div>
                 </div>
             </div>
+
+            <RoomChat
+                currentUser={
+                    isHost
+                        ? host?.displayName
+                        : opponent?.displayName || "You"
+                }
+                roomId={roomId}
+            />
 
             <div className={styles.actions}>
                 <Button

@@ -1,4 +1,4 @@
-package org.dama.damajatek.dto.game;
+package org.dama.damajatek.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

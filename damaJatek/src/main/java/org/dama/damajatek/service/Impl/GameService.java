@@ -11,7 +11,7 @@ import org.dama.damajatek.dto.game.GameInfoDto;
 import org.dama.damajatek.dto.game.MoveResult;
 import org.dama.damajatek.dto.game.websocket.IGameEvent;
 import org.dama.damajatek.entity.Game;
-import org.dama.damajatek.entity.Room;
+import org.dama.damajatek.entity.room.Room;
 import org.dama.damajatek.entity.player.BotPlayer;
 import org.dama.damajatek.entity.player.Player;
 import org.dama.damajatek.enums.game.GameResult;

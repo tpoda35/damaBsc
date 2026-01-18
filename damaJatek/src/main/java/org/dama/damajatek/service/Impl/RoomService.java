@@ -12,7 +12,7 @@ import org.dama.damajatek.dto.room.RoomCreateDto;
 import org.dama.damajatek.dto.room.RoomInfoDtoV1;
 import org.dama.damajatek.dto.room.RoomInfoDtoV2;
 import org.dama.damajatek.entity.Game;
-import org.dama.damajatek.entity.Room;
+import org.dama.damajatek.entity.room.Room;
 import org.dama.damajatek.entity.player.Player;
 import org.dama.damajatek.exception.PasswordMismatchException;
 import org.dama.damajatek.exception.auth.AccessDeniedException;

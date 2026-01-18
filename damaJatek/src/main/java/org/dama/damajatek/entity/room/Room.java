@@ -1,4 +1,4 @@
-package org.dama.damajatek.entity;
+package org.dama.damajatek.entity.room;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -6,8 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.enums.room.ReadyStatus;
 import org.dama.damajatek.authentication.user.AppUser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.dama.damajatek.enums.room.ReadyStatus.NOT_READY;
 import static org.dama.damajatek.enums.room.ReadyStatus.READY;
@@ -58,6 +62,10 @@ public class Room {
 
     @OneToOne(mappedBy = "room")
     private Game game;
+
+    // Chat part
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatMessage> chatMessages = new ArrayList<>();
 
     @Version
     private Long version;

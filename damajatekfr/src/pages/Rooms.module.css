@@ -19,7 +19,7 @@
 .empty {
     text-align: center;
     padding: 40px;
-    background: var(--grey-light);
+    background: var(--bg-muted);
     border-radius: 12px;
     font-size: 0.95rem;
 }
@@ -30,19 +30,19 @@
 }
 
 .roomCard {
-    background: var(--white);
+    background: var(--bg-page);
     border-radius: 14px;
     padding: 16px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .roomDesc {
     margin: 0;
     font-size: 0.9rem;
-    color: #555;
+    color: var(--text-secondary);
 }
 
 .roomMeta {
@@ -54,12 +54,12 @@
 .infoBox {
     font-size: 0.85rem;
     font-weight: 500;
-    background: var(--grey-light);
+    background: var(--bg-disabled);
     padding: 6px 12px;
     border-radius: 999px;
 }
 
-.profile-pagination {
+.pagination {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -70,5 +70,4 @@
 .pageInfo {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #333;
 }

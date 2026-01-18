@@ -22,7 +22,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
                 </button>
 
                 {title && <h2 className={styles.title}>{title}</h2>}
-                <div>{children}</div>
+                <div className={styles.modalContainer}>{children}</div>
             </div>
         </div>
     );

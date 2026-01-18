@@ -5,7 +5,7 @@ import org.dama.damajatek.dto.appUser.AppUserGameDto;
 import org.dama.damajatek.dto.room.RoomCreateDto;
 import org.dama.damajatek.dto.room.RoomInfoDtoV1;
 import org.dama.damajatek.dto.room.RoomInfoDtoV2;
-import org.dama.damajatek.entity.Room;
+import org.dama.damajatek.entity.room.Room;
 import org.dama.damajatek.enums.room.ReadyStatus;
 
 public class RoomMapper {

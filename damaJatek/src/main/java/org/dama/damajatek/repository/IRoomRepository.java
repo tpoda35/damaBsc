@@ -1,7 +1,7 @@
 package org.dama.damajatek.repository;
 
 import org.dama.damajatek.authentication.user.AppUser;
-import org.dama.damajatek.entity.Room;
+import org.dama.damajatek.entity.room.Room;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
