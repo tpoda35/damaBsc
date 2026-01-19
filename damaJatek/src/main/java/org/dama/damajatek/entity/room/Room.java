@@ -63,7 +63,6 @@ public class Room {
     @OneToOne(mappedBy = "room")
     private Game game;
 
-    // Chat part
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatMessage> chatMessages = new ArrayList<>();
 

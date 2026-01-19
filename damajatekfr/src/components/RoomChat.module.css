@@ -25,27 +25,33 @@
 
 .chatMessage {
     max-width: 75%;
-    padding: 10px 12px;
-    border-radius: 10px;
+    padding: 10px 14px;
+    border-radius: 14px;
     font-size: 0.9rem;
     line-height: 1.4;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    position: relative;
 }
 
 .chatMessageSelf {
     align-self: flex-end;
     background: var(--primary);
     color: var(--white);
+    border-bottom-right-radius: 4px;
 }
 
 .chatMessageOther {
     align-self: flex-start;
-    background: #f2f2f2;
+    background: var(--bg-disabled);
     color: var(--text-primary);
+    border-bottom-left-radius: 4px;
 }
 
 .chatSender {
     display: block;
-    font-size: 0.9rem;
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-bottom: 4px;
 }
 
 .chatContent {

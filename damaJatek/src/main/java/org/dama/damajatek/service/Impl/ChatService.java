@@ -1,5 +1,6 @@
 package org.dama.damajatek.service.Impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
@@ -26,12 +27,12 @@ public class ChatService implements IChatService {
     private final IChatMessageRepository chatMessageRepository;
 
     @Override
+    @Transactional
     public ChatMessageResponseDto handleMessage(Long roomId, Principal principal, String content) {
         Authentication auth = (Authentication) principal;
         AppUser sender = (AppUser) auth.getPrincipal();
 
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(RoomNotFoundException::new);
+        Room room = findRoomByIdWithUsers(roomId);
 
         if (!isMember(room, sender)) {
             throw new AccessDeniedException("User not in room");
@@ -43,13 +44,21 @@ public class ChatService implements IChatService {
                 .content(content)
                 .build();
 
-        chatMessageRepository.save(message);
+        ChatMessage saved = chatMessageRepository.saveAndFlush(message);
 
-        return ChatMessageMapper.createChatMessageResponseDto(sender.getId(), content);
+        return ChatMessageMapper.createChatMessageResponseDto(saved);
     }
 
     private boolean isMember(Room room, AppUser user) {
         return user.getId().equals(room.getHost().getId())
                 || user.getId().equals(room.getOpponent().getId());
+    }
+
+    private Room findRoomByIdWithUsers(Long roomId) {
+        return roomRepository.findByIdWithUsers(roomId)
+                .orElseThrow(() -> {
+                    log.warn("Room(id: {}) not found.", roomId);
+                    return new RoomNotFoundException();
+                });
     }
 }

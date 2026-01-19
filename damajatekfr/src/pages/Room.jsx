@@ -284,12 +284,8 @@ const Room = () => {
             </div>
 
             <RoomChat
-                currentUser={
-                    isHost
-                        ? host?.displayName
-                        : opponent?.displayName || "You"
-                }
                 roomId={roomId}
+                chatMessages={room.messages}
             />
 
             <div className={styles.actions}>

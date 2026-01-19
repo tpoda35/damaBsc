@@ -12,13 +12,16 @@ import org.dama.damajatek.dto.room.RoomCreateDto;
 import org.dama.damajatek.dto.room.RoomInfoDtoV1;
 import org.dama.damajatek.dto.room.RoomInfoDtoV2;
 import org.dama.damajatek.entity.Game;
+import org.dama.damajatek.entity.room.ChatMessage;
 import org.dama.damajatek.entity.room.Room;
 import org.dama.damajatek.entity.player.Player;
 import org.dama.damajatek.exception.PasswordMismatchException;
 import org.dama.damajatek.exception.auth.AccessDeniedException;
 import org.dama.damajatek.exception.room.*;
+import org.dama.damajatek.mapper.ChatMessageMapper;
 import org.dama.damajatek.mapper.PlayerMapper;
 import org.dama.damajatek.mapper.RoomMapper;
+import org.dama.damajatek.repository.IChatMessageRepository;
 import org.dama.damajatek.repository.IRoomRepository;
 import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.service.IRoomService;
@@ -30,6 +33,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
@@ -49,6 +53,7 @@ public class RoomService implements IRoomService {
     private final IRoomWebSocketService roomWebSocketService;
     private final AppUserRepository appUserRepository;
     private final IAppUserCacheService appUserCacheService;
+    private final IChatMessageRepository chatMessageRepository;
 
     // Lock handling, also set database restr. with flyway
     @Transactional
@@ -248,7 +253,11 @@ public class RoomService implements IRoomService {
             throw new AccessDeniedException("You are not a participant in this room");
         }
 
-        RoomInfoDtoV1 roomInfoDtoV1 = RoomMapper.createRoomInfoDtoV1(room, host, opponent, isHost);
+        List<ChatMessage> messages = chatMessageRepository.findByRoomIdWithSender(roomId);
+
+        RoomInfoDtoV1 roomInfoDtoV1 = RoomMapper.createRoomInfoDtoV1(
+                room, host, ChatMessageMapper.createChatMessageResponseDtoList(messages), opponent, isHost
+        );
 
         return CompletableFuture.completedFuture(
                 roomInfoDtoV1

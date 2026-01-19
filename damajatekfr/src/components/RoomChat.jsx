@@ -2,11 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./RoomChat.module.css";
 import Button from "../components/Button.jsx";
 import { useSharedWebSocket } from "../contexts/WebSocketContext.jsx";
+import {useSharedAuth} from "../contexts/AuthContext.jsx";
 
-const RoomChat = ({ currentUser, roomId }) => {
-    const [messages, setMessages] = useState([]);
+const RoomChat = ({ roomId, chatMessages }) => {
+    const [messages, setMessages] = useState(chatMessages);
     const [input, setInput] = useState("");
     const bottomRef = useRef(null);
+
+    const { user } = useSharedAuth();
 
     const {
         isConnected,
@@ -57,15 +60,15 @@ const RoomChat = ({ currentUser, roomId }) => {
             <div className={styles.chatMessages}>
                 {messages.map(msg => (
                     <div
-                        key={msg.id}
+                        key={msg?.id}
                         className={`${styles.chatMessage} ${
-                            msg.sender === currentUser
-                                ? styles.chatMessageSelf
-                                : styles.chatMessageOther
+                            msg?.senderId !== user?.id
+                                ? styles.chatMessageOther
+                                : styles.chatMessageSelf
                         }`}
                     >
-                        <span className={styles.chatSender}>{msg.sender}</span>
-                        <span className={styles.chatContent}>{msg.content}</span>
+                        <span className={styles.chatSender}>{msg?.senderName}</span>
+                        <span className={styles.chatContent}>{msg?.content}</span>
                     </div>
                 ))}
                 <div ref={bottomRef} />
