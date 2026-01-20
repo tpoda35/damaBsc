@@ -85,7 +85,7 @@ public class GameService implements IGameService {
         gameRepository.save(game);
 
         // Add 1s delay to the bot to let the user load the page
-        if (game.getCurrentTurn() == PieceColor.BLACK && blackPlayer instanceof BotPlayer) {
+        if (game.getCurrentTurn() == PieceColor.WHITE && blackPlayer instanceof BotPlayer) {
             CompletableFuture
                     .delayedExecutor(1, TimeUnit.SECONDS)
                     .execute(() -> botService.playBotTurnAsync(game.getId())); // Make bot move and send the move event through websocket
@@ -106,7 +106,7 @@ public class GameService implements IGameService {
         PieceColor playerColor =
                 isHumanPlayerMatchingUser(game.getRedPlayer(), loggedInUser)
                         ? RED
-                        : PieceColor.BLACK;
+                        : PieceColor.WHITE;
 
         Board board = loadBoard(game);
         List<Move> validMoves = gameEngine.getAvailableMoves(board, game.getCurrentTurn());
@@ -160,7 +160,7 @@ public class GameService implements IGameService {
 
         // Turn validation
         if ((currentTurn == PieceColor.RED && !isHumanPlayerMatchingUser(game.getRedPlayer(), loggedInUser)) ||
-                (currentTurn == PieceColor.BLACK && !isHumanPlayerMatchingUser(game.getBlackPlayer(), loggedInUser))) {
+                (currentTurn == PieceColor.WHITE && !isHumanPlayerMatchingUser(game.getBlackPlayer(), loggedInUser))) {
             throw new AccessDeniedException("Not your turn");
         }
 
@@ -212,7 +212,7 @@ public class GameService implements IGameService {
         // Verify that the user is forfeiting their own color
         boolean isUserColor =
                 (pieceColor == PieceColor.RED && isHumanPlayerMatchingUser(game.getRedPlayer(), loggedInUser)) ||
-                        (pieceColor == PieceColor.BLACK && isHumanPlayerMatchingUser(game.getBlackPlayer(), loggedInUser));
+                        (pieceColor == PieceColor.WHITE && isHumanPlayerMatchingUser(game.getBlackPlayer(), loggedInUser));
 
         if (!isUserColor) {
             throw new AccessDeniedException("You can only forfeit your own game");
@@ -224,7 +224,7 @@ public class GameService implements IGameService {
                 : game.getRedPlayer();
 
         PieceColor winnerColor = (pieceColor == PieceColor.RED)
-                ? PieceColor.BLACK
+                ? PieceColor.WHITE
                 : PieceColor.RED;
 
         GameResult result = (pieceColor == PieceColor.RED)

@@ -274,7 +274,7 @@ public class HardBot implements IBotStrategy {
 
                 // Back row bonus (defensive strength)
                 if ((piece.getColor() == PieceColor.RED && r == 7) ||
-                        (piece.getColor() == PieceColor.BLACK && r == 0)) {
+                        (piece.getColor() == PieceColor.WHITE && r == 0)) {
                     value += 2;
                 }
 

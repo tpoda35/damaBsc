@@ -14,10 +14,3 @@
     will-change: transform, opacity;
     box-shadow: 0 15px 30px rgba(0,0,0,0.4);
 }
-
-.black {
-    background: radial-gradient(circle at top left, #555, #111 75%);
-}
-.red {
-    background: radial-gradient(circle at top left, #ff5c5c, #a80000 70%);
-}

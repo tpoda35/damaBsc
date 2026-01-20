@@ -5,6 +5,7 @@ import {useNavigate} from "react-router-dom";
 import React from "react";
 import CheckersHeroAnimation from "../components/CheckersHeroAnimation.jsx";
 import {motion} from "framer-motion";
+import CheckersRulesPanel from "../components/CheckersRulesPanel.jsx";
 
 const Home = () => {
     const { user } = useSharedAuth();
@@ -53,7 +54,10 @@ const Home = () => {
                         Welcome, {user.displayName || "Player"}!
                     </motion.h1>
 
-                    <CheckersHeroAnimation />
+                    <div className={styles.contentRow}>
+                        <CheckersHeroAnimation />
+                        <CheckersRulesPanel />
+                    </div>
                 </div>
             )}
         </div>

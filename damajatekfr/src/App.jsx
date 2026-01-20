@@ -50,6 +50,7 @@ function App() {
             <BrowserRouter>
                 <ToastContainer
                     style={{ top: '80px' }}
+                    toastStyle={{ padding: '16px 20px' }}
                     position="top-left"
                     autoClose={5000}
                     hideProgressBar={false}

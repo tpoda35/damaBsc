@@ -5,6 +5,7 @@ import Form from "../components/Form.jsx";
 import './Auth.css';
 import {toast} from "react-toastify";
 import {getErrorMessage} from "../utils/getErrorMessage.js";
+import {Link} from "react-router";
 
 const Register = () => {
     const { register } = useSharedAuth();
@@ -32,7 +33,7 @@ const Register = () => {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <h2 className="auth-title">Welcome</h2>
+                <h2 className="auth-title">Welcome!</h2>
                 <p className="auth-subtitle">Please register to continue</p>
                 <Form
                     fields={fields}
@@ -40,6 +41,13 @@ const Register = () => {
                     buttonText="Register"
                     error={error}
                 />
+
+                <p className="auth-footer">
+                    Already have an account?{" "}
+                    <Link to="/login" className="auth-link">
+                        Login here
+                    </Link>
+                </p>
             </div>
         </div>
     );

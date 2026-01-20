@@ -17,7 +17,7 @@ import static java.time.ZoneOffset.UTC;
 import static org.dama.damajatek.enums.game.GameResult.UNDECIDED;
 import static org.dama.damajatek.enums.game.GameStatus.FINISHED;
 import static org.dama.damajatek.enums.game.GameStatus.IN_PROGRESS;
-import static org.dama.damajatek.enums.game.PieceColor.BLACK;
+import static org.dama.damajatek.enums.game.PieceColor.WHITE;
 
 @Data
 @NoArgsConstructor
@@ -45,7 +45,7 @@ public class Game {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private PieceColor currentTurn = BLACK;
+    private PieceColor currentTurn = WHITE;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -80,7 +80,7 @@ public class Game {
 
     @PrePersist
     public void init() {
-        if (currentTurn == null) currentTurn = BLACK;
+        if (currentTurn == null) currentTurn = WHITE;
         if (status == null) status = IN_PROGRESS;
         if (result == null) result = UNDECIDED;
         if (movesWithoutCaptureOrPromotion == null) movesWithoutCaptureOrPromotion = 0;

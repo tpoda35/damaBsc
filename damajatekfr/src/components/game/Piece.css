@@ -6,14 +6,6 @@
     0 0 8px rgba(0, 0, 0, 0.4);
 }
 
-.piece.red {
-    background-color: #d62828;
-}
-
-.piece.black {
-    background-color: #222;
-}
-
 .piece.king {
     border: 4px solid gold;
     box-shadow:

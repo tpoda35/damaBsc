@@ -60,7 +60,7 @@ public class MoveProcessor implements IMoveProcessor {
 
         // Check game over
         PieceColor nextTurn = (game.getCurrentTurn() == PieceColor.RED)
-                ? PieceColor.BLACK
+                ? PieceColor.WHITE
                 : PieceColor.RED;
 
         boolean gameOver = gameEngine.isGameOver(board, nextTurn, game);
@@ -108,7 +108,7 @@ public class MoveProcessor implements IMoveProcessor {
         }
 
         if (winnerId.equals(game.getBlackPlayer().getId())) {
-            return PieceColor.BLACK;
+            return PieceColor.WHITE;
         }
 
         throw new IllegalStateException("Winner is not part of the game");

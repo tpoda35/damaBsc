@@ -4,11 +4,9 @@ import "./GameBoard.css";
 import "./Piece.css";
 
 const Piece = ({ color, isKing, pieceId }) => {
-    const pieceClass = `piece ${color.toLowerCase()} ${
+    const pieceClass = `piece piece-${color.toLowerCase()} ${
         isKing ? "king" : ""
     }`;
-
-    console.log("ReRender Piece - ", pieceId);
 
     return (
         <motion.div

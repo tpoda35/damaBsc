@@ -6,7 +6,7 @@ import org.dama.damajatek.model.Board;
 public class BotUtils {
 
     public static PieceColor opposite(PieceColor c) {
-        return (c == PieceColor.RED) ? PieceColor.BLACK : PieceColor.RED;
+        return (c == PieceColor.RED) ? PieceColor.WHITE : PieceColor.RED;
     }
 
     public static int boardHash(Board board) {

@@ -67,9 +67,6 @@ html {
   --text-inverse: var(--white);
   --text-link: var(--primary);
 
-  /* Focus & selection */
-  --focus-ring: rgba(47, 158, 68, 0.35);
-
   /* Primary button */
   --btn-primary-bg: var(--primary);
   --btn-primary-text: var(--text-inverse);
@@ -94,4 +91,28 @@ html {
   --btn-error-text: var(--text-inverse);
   --btn-info-bg: var(--info);
   --btn-info-text: var(--text-inverse);
+
+  /* Checkers pieces */
+  --checker-red-light: #ff5c5c;
+  --checker-red-dark: #a80000;
+
+  --checker-white-light: #ffffff;
+  --checker-white-dark: #d9d9d9;
 }
+
+.piece-white {
+  background: radial-gradient(
+          circle at top left,
+          var(--checker-white-light),
+          var(--checker-white-dark) 75%
+  );
+}
+
+.piece-red {
+  background: radial-gradient(
+          circle at top left,
+          var(--checker-red-light),
+          var(--checker-red-dark) 70%
+  );
+}
+

@@ -1,8 +1,10 @@
+(-) == kész
+
 - Front-end redesign
-- Dáma szabályok oldal
+- Dáma szabályok (-)
 - Game loading animáció
 - Statok game végén
-- Room chat
+- Room chat (-)
 - Profilkép
 - Leütött dáma bábu számláló
 - Auth baj, unauth kéréseknél nem jó a handling
@@ -15,6 +17,7 @@ Front-end redesign haladás:
     - Navbar kész
     - Home kész
     - Profile kész
+    - Room kész
 
 Kis gondok:
     - A "No games played yet" részeket egyformává kéne tenni, mint a GameHistory és a Rooms résznél, status a Room-ban

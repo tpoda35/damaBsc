@@ -22,7 +22,7 @@ public class BoardInitializer {
         for (int row = 5; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 if ((row + col) % 2 == 1) {
-                    board.setPiece(row, col, new Piece(PieceColor.BLACK, false));
+                    board.setPiece(row, col, new Piece(PieceColor.WHITE, false));
                 }
             }
         }
