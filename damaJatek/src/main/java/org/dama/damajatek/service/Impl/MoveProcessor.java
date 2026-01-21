@@ -20,6 +20,9 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.dama.damajatek.enums.game.PieceColor.RED;
+import static org.dama.damajatek.enums.game.PieceColor.WHITE;
+
 @Component
 @RequiredArgsConstructor
 public class MoveProcessor implements IMoveProcessor {
@@ -47,6 +50,20 @@ public class MoveProcessor implements IMoveProcessor {
         // Add events
         if (!move.getCapturedPieces().isEmpty()) {
             events.add(EventMapper.createCaptureMadeEvent(move));
+
+            // Removed piece counter
+            PieceColor removedFrom = opposite(game.getCurrentTurn());
+            int removedCount = move.getCapturedPieces().size();
+
+            for (int i = 0; i < removedCount; i++) {
+                events.add(EventMapper.createRemovedPieceEvent(removedFrom));
+            }
+
+            if (removedFrom == RED) {
+                game.setRemovedRedPieces(game.getRemovedRedPieces() + removedCount);
+            } else {
+                game.setRemovedWhitePieces(game.getRemovedWhitePieces() + removedCount);
+            }
         } else {
             events.add(EventMapper.createMoveMadeEvent(move));
         }
@@ -59,9 +76,9 @@ public class MoveProcessor implements IMoveProcessor {
         }
 
         // Check game over
-        PieceColor nextTurn = (game.getCurrentTurn() == PieceColor.RED)
-                ? PieceColor.WHITE
-                : PieceColor.RED;
+        PieceColor nextTurn = (game.getCurrentTurn() == RED)
+                ? WHITE
+                : RED;
 
         boolean gameOver = gameEngine.isGameOver(board, nextTurn, game);
 
@@ -104,13 +121,17 @@ public class MoveProcessor implements IMoveProcessor {
         Long winnerId = winner.getId();
 
         if (winnerId.equals(game.getRedPlayer().getId())) {
-            return PieceColor.RED;
+            return RED;
         }
 
         if (winnerId.equals(game.getBlackPlayer().getId())) {
-            return PieceColor.WHITE;
+            return WHITE;
         }
 
         throw new IllegalStateException("Winner is not part of the game");
+    }
+
+    private PieceColor opposite(PieceColor color) {
+        return color == RED ? WHITE : RED;
     }
 }

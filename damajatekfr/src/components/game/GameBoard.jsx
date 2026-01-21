@@ -21,7 +21,7 @@ const GameBoard = ({
     const isHighlighted = (row, col) =>
         movesForSelected.some((m) => m.toRow === row && m.toCol === col);
 
-    const shouldRotate = playerColor.toLowerCase() === 'black';
+    const shouldRotate = playerColor.toLowerCase() === 'white';
 
     return (
         <div className={`board ${shouldRotate ? '' : 'rotated'}`}>

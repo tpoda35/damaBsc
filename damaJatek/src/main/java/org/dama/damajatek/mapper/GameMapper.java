@@ -18,6 +18,8 @@ public class GameMapper {
                 .board(board)
                 .currentTurn(game.getCurrentTurn())
                 .allowedMoves(allowedMoves)
+                .removedRedPieces(game.getRemovedRedPieces())
+                .removedWhitePieces(game.getRemovedWhitePieces())
                 .playerColor(playerColor)
                 .build();
     }

@@ -1,17 +1,35 @@
-
 .mainContainer {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    min-height: 80vh;
-    gap: 1.5rem;
-    background: var(--grey-light);
-    color: var(--text-dark);
+    gap: 2rem;
     padding: 2rem;
 }
 
-/* Header card */
+.playerColor,
+.turnColor {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-weight: 700;
+    text-transform: capitalize;
+    margin-left: 0.25rem;
+    font-size: 0.95rem;
+}
+
+/* Color variants */
+.red {
+    background: #ffe5e5;
+    color: #c62828;
+}
+
+.white {
+    background: #f4f4f4;
+    color: #444;
+    border: 1px solid #ddd;
+}
+
+
 .header {
     background: var(--white);
     border-radius: 16px;
@@ -23,63 +41,19 @@
     border-top: 6px solid var(--primary);
 }
 
-/* Title */
 .header h2 {
     margin: 0;
     font-size: 1.4rem;
     font-weight: 700;
 }
 
-.gameId {
-    opacity: 0.6;
-}
-
-/* Turn info */
 .turnInfo {
     margin: 0.75rem 0 1.25rem;
     font-size: 1rem;
 }
 
-/* Color highlights */
 .playerColor,
 .turnColor {
     font-weight: 700;
     text-transform: capitalize;
-}
-
-.white {
-    color: var(--text-dark);
-}
-
-.black {
-    color: var(--primary-dark);
-}
-
-/* Forfeit button */
-.forfeitButton {
-    background: linear-gradient(
-            135deg,
-            var(--primary),
-            var(--primary-dark)
-    );
-    color: var(--white);
-    border: none;
-    border-radius: 10px;
-    padding: 0.6rem 1.6rem;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease,
-    opacity 0.15s;
-}
-
-.forfeitButton:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(244, 124, 38, 0.35);
-}
-
-.forfeitButton:disabled {
-    background: var(--primary-light);
-    opacity: 0.6;
-    cursor: not-allowed;
 }

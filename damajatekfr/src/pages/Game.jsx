@@ -15,7 +15,16 @@ const Game = () => {
     const [selectedCell, setSelectedCell] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    console.log("ReRender Game - ", gameId);
+    // Removed piece counter
+    const [removedRedPieces, setRemovedRedPieces] = useState(0);
+    const [removedWhitePieces, setRemovedWhitePieces] = useState(0);
+    useEffect(() => {
+        if (!game) return;
+
+        setRemovedRedPieces(game.removedRedPieces ?? 0);
+        setRemovedWhitePieces(game.removedWhitePieces ?? 0);
+    }, [game]);
+
 
     const navigate = useNavigate();
 
@@ -349,6 +358,21 @@ const Game = () => {
                             case "INVALID_MOVE": {
                                 console.warn("Invalid move detected");
                                 setSelectedCell(null);
+
+                                break;
+                            }
+
+                            case "REMOVED_PIECE": {
+                                const { pieceColor } = response;
+
+                                if (pieceColor === "RED") {
+                                    setRemovedRedPieces(prev => prev + 1);
+                                } else if (pieceColor === "WHITE") {
+                                    setRemovedWhitePieces(prev => prev + 1);
+                                } else {
+                                    console.warn("Unknown pieceColor in REMOVED_PIECE:", pieceColor);
+                                }
+
                                 break;
                             }
 
@@ -452,12 +476,14 @@ const Game = () => {
                 </p>
 
                 <Button
-                    className={styles.forfeitButton}
                     onClick={handleForfeit}
                     disabled={!game.currentTurn || game.winner}
                     children="Forfeit"
                 />
             </div>
+
+            <p>{removedRedPieces}</p>
+            <p>{removedWhitePieces}</p>
 
             <GameBoard
                 board={game.board}

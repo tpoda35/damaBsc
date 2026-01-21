@@ -70,6 +70,12 @@ public class Game {
     @Builder.Default
     private Integer totalMoves = 0;
 
+    @Builder.Default
+    private Integer removedRedPieces = 0;
+
+    @Builder.Default
+    private Integer removedWhitePieces = 0;
+
     @Column(nullable = false, updatable = false)
     private OffsetDateTime startTime;
 

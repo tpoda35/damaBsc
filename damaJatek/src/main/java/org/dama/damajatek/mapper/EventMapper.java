@@ -63,4 +63,10 @@ public class EventMapper {
                 .build();
     }
 
+    public static RemovedPieceEvent createRemovedPieceEvent(PieceColor pieceColor) {
+        return RemovedPieceEvent.builder()
+                .pieceColor(pieceColor)
+                .build();
+    }
+
 }
