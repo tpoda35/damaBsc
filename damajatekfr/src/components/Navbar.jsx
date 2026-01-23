@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useSharedAuth } from "../contexts/AuthContext";
 import React, { useState, useRef, useEffect } from "react";
-import "./Navbar.css";
+import styles from "./Navbar.module.css";
 import Modal from "./Modal.jsx";
 import Form from "./Form.jsx";
 import ApiService from "../services/ApiService.js";
@@ -41,7 +41,9 @@ const Navbar = () => {
     }, []);
 
     const getNavLinkClass = ({ isActive }) =>
-        isActive ? "navbar-button navbar-button-active" : "navbar-button";
+        isActive
+            ? `${styles.navbarButton} ${styles.navbarButtonActive}`
+            : styles.navbarButton;
 
     const fields = [
         {
@@ -58,13 +60,13 @@ const Navbar = () => {
     ];
 
     return (
-        <nav className="navbar">
-            <NavLink to="/" className="navbar-logo-btn">
+        <nav className={styles.navbar}>
+            <NavLink to="/" className={styles.logoBtn}>
                 Checkers
             </NavLink>
 
             {!user ? (
-                <div className="navbar-button-container">
+                <div className={styles.buttonContainer}>
                     <NavLink to="/login" className={getNavLinkClass}>
                         Login
                     </NavLink>
@@ -73,20 +75,20 @@ const Navbar = () => {
                     </NavLink>
                 </div>
             ) : (
-                <div className="navbar-button-container">
+                <div className={styles.buttonContainer}>
 
-                    <div className="navbar-dropdown" ref={playRef}>
+                    <div className={styles.dropdown} ref={playRef}>
                         <button
-                            className="navbar-button"
+                            className={styles.navbarButton}
                             onClick={() => setPlayOpen((prev) => !prev)}
                         >
                             Play ▾
                         </button>
 
                         {playOpen && (
-                            <div className="navbar-dropdown-menu">
+                            <div className={styles.dropdownMenu}>
                                 <button
-                                    className="navbar-dropdown-item"
+                                    className={styles.dropdownItem}
                                     onClick={() => {
                                         setPlayOpen(false);
                                         navigate("/rooms");
@@ -96,7 +98,7 @@ const Navbar = () => {
                                 </button>
 
                                 <button
-                                    className="navbar-dropdown-item"
+                                    className={styles.dropdownItem}
                                     onClick={() => {
                                         setPlayOpen(false);
                                         setIsModalOpen(true);
@@ -114,7 +116,7 @@ const Navbar = () => {
                     <NavLink to="/friends" className={getNavLinkClass}>
                         Friends
                     </NavLink>
-                    <button onClick={logout} className="navbar-button">
+                    <button onClick={logout} className={styles.navbarButton}>
                         Logout
                     </button>
                 </div>

@@ -3,11 +3,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--grey-light);
 }
 
 .card {
-    background: var(--white);
+    background: var(--bg-page);
     padding: 2.5rem 3rem;
     border-radius: 20px;
     text-align: center;
@@ -24,7 +23,7 @@
 
 .subtitle {
     margin-top: 0.25rem;
-    color: #777;
+    color: var(--text-secondary);
 }
 
 .result {

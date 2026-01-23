@@ -1,11 +1,11 @@
-.auth-container {
+.authContainer {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.auth-card {
+.authCard {
     background-color: var(--white);
     width: 100%;
     max-width: 420px;
@@ -14,14 +14,14 @@
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 
-.auth-title {
+.authTitle {
     text-align: center;
     color: var(--text-primary);
     font-size: 1.8rem;
     font-weight: 600;
 }
 
-.auth-subtitle {
+.authSubtitle {
     margin-top: 0.5rem;
     margin-bottom: 2rem;
     text-align: center;
@@ -29,20 +29,20 @@
     font-size: 0.95rem;
 }
 
-.auth-footer {
+.authFooter {
     margin-top: 1.5rem;
     text-align: center;
     font-size: 0.9rem;
     color: var(--text-secondary);
 }
 
-.auth-link {
+.authLink {
     color: var(--primary);
     font-weight: 500;
     text-decoration: none;
 }
 
-.auth-link:hover {
+.authLink:hover {
     text-decoration: underline;
 }
 

@@ -67,7 +67,7 @@ const RoomChat = ({ roomId, chatMessages }) => {
                                 : styles.chatMessageSelf
                         }`}
                     >
-                        <span className={styles.chatSender}>{msg?.senderName}</span>
+                        <span className={styles.otherSender}>{msg?.senderName}</span>
                         <span className={styles.chatContent}>{msg?.content}</span>
                     </div>
                 ))}

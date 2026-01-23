@@ -1,7 +1,7 @@
 import { useSharedAuth } from "../contexts/AuthContext";
 import Form from "../components/Form.jsx";
 import { useState } from "react";
-import  "./Auth.css";
+import styles from "./Auth.module.css";
 import {useNavigate} from "react-router-dom";
 import {toast} from "react-toastify";
 import {getErrorMessage} from "../utils/getErrorMessage.js";
@@ -31,10 +31,10 @@ const Login = () => {
     ];
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <h2 className="auth-title">Welcome!</h2>
-                <p className="auth-subtitle">Please log in to continue</p>
+        <div className={styles.authContainer}>
+            <div className={styles.authCard}>
+                <h2 className={styles.authTitle}>Welcome!</h2>
+                <p className={styles.authSubtitle}>Please log in to continue</p>
                 <Form
                     fields={fields}
                     onSubmit={handleLogin}
@@ -42,9 +42,9 @@ const Login = () => {
                     error={error}
                 />
 
-                <p className="auth-footer">
+                <p className={styles.authFooter}>
                     No account?{" "}
-                    <Link to="/register" className="auth-link">
+                    <Link to="/register" className={styles.authLink}>
                         Register here
                     </Link>
                 </p>

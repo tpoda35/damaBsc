@@ -13,7 +13,7 @@
     padding: 0 1.5rem;
 }
 
-.navbar-logo-btn {
+.logoBtn {
     font-family: "Dancing Script", cursive;
     font-optical-sizing: auto;
     font-weight: 700;
@@ -30,12 +30,11 @@
     color: var(--text-primary);
 }
 
-/* Button */
-.navbar-button-container {
+.buttonContainer {
     display: flex;
 }
 
-.navbar-button {
+.navbarButton {
     padding: 1rem 1rem;
     text-decoration: none;
     font: inherit;
@@ -54,27 +53,26 @@
     transition: all .2s;
 }
 
-.navbar-button:hover {
+.navbarButton:hover {
     background-color: var(--bg-hover);
     color: var(--text-primary);
 }
 
-.navbar-button-active {
+.navbarButtonActive {
     background-color: var(--bg-hover);
     color: var(--primary);
 }
 
-.navbar-button-active:hover {
+.navbarButtonActive:hover {
     background-color: var(--bg-hover);
     color: var(--primary);
 }
 
-/* Dropdown */
-.navbar-dropdown {
+.dropdown {
     position: relative;
 }
 
-.navbar-dropdown-menu {
+.dropdownMenu {
     position: absolute;
     top: 100%;
     left: 0;
@@ -85,7 +83,7 @@
     z-index: 1000;
 }
 
-.navbar-dropdown-item {
+.dropdownItem {
     width: 100%;
     padding: 10px 14px;
     background: none;
@@ -96,7 +94,7 @@
     transition: all .2s;
 }
 
-.navbar-dropdown-item:hover {
+.dropdownItem:hover {
     background: var(--btn-light-hover);
 }
 

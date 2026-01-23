@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import ApiService from "../services/ApiService";
 import { useSharedAuth } from "../contexts/AuthContext.jsx";
-import "./Profile.css";
+import styles from "./Profile.module.css";
 import Loader from "../components/Loader.jsx";
 import Button from "../components/Button.jsx";
 import {motion} from "framer-motion";
@@ -23,8 +23,6 @@ const Profile = () => {
             setError(err.message || "Failed to fetch game history");
         }
     };
-
-    console.log('gameHistory: ', gameHistory);
 
     useEffect(() => {
         const loadAll = async () => {
@@ -55,15 +53,15 @@ const Profile = () => {
 
     return (
         <motion.div
-            className="profile"
+            className={styles.profile}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
             style={{ willChange: "transform, opacity" }}
         >
             {user && (
-                <div className="profile-card">
-                    <div className="profile-default-data">
+                <div className={styles.profileCard}>
+                    <div className={styles.profileDefaultData}>
                         <p><strong>Name:</strong> {user.displayName}</p>
                         <p><strong>Email:</strong> {user.email}</p>
                         <p><strong>Created At:</strong> {new Date(user.createdAt).toLocaleString()}</p>
@@ -71,13 +69,13 @@ const Profile = () => {
                     </div>
 
                     <h3>Room Stats</h3>
-                    <ul className="profile-stats-list">
+                    <ul className={styles.profileStatsList}>
                         <li>Hosted Rooms: {user.hostedRoomNum}</li>
                         <li>Joined Rooms: {user.joinedRoomNum}</li>
                     </ul>
 
                     <h3>Vs AI Stats</h3>
-                    <ul className="profile-stats-list">
+                    <ul className={styles.profileStatsList}>
                         <li>Games: {user.vsAiGames}</li>
                         <li>Wins: {user.vsAiWins}</li>
                         <li>Losses: {user.vsAiLoses}</li>
@@ -86,7 +84,7 @@ const Profile = () => {
                     </ul>
 
                     <h3>Vs Player Stats</h3>
-                    <ul className="profile-stats-list">
+                    <ul className={styles.profileStatsList}>
                         <li>Games: {user.vsPlayerGames}</li>
                         <li>Wins: {user.vsPlayerWins}</li>
                         <li>Losses: {user.vsPlayerLoses}</li>
@@ -95,20 +93,20 @@ const Profile = () => {
                     </ul>
 
                     <h3>Overall</h3>
-                    <ul className="profile-stats-list">
+                    <ul className={styles.profileStatsList}>
                         <li>Total Games: {user.overallGames}</li>
                         <li>Overall Winrate: {user.overallWinrate}%</li>
                     </ul>
                 </div>
             )}
 
-            <div className="profile-card">
+            <div className={styles.profileCard}>
                 <h3>Game History</h3>
                 {gameHistory.length === 0 ? (
-                    <p className="profile-no-games">No games played yet.</p>
+                    <p className={styles.profileNoGames}>No games played yet.</p>
                 ) : (
                     <>
-                        <table className="profile-game-table">
+                        <table className={styles.profileGameTable}>
                             <thead>
                             <tr>
                                 <th>Red Player</th>
@@ -150,13 +148,13 @@ const Profile = () => {
                             </tbody>
                         </table>
 
-                        <div className="profile-pagination">
+                        <div className={styles.profilePagination}>
                             <Button
                                 onClick={() => setPageNum((prev) => Math.max(prev - 1, 0))}
                                 disabled={pageNum === 0}
                                 children="Prev"
                             />
-                            <span className="profile-page-info">
+                            <span className={styles.profilePagination}>
                                 Page {pageNum + 1} of {Math.ceil(gameHistory.length / pageSize)}
                             </span>
                             <Button

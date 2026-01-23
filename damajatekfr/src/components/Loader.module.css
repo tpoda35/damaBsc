@@ -18,7 +18,7 @@
 
 .text {
     font-size: 0.95rem;
-    color: #555;
+    color: var(--text-primary);
 }
 
 @keyframes spin {

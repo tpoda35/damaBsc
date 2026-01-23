@@ -4,18 +4,16 @@
     margin: 0 auto;
 }
 
-.profile-default-data {
+.profileDefaultData {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    margin: 1rem 0;
     text-align: center;
     padding-bottom: 10px;
     border-bottom: 1px solid var(--border-default);
 }
 
-/* User card */
-.profile-card {
+.profileCard {
     background-color: var(--bg-page);
     padding: 2rem;
     border-radius: 12px;
@@ -23,7 +21,7 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-.profile-card h3 {
+.profileCard h3 {
     margin-top: .75rem;
     margin-bottom: 0.5rem;
     color: var(--text-primary);
@@ -32,17 +30,16 @@
     text-align: center;
 }
 
-.profile-card p {
+.profileCard p {
     margin: 0.3rem 0;
 }
 
-.profile-default-data p {
+.profileDefaultData p {
     flex: 1 1 45%;
     margin: 0;
 }
 
-/* Stats list */
-.profile-stats-list {
+.profileStatsList {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
@@ -50,7 +47,7 @@
     margin-bottom: .75rem;
 }
 
-.profile-stats-list li {
+.profileStatsList li {
     background: var(--bg-disabled);
     padding: 0.5rem 1rem;
     border-radius: 8px;
@@ -59,37 +56,30 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }
 
-/* Game history */
-.profile-game-table {
+.profileGameTable {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
 }
 
-.profile-game-table th,
-.profile-game-table td {
+.profileGameTable th,
+.profileGameTable td {
     text-align: center;
     padding: 0.75rem 0.5rem;
     border-bottom: 1px solid var(--border-default);
 }
 
-.profile-game-table th {
+.profileGameTable th {
     background: var(--bg-disabled);
 }
 
-.profile-game-table tr:hover td {
-    background: #f9f9f9;
-}
-
-.profile-no-games {
-    font-style: italic;
-    color: #777;
+.profileNoGames {
+    color: var(--text-secondary);
     text-align: center;
     margin: 1rem 0;
 }
 
-/* Pagination */
-.profile-pagination {
+.profilePagination {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -97,19 +87,8 @@
     margin-top: 20px;
 }
 
-.profile-page-info {
+.profilePageInfo {
     font-size: 0.95rem;
     font-weight: 500;
-    color: #555;
+    color: var(--text-secondary);
 }
-
-/*@media screen and (max-width: 768px) {*/
-/*    .statsList {*/
-/*        flex-direction: column;*/
-/*    }*/
-
-/*    .gameTable th, .gameTable td {*/
-/*        font-size: 0.85rem;*/
-/*        padding: 0.5rem 0.25rem;*/
-/*    }*/
-/*}*/

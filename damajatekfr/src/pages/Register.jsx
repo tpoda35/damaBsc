@@ -2,7 +2,7 @@ import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {useSharedAuth} from "../contexts/AuthContext";
 import Form from "../components/Form.jsx";
-import './Auth.css';
+import styles from './Auth.module.css';
 import {toast} from "react-toastify";
 import {getErrorMessage} from "../utils/getErrorMessage.js";
 import {Link} from "react-router";
@@ -31,10 +31,10 @@ const Register = () => {
     ];
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <h2 className="auth-title">Welcome!</h2>
-                <p className="auth-subtitle">Please register to continue</p>
+        <div className={styles.authContainer}>
+            <div className={styles.authCard}>
+                <h2 className={styles.authTitle}>Welcome!</h2>
+                <p className={styles.authSubtitle}>Please register to continue</p>
                 <Form
                     fields={fields}
                     onSubmit={handleRegister}
@@ -42,9 +42,9 @@ const Register = () => {
                     error={error}
                 />
 
-                <p className="auth-footer">
+                <p className={styles.authFooter}>
                     Already have an account?{" "}
-                    <Link to="/login" className="auth-link">
+                    <Link to="/login" className={styles.authLink}>
                         Login here
                     </Link>
                 </p>

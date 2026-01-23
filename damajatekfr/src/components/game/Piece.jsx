@@ -1,12 +1,13 @@
 import React, { memo } from "react";
 import { motion } from "framer-motion";
-import "./GameBoard.css";
-import "./Piece.css";
+import styles from "./Piece.module.css";
 
 const Piece = ({ color, isKing, pieceId }) => {
-    const pieceClass = `piece piece-${color.toLowerCase()} ${
-        isKing ? "king" : ""
-    }`;
+    const pieceClass = [
+        styles.piece,
+        `piece-${color.toLowerCase()}`,
+        isKing && styles.king,
+    ].filter(Boolean).join(" ");
 
     return (
         <motion.div

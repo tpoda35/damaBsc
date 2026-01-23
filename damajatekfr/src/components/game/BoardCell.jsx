@@ -12,8 +12,6 @@ const BoardCell = ({
                        isHighlighted,
                        canSelect,
                    }) => {
-    console.log("ReRender BoardCell");
-
     const isDark = (row + col) % 2 === 1;
 
     const cellClass = `
@@ -32,10 +30,10 @@ const BoardCell = ({
             <AnimatePresence>
                 {piece && (
                     <Piece
-                        key={`piece-${piece.id}`} // Use piece.id as key, not position
+                        key={`piece-${piece.id}`}
                         color={piece.color}
                         isKing={piece.king}
-                        pieceId={piece.id} // Pass the unique piece ID
+                        pieceId={piece.id}
                     />
                 )}
             </AnimatePresence>

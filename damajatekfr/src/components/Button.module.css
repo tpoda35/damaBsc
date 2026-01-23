@@ -13,7 +13,6 @@
     width: 100%;
 }
 
-/* Variants */
 .primary {
     background-color: var(--btn-primary-bg);
     color: var(--btn-primary-text);
@@ -32,14 +31,12 @@
     background-color: var(--btn-light-hover);
 }
 
-/* Disabled */
 .button:disabled {
     background-color: var(--btn-disabled-bg);
     color: var(--btn-disabled-text);
     cursor: not-allowed;
 }
 
-/* Status buttons */
 .success {
     background-color: var(--btn-success-bg);
     color: var(--btn-success-text);
