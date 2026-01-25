@@ -6,7 +6,7 @@
 - Statok game végén
 - Room chat (-)
 - Profilkép
-- Leütött dáma bábu számláló
+- Leütött dáma bábu számláló (-)
 - Auth baj, unauth kéréseknél nem jó a handling
 - WebSocket room list
 - Room kidobás és tiltás
@@ -21,5 +21,3 @@ Front-end redesign haladás:
 
 Kis gondok:
     - A "No games played yet" részeket egyformává kéne tenni, mint a GameHistory és a Rooms résznél, status a Room-ban
-
-TODO: Befejezni a css név írásokat, RoomChat css-t optimalizálni

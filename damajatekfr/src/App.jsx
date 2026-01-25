@@ -70,9 +70,10 @@ function App() {
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/rooms" element={<Rooms />} />
                         <Route path="/rooms/:roomId" element={<Room />} />
-                        <Route path="/games/:gameId" element={<Game />} />
-                        <Route path="/game-ended" element={<GameEnded />} />
                     </Route>
+
+                    <Route path="/games/:gameId" element={<Game />} />
+                    <Route path="/game-ended" element={<GameEnded />} />
 
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />

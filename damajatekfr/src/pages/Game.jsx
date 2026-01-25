@@ -18,13 +18,6 @@ const Game = () => {
     // Removed piece counter
     const [removedRedPieces, setRemovedRedPieces] = useState(0);
     const [removedWhitePieces, setRemovedWhitePieces] = useState(0);
-    useEffect(() => {
-        if (!game) return;
-
-        setRemovedRedPieces(game.removedRedPieces ?? 0);
-        setRemovedWhitePieces(game.removedWhitePieces ?? 0);
-    }, [game]);
-
 
     const navigate = useNavigate();
 
@@ -75,6 +68,9 @@ const Game = () => {
                 ...data,
                 board: initializePieceIds(data.board)
             });
+
+            setRemovedRedPieces(data.removedRedPieces ?? 0);
+            setRemovedWhitePieces(data.removedWhitePieces ?? 0);
         } catch (err) {
             toast.error(err.message || "Failed to fetch game info");
         } finally {
@@ -365,6 +361,8 @@ const Game = () => {
                             case "REMOVED_PIECE": {
                                 const { pieceColor } = response;
 
+                                console.log('Removed piece: ', pieceColor)
+
                                 if (pieceColor === "RED") {
                                     setRemovedRedPieces(prev => prev + 1);
                                 } else if (pieceColor === "WHITE") {
@@ -453,45 +451,58 @@ const Game = () => {
     if (!game) return null;
 
     return (
-        <div className={styles.mainContainer}>
-            <div className={styles.header}>
-                <h2>
-                    You are{" "}
-                    <span
-                        className={`${styles.playerColor} ${styles[game.playerColor.toLowerCase()]}`}
-                    >
-                {game.playerColor.toLowerCase()}
-            </span>
-                </h2>
+        <div className={styles.page}>
+            <div className={styles.mainContainer}>
+                <div className={styles.sidePanel}>
+                    <div className={styles.header}>
+                        <h2>
+                            You are
+                            <span
+                                className={`${styles.playerColor} ${styles[game.playerColor.toLowerCase()]}`}
+                            >
+                            {game.playerColor.toLowerCase()}
+                        </span>
+                        </h2>
 
-                <p className={styles.turnInfo}>
-                    Current turn:{" "}
-                    <span
-                        className={`${styles.turnColor} ${
-                            game.currentTurn ? styles[game.currentTurn.toLowerCase()] : ""
-                        }`}
-                    >
-                {game.currentTurn ? game.currentTurn.toLowerCase() : "-"}
-            </span>
-                </p>
+                        <p className={styles.turnInfo}>
+                            Current turn:
+                            <span
+                                className={`${styles.turnColor} ${
+                                    game.currentTurn ? styles[game.currentTurn.toLowerCase()] : ""
+                                }`}
+                            >
+                            {game.currentTurn ? game.currentTurn.toLowerCase() : "-"}
+                        </span>
+                        </p>
 
-                <Button
-                    onClick={handleForfeit}
-                    disabled={!game.currentTurn || game.winner}
-                    children="Forfeit"
+                        <Button
+                            onClick={handleForfeit}
+                            disabled={!game.currentTurn || game.winner}
+                            children="Forfeit"
+                        />
+                    </div>
+
+                    <div className={styles.captured}>
+                        <h4>Captured pieces</h4>
+                        <div className={styles.capturedRow}>
+                        <span className={`${styles.badge} ${styles.red}`}>
+                            Red: {removedRedPieces}
+                        </span>
+                            <span className={`${styles.badge} ${styles.white}`}>
+                            White: {removedWhitePieces}
+                        </span>
+                        </div>
+                    </div>
+                </div>
+
+                <GameBoard
+                    board={game.board}
+                    allowedMoves={game.allowedMoves}
+                    selectedCell={selectedCell}
+                    onCellClick={handleCellClick}
+                    playerColor={game.playerColor}
                 />
             </div>
-
-            <p>{removedRedPieces}</p>
-            <p>{removedWhitePieces}</p>
-
-            <GameBoard
-                board={game.board}
-                allowedMoves={game.allowedMoves}
-                selectedCell={selectedCell}
-                onCellClick={handleCellClick}
-                playerColor={game.playerColor}
-            />
         </div>
     );
 };
