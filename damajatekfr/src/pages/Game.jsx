@@ -8,16 +8,22 @@ import {toast} from "react-toastify";
 
 import styles from './Game.module.css';
 import Button from "../components/Button.jsx";
+import GameIntro from "../components/GameIntro.jsx";
+import {useSharedAuth} from "../contexts/AuthContext.jsx";
 
 const Game = () => {
     const { gameId } = useParams();
     const [game, setGame] = useState(null);
     const [selectedCell, setSelectedCell] = useState(null);
+
     const [loading, setLoading] = useState(true);
 
     // Removed piece counter
     const [removedRedPieces, setRemovedRedPieces] = useState(0);
     const [removedWhitePieces, setRemovedWhitePieces] = useState(0);
+
+    const [showIntro, setShowIntro] = useState(true);
+    const { user } = useSharedAuth();
 
     const navigate = useNavigate();
 
@@ -449,6 +455,18 @@ const Game = () => {
 
     if (loading) return <Loader />;
     if (!game) return null;
+
+    console.log('Game: ', game);
+
+    if (showIntro) {
+        return (
+            <GameIntro
+                playerOne={user.displayName || "Red"}
+                playerTwo={game.enemyDisplayName || "White"}
+                onFinish={() => setShowIntro(false)}
+            />
+        );
+    }
 
     return (
         <div className={styles.page}>

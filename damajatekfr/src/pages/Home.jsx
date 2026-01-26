@@ -6,6 +6,7 @@ import React from "react";
 import CheckersHeroAnimation from "../components/CheckersHeroAnimation.jsx";
 import {motion} from "framer-motion";
 import CheckersRulesPanel from "../components/CheckersRulesPanel.jsx";
+import AnimatedPage from "../components/AnimatedPage.jsx";
 
 const Home = () => {
     const { user } = useSharedAuth();
@@ -20,39 +21,21 @@ const Home = () => {
     };
 
     return (
-        <div className={styles.mainContainer}>
+        <AnimatedPage className={styles.mainContainer}>
             {!user ? (
                 <div className={styles.heroContainer}>
-                    <motion.h1
-                        className={styles.welcomeText}
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                            duration: 1,
-                            ease: "easeOut"
-                        }}
-                        style={{ willChange: "transform, opacity" }}
-                    >
+                    <h1>
                         Welcome!
                         Please log in to play.
-                    </motion.h1>
+                    </h1>
 
                     <CheckersHeroAnimation />
                 </div>
             ) : (
                 <div className={styles.heroContainer}>
-                    <motion.h1
-                        className={styles.welcomeText}
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                            duration: 1,
-                            ease: "easeOut"
-                        }}
-                        style={{ willChange: "transform, opacity" }}
-                    >
+                    <h1 className={styles.welcomeText}>
                         Welcome, {user.displayName || "Player"}!
-                    </motion.h1>
+                    </h1>
 
                     <div className={styles.contentRow}>
                         <CheckersHeroAnimation />
@@ -60,7 +43,7 @@ const Home = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </AnimatedPage>
     );
 };
 

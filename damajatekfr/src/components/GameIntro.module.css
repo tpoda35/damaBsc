@@ -1,0 +1,64 @@
+.overlay {
+    height: 100vh;
+    z-index: 9999;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.vsLine {
+    font-size: 1.9rem;
+    font-weight: 600;
+
+    color: var(--text-secondary);
+}
+
+.playerRed {
+    color: var(--checker-red-dark);
+}
+
+.playerWhite {
+    color: var(--gray-700);
+}
+
+.vs {
+    margin: 0 0.6rem;
+    font-weight: 700;
+}
+
+.turnColorWhite {
+    display: inline-block;
+    padding: 0.3rem 0.85rem;
+    border-radius: 999px;
+    font-weight: 700;
+    text-transform: capitalize;
+    margin-left: 0.4rem;
+    font-size: 1.9rem;
+    background: #f4f4f4;
+    color: #444;
+    border: 1px solid #ddd;
+}
+
+.turnColorRed {
+    display: inline-block;
+    padding: 0.3rem 0.85rem;
+    border-radius: 999px;
+    font-weight: 700;
+    text-transform: capitalize;
+    margin-left: 0.4rem;
+    font-size: 1.9rem;
+    background: #ffe5e5;
+    color: #c62828;
+}

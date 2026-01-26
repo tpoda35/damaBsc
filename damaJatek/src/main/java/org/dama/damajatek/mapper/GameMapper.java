@@ -12,6 +12,7 @@ import java.util.List;
 
 public class GameMapper {
 
+    // The game players need to be loaded to use this
     public static GameInfoDto createGameInfoDtoV1(Game game, Board board, List<Move> allowedMoves, PieceColor playerColor) {
         return GameInfoDto.builder()
                 .id(game.getId())
@@ -21,6 +22,7 @@ public class GameMapper {
                 .removedRedPieces(game.getRemovedRedPieces())
                 .removedWhitePieces(game.getRemovedWhitePieces())
                 .playerColor(playerColor)
+                .enemyDisplayName(getEnemyDisplayName(game, playerColor))
                 .build();
     }
 
@@ -39,5 +41,13 @@ public class GameMapper {
                 .gameTime(gameTime)
                 .build();
     }
+
+    private static String getEnemyDisplayName(Game game, PieceColor playerColor) {
+        if (playerColor == PieceColor.RED) {
+            return game.getBlackPlayer().getDisplayName();
+        }
+        return game.getRedPlayer().getDisplayName();
+    }
+
 
 }

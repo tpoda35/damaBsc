@@ -5,6 +5,7 @@ import styles from "./Profile.module.css";
 import Loader from "../components/Loader.jsx";
 import Button from "../components/Button.jsx";
 import {motion} from "framer-motion";
+import AnimatedPage from "../components/AnimatedPage.jsx";
 
 const Profile = () => {
     const { user, fetchUser } = useSharedAuth();
@@ -52,13 +53,7 @@ const Profile = () => {
     // if (error) return <p style={{ color: "red" }}>{error}</p>; TODO: fix this
 
     return (
-        <motion.div
-            className={styles.profile}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            style={{ willChange: "transform, opacity" }}
-        >
+        <AnimatedPage className={styles.profile}>
             {user && (
                 <div className={styles.profileCard}>
                     <div className={styles.profileDefaultData}>
@@ -170,7 +165,7 @@ const Profile = () => {
                     </>
                 )}
             </div>
-        </motion.div>
+        </AnimatedPage>
     );
 };
 

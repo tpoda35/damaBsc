@@ -21,6 +21,8 @@ public class GameInfoDto {
     private PieceColor currentTurn;
     private List<Move> allowedMoves;
 
+    private String enemyDisplayName;
+
     private Integer removedRedPieces;
     private Integer removedWhitePieces;
 

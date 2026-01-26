@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { getErrorMessage } from "../utils/getErrorMessage.js";
 import Loader from "../components/Loader.jsx";
 import { withToastError } from "../utils/withToastError.js";
+import AnimatedPage from "../components/AnimatedPage.jsx";
 
 const Rooms = () => {
     const [roomsPage, setRoomsPage] = useState(null);
@@ -86,63 +87,67 @@ const Rooms = () => {
     const totalPages = roomsPage?.totalPages || 1;
 
     return (
-        <div className={styles.rooms}>
-            <div className={styles.header}>
-                <h2 className={styles.title}>Room list</h2>
-                <Button onClick={handleHostRoom} children="Host room" />
-            </div>
+        <>
+            <AnimatedPage className={styles.rooms}>
+                <div className={styles.header}>
+                    <h2 className={styles.title}>Room list</h2>
+                    <Button onClick={handleHostRoom} children="Host room" />
+                </div>
 
-            {roomList.length === 0 ? (
-                <div className={styles.empty}>No rooms available</div>
-            ) : (
-                <>
-                    <ul className={styles.roomList}>
-                        {roomList.map((room) => (
-                            <li className={styles.roomCard} key={room.id}>
-                                <div>
-                                    <strong>{room.name || `Room ${room.id}`}</strong>
-                                    <div className={styles.roomDesc}>
-                                        {room.description || "No description"}
+                {roomList.length === 0 ? (
+                    <div className={styles.empty}>No rooms available</div>
+                ) : (
+                    <>
+                        <ul className={styles.roomList}>
+                            {roomList.map((room) => (
+                                <li className={styles.roomCard} key={room.id}>
+                                    <div>
+                                        <strong>{room.name || `Room ${room.id}`}</strong>
+                                        <div className={styles.roomDesc}>
+                                            {room.description || "No description"}
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className={styles.roomMeta}>
-                                    {room.locked && (
-                                        <span className={styles.infoBox}>
+                                    <div className={styles.roomMeta}>
+                                        {room.locked && (
+                                            <span className={styles.infoBox}>
                                             <i className="fa fa-lock" aria-hidden="true"></i>
                                         </span>
-                                    )}
+                                        )}
 
-                                    <span className={styles.infoBox}>
+                                        <span className={styles.infoBox}>
                                         {room.playerCount}/2
                                     </span>
 
-                                    <Button
-                                        onClick={() => handleJoinRoom(room)}
-                                        children="Join room"
-                                    />
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
+                                        <Button
+                                            onClick={() => handleJoinRoom(room)}
+                                            children="Join room"
+                                        />
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
 
-                    <div className={styles.pagination}>
-                        <Button
-                            onClick={() => setPageNum((prev) => Math.max(prev - 1, 0))}
-                            disabled={pageNum === 0}
-                            children="Prev"
-                        />
-                        <span className={styles.pageInfo}>
+                        <div className={styles.pagination}>
+                            <Button
+                                onClick={() => setPageNum((prev) => Math.max(prev - 1, 0))}
+                                disabled={pageNum === 0}
+                                children="Prev"
+                            />
+                            <span className={styles.pageInfo}>
                             Page {pageNum + 1} of {totalPages}
                         </span>
-                        <Button
-                            onClick={() => setPageNum((prev) => Math.min(prev + 1, totalPages - 1))}
-                            disabled={pageNum + 1 >= totalPages}
-                            children="Next"
-                        />
-                    </div>
-                </>
-            )}
+                            <Button
+                                onClick={() => setPageNum((prev) => Math.min(prev + 1, totalPages - 1))}
+                                disabled={pageNum + 1 >= totalPages}
+                                children="Next"
+                            />
+                        </div>
+                    </>
+                )}
+
+
+            </AnimatedPage>
 
             <Modal
                 isOpen={isModalOpen}
@@ -160,7 +165,7 @@ const Rooms = () => {
                     }}
                 />
             </Modal>
-        </div>
+        </>
     );
 };
 
