@@ -1,7 +1,6 @@
 package org.dama.damajatek.service.Impl;
 
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.IAppUserCacheService;
@@ -11,9 +10,9 @@ import org.dama.damajatek.dto.game.GameInfoDto;
 import org.dama.damajatek.dto.game.MoveResult;
 import org.dama.damajatek.dto.game.websocket.IGameEvent;
 import org.dama.damajatek.entity.Game;
-import org.dama.damajatek.entity.room.Room;
 import org.dama.damajatek.entity.player.BotPlayer;
 import org.dama.damajatek.entity.player.Player;
+import org.dama.damajatek.entity.room.Room;
 import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.exception.auth.AccessDeniedException;
@@ -29,6 +28,7 @@ import org.dama.damajatek.service.IBotService;
 import org.dama.damajatek.service.IGameEngine;
 import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.service.IMoveProcessor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.TaskScheduler;
@@ -57,7 +57,6 @@ import static org.dama.damajatek.util.PlayerUtils.verifyUserAccess;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class GameService implements IGameService {
 
     private final IGameRepository gameRepository;
@@ -67,6 +66,24 @@ public class GameService implements IGameService {
     private final IMoveProcessor moveProcessor;
     private final IAppUserCacheService appUserCacheService;
     private final TaskScheduler taskScheduler;
+
+    public GameService(
+            IGameRepository gameRepository,
+            IAppUserService appUserService,
+            IGameEngine gameEngine,
+            IBotService botService,
+            IMoveProcessor moveProcessor,
+            IAppUserCacheService appUserCacheService,
+            @Qualifier("taskScheduler") TaskScheduler taskScheduler
+    ) {
+        this.gameRepository = gameRepository;
+        this.appUserService = appUserService;
+        this.gameEngine = gameEngine;
+        this.botService = botService;
+        this.moveProcessor = moveProcessor;
+        this.appUserCacheService = appUserCacheService;
+        this.taskScheduler = taskScheduler;
+    }
 
     // Rule source: https://www.okosjatek.hu/custom/okosjatek/image/data/srattached/1fb12c3bdc1f524812fb6c5043d11637_D%C3%A1ma%20j%C3%A1t%C3%A9kszab%C3%A1ly.pdf
     // The forced capture rule is used, so if there's a capture, then the user only gets that move.
@@ -88,7 +105,7 @@ public class GameService implements IGameService {
         gameRepository.save(game);
 
         // Add 1s delay to the bot to let the user load the page
-        if (game.getCurrentTurn() == RED && whitePlayer instanceof BotPlayer) {
+        if (game.getCurrentTurn() == RED && redPlayer instanceof BotPlayer) {
             CompletableFuture
                     .delayedExecutor(5, TimeUnit.SECONDS)
                     .execute(() -> botService.playBotTurnAsync(game.getId())); // Make bot move and send the move event through websocket
@@ -252,8 +269,8 @@ public class GameService implements IGameService {
     private Game findGameByIdWithPlayers(Long gameId) {
         return gameRepository.findByIdWithPlayers(gameId)
                 .orElseThrow(() -> {
-                   log.info("Game not found with id {}.", gameId);
-                   return new GameNotFoundException();
+                    log.info("Game not found with id {}.", gameId);
+                    return new GameNotFoundException();
                 });
     }
 }

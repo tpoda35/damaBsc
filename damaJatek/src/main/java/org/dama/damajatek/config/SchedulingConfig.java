@@ -15,7 +15,7 @@ public class SchedulingConfig {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(2);
         scheduler.setThreadNamePrefix("bot-delay-");
-        scheduler.initialize(); // ❗ required
+        scheduler.initialize();
         return scheduler;
     }
 

@@ -2,7 +2,6 @@ package org.dama.damajatek.util;
 
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Piece;
-import org.dama.damajatek.enums.game.PieceColor;
 
 import static org.dama.damajatek.enums.game.PieceColor.RED;
 import static org.dama.damajatek.enums.game.PieceColor.WHITE;
