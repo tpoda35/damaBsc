@@ -4,6 +4,9 @@ import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Piece;
 import org.dama.damajatek.enums.game.PieceColor;
 
+import static org.dama.damajatek.enums.game.PieceColor.RED;
+import static org.dama.damajatek.enums.game.PieceColor.WHITE;
+
 public class BoardInitializer {
 
     public static Board createStartingBoard() {
@@ -13,7 +16,7 @@ public class BoardInitializer {
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 8; col++) {
                 if ((row + col) % 2 == 1) {
-                    board.setPiece(row, col, new Piece(PieceColor.RED, false));
+                    board.setPiece(row, col, new Piece(RED, false));
                 }
             }
         }
@@ -22,7 +25,7 @@ public class BoardInitializer {
         for (int row = 5; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 if ((row + col) % 2 == 1) {
-                    board.setPiece(row, col, new Piece(PieceColor.WHITE, false));
+                    board.setPiece(row, col, new Piece(WHITE, false));
                 }
             }
         }

@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import ApiService from "../services/ApiService";
-import { useSharedAuth } from "../contexts/AuthContext.jsx";
+import {useSharedAuth} from "../contexts/AuthContext.jsx";
 import styles from "./Profile.module.css";
 import Loader from "../components/Loader.jsx";
 import Button from "../components/Button.jsx";
-import {motion} from "framer-motion";
 import AnimatedPage from "../components/AnimatedPage.jsx";
 
 const Profile = () => {
@@ -12,6 +11,8 @@ const Profile = () => {
     const [gameHistory, setGameHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    console.log('User: ', user);
 
     const [pageNum, setPageNum] = useState(0);
     const [pageSize] = useState(5);
@@ -118,7 +119,7 @@ const Profile = () => {
                                 .map((game) => (
                                     <tr key={game.id}>
                                         <td>{game.redPlayer.displayName}</td>
-                                        <td>{game.blackPlayer.displayName}</td>
+                                        <td>{game.whitePlayer.displayName}</td>
                                         <td>{GAME_RESULT_LABELS[game.result] ?? "Unknown"}</td>
                                         <td>{game.winner ? game.winner.displayName : "---"}</td>
                                         <td>{game.totalMoves}</td>

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.dama.damajatek.enums.game.GameResult.BLACK_WIN;
+import static org.dama.damajatek.enums.game.GameResult.WHITE_WIN;
 import static org.dama.damajatek.enums.game.GameResult.RED_WIN;
 import static org.dama.damajatek.enums.game.PieceColor.RED;
 
@@ -276,11 +276,11 @@ public class GameEngine implements IGameEngine {
 
         // For regular pieces:
         // - RED: forward means row increasing (dir[0] > 0)
-        // - BLACK: forward means row decreasing (dir[0] < 0)
+        // - WHITE: forward means row decreasing (dir[0] < 0)
         if (piece.getColor() == PieceColor.RED) {
             return dir[0] <= 0; // red moves downwards (increase row)
         } else {
-            return dir[0] >= 0; // black moves upwards (decrease row)
+            return dir[0] >= 0; // white moves upwards (decrease row)
         }
     }
 
@@ -301,8 +301,8 @@ public class GameEngine implements IGameEngine {
         // If player has no pieces
         if (!playerHasPieces) {
             log.info("Game over: {} has no pieces, opponent wins", playerToMove);
-            Player winner = (playerToMove == PieceColor.RED) ? game.getBlackPlayer() : game.getRedPlayer();
-            game.markFinished(winner, (playerToMove == PieceColor.RED) ? BLACK_WIN : RED_WIN);
+            Player winner = (playerToMove == PieceColor.RED) ? game.getWhitePlayer() : game.getRedPlayer();
+            game.markFinished(winner, (playerToMove == PieceColor.RED) ? WHITE_WIN : RED_WIN);
             return true;
         }
 
@@ -310,8 +310,8 @@ public class GameEngine implements IGameEngine {
         List<Move> validMoves = getAvailableMoves(board, playerToMove);
         if (validMoves.isEmpty()) {
             log.info("Game over: {} has no valid moves, loses", playerToMove);
-            Player winner = (playerToMove == PieceColor.RED) ? game.getBlackPlayer() : game.getRedPlayer();
-            game.markFinished(winner, (playerToMove == PieceColor.RED) ? BLACK_WIN : RED_WIN);
+            Player winner = (playerToMove == PieceColor.RED) ? game.getWhitePlayer() : game.getRedPlayer();
+            game.markFinished(winner, (playerToMove == PieceColor.RED) ? WHITE_WIN : RED_WIN);
             return true;
         }
 

@@ -57,7 +57,7 @@ public class AppUserCacheService implements IAppUserCacheService {
     @Override
     public void evictPlayers(Game game) {
         Long redId = game.getRedPlayer().getAppUserId();
-        Long blackId = game.getBlackPlayer().getAppUserId();
+        Long blackId = game.getWhitePlayer().getAppUserId();
 
         var cache = cacheManager.getCache("userProfileCache");
         if (cache != null) {

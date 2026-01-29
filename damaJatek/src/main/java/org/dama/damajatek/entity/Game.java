@@ -17,7 +17,7 @@ import static java.time.ZoneOffset.UTC;
 import static org.dama.damajatek.enums.game.GameResult.UNDECIDED;
 import static org.dama.damajatek.enums.game.GameStatus.FINISHED;
 import static org.dama.damajatek.enums.game.GameStatus.IN_PROGRESS;
-import static org.dama.damajatek.enums.game.PieceColor.WHITE;
+import static org.dama.damajatek.enums.game.PieceColor.RED;
 
 @Data
 @NoArgsConstructor
@@ -40,12 +40,12 @@ public class Game {
     private Player redPlayer;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "black_player_id")
-    private Player blackPlayer;
+    @JoinColumn(name = "white_player_id")
+    private Player whitePlayer;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private PieceColor currentTurn = WHITE;
+    private PieceColor currentTurn = RED;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -86,7 +86,7 @@ public class Game {
 
     @PrePersist
     public void init() {
-        if (currentTurn == null) currentTurn = WHITE;
+        if (currentTurn == null) currentTurn = RED;
         if (status == null) status = IN_PROGRESS;
         if (result == null) result = UNDECIDED;
         if (movesWithoutCaptureOrPromotion == null) movesWithoutCaptureOrPromotion = 0;

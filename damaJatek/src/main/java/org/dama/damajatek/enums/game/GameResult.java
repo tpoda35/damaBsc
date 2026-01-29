@@ -2,9 +2,9 @@ package org.dama.damajatek.enums.game;
 
 public enum GameResult {
     RED_WIN,
-    BLACK_WIN,
+    WHITE_WIN,
     RED_FORFEIT,
-    BLACK_FORFEIT,
+    WHITE_FORFEIT,
     DRAW,
     UNDECIDED
 }

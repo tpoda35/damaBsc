@@ -30,7 +30,7 @@ public class GameMapper {
         return GameHistoryDto.builder()
                 .id(game.getId())
                 .redPlayer(game.getRedPlayer())
-                .blackPlayer(game.getBlackPlayer())
+                .whitePlayer(game.getWhitePlayer())
                 .status(game.getStatus())
                 .result(game.getResult())
                 .drawReason(game.getDrawReason())
@@ -44,7 +44,7 @@ public class GameMapper {
 
     private static String getEnemyDisplayName(Game game, PieceColor playerColor) {
         if (playerColor == PieceColor.RED) {
-            return game.getBlackPlayer().getDisplayName();
+            return game.getWhitePlayer().getDisplayName();
         }
         return game.getRedPlayer().getDisplayName();
     }

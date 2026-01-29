@@ -13,7 +13,8 @@ import AnimatedPage from "../components/AnimatedPage.jsx";
 
 const Rooms = () => {
     const [roomsPage, setRoomsPage] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [pageNum, setPageNum] = useState(0);
@@ -37,12 +38,34 @@ const Rooms = () => {
         }
     };
 
+    const refreshRooms = async (page = 0, size = 10) => {
+        setRefreshing(true);
+        setError(null);
+
+        try {
+            const data = await withToastError(
+                () => ApiService.get(`/rooms?pageNum=${page}&pageSize=${size}`),
+                "Failed to fetch rooms"
+            );
+            setRoomsPage(data);
+        } catch (err) {
+            setError(getErrorMessage(err, "Failed to fetch rooms"));
+        } finally {
+            setRefreshing(false);
+        }
+    };
+
+
     useEffect(() => {
         fetchRooms(pageNum, pageSize);
     }, [pageNum, pageSize]);
 
     const handleHostRoom = () => {
         setIsModalOpen(true);
+    };
+
+    const handleRefresh = () => {
+        refreshRooms(pageNum, pageSize);
     };
 
     const handleJoinRoom = async (room) => {
@@ -86,12 +109,23 @@ const Rooms = () => {
     const roomList = roomsPage?.content || [];
     const totalPages = roomsPage?.totalPages || 1;
 
+    console.log('Refreshing: ', refreshing);
+
     return (
         <>
             <AnimatedPage className={styles.rooms}>
                 <div className={styles.header}>
                     <h2 className={styles.title}>Room list</h2>
-                    <Button onClick={handleHostRoom} children="Host room" />
+                    <div className={styles.headerButtons}>
+                        <Button onClick={handleHostRoom} children="Host room" />
+                        <Button onClick={handleRefresh} disabled={refreshing}>
+                            <i
+                                className={`fa ${refreshing ? "fa-spinner fa-spin" : "fa-refresh"}`}
+                                aria-hidden="true"
+                            />
+                        </Button>
+
+                    </div>
                 </div>
 
                 {roomList.length === 0 ? (

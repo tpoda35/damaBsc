@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface IGameService {
-    Game createGame(Player redPlayer, Player blackPlayer, Room room);
+    Game createGame(Player redPlayer, Player whitePlayer, Room room);
     CompletableFuture<GameInfoDto> getGame(Long gameId);
     CompletableFuture<Page<GameHistoryDto>> getGameHistory();
     List<IGameEvent> makeMove(Long gameId, Move move, Principal principal);

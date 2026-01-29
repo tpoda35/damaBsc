@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import styles from "./CheckersRulesPanel.module.css";
 
 const rulesSlides = [
@@ -74,7 +73,7 @@ const CheckersRulesSliderMotion = () => {
 
                 <div className={styles.content}>
                     <button className={styles.arrow} onClick={prevSlide}>
-                        <ChevronLeft size={24} />
+                        <i className="fa fa-chevron-left" aria-hidden="true" />
                     </button>
 
                     <div className={styles.slideWrapper}>
@@ -96,7 +95,7 @@ const CheckersRulesSliderMotion = () => {
                     </div>
 
                     <button className={styles.arrow} onClick={nextSlide}>
-                        <ChevronRight size={24} />
+                        <i className="fa fa-chevron-right" aria-hidden="true" />
                     </button>
                 </div>
             </div>

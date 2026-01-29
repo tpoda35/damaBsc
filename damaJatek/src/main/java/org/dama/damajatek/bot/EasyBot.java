@@ -118,7 +118,7 @@ public class EasyBot implements IBotStrategy {
 
     private int evaluateBoard(Board board, PieceColor color) {
         int redScore = 0;
-        int blackScore = 0;
+        int whiteScore = 0;
 
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
@@ -128,13 +128,13 @@ public class EasyBot implements IBotStrategy {
                 int value = piece.isKing() ? 3 : 1;
 
                 if (piece.getColor() == PieceColor.RED) redScore += value;
-                else blackScore += value;
+                else whiteScore += value;
             }
         }
 
         int value = (color == PieceColor.RED)
-                ? (redScore - blackScore)
-                : (blackScore - redScore);
+                ? (redScore - whiteScore)
+                : (whiteScore - redScore);
 
         // Penalize repetition to avoid loops
         int hash = boardHash(board);

@@ -14,7 +14,7 @@ public class PlayerUtils {
 
     public static void verifyUserAccess(Game game, AppUser user) {
         if (!isHumanPlayerMatchingUser(game.getRedPlayer(), user)
-                && !isHumanPlayerMatchingUser(game.getBlackPlayer(), user)) {
+                && !isHumanPlayerMatchingUser(game.getWhitePlayer(), user)) {
             throw new AccessDeniedException("You are not a participant in this game");
         }
     }

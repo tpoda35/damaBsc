@@ -124,7 +124,7 @@ public class MoveProcessor implements IMoveProcessor {
             return RED;
         }
 
-        if (winnerId.equals(game.getBlackPlayer().getId())) {
+        if (winnerId.equals(game.getWhitePlayer().getId())) {
             return WHITE;
         }
 

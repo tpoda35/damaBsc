@@ -72,7 +72,7 @@ public class BotService implements IBotService {
 
         Player currentPlayer = (game.getCurrentTurn() == PieceColor.RED)
                 ? game.getRedPlayer()
-                : game.getBlackPlayer();
+                : game.getWhitePlayer();
 
         // Check if the Player is a bot player
         if (!(currentPlayer instanceof BotPlayer botPlayer)) {

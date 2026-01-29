@@ -201,23 +201,23 @@ public class RoomService implements IRoomService {
         if (room.isFullyReady()) {
             // Game start logic
             Player redPlayer;
-            Player blackPlayer;
+            Player whitePlayer;
 
             // This logic will be used temporarily
             Random random = new Random();
             int number = random.nextInt(2) + 1;
             if (number == 1) {
-                blackPlayer = PlayerMapper.createHumanPlayer(room.getHost());
+                whitePlayer = PlayerMapper.createHumanPlayer(room.getHost());
                 redPlayer = PlayerMapper.createHumanPlayer(room.getOpponent());
             } else {
-                blackPlayer = PlayerMapper.createHumanPlayer(room.getOpponent());
+                whitePlayer = PlayerMapper.createHumanPlayer(room.getOpponent());
                 redPlayer = PlayerMapper.createHumanPlayer(room.getHost());
             }
 
             room.setStarted(true);
             roomRepository.save(room);
 
-            Game game = gameService.createGame(redPlayer, blackPlayer, room);
+            Game game = gameService.createGame(redPlayer, whitePlayer, room);
             roomWebSocketService.broadcastRoomUpdate(START, game.getId(), "/topic/rooms/" + roomId);
         } else {
             log.warn("Game start blocked for room(id: {}): hostReadyStatus={}, opponentReadyStatus={}",

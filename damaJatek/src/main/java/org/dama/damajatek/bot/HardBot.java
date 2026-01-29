@@ -243,9 +243,9 @@ public class HardBot implements IBotStrategy {
 
     private int evaluateBoard(Board board, PieceColor color) {
         int redScore = 0;
-        int blackScore = 0;
+        int whiteScore = 0;
 
-        int redPieces = 0, blackPieces = 0;
+        int redPieces = 0, whitePieces = 0;
         int redKings = 0, blackKings = 0;
 
         for (int r = 0; r < 8; r++) {
@@ -283,16 +283,16 @@ public class HardBot implements IBotStrategy {
                     redPieces++;
                     if (piece.isKing()) redKings++;
                 } else {
-                    blackScore += value;
-                    blackPieces++;
+                    whiteScore += value;
+                    whitePieces++;
                     if (piece.isKing()) blackKings++;
                 }
             }
         }
 
         // Material advantage bonus
-        int myPieces = (color == PieceColor.RED) ? redPieces : blackPieces;
-        int oppPieces = (color == PieceColor.RED) ? blackPieces : redPieces;
+        int myPieces = (color == PieceColor.RED) ? redPieces : whitePieces;
+        int oppPieces = (color == PieceColor.RED) ? whitePieces : redPieces;
         int materialAdvantage = (myPieces - oppPieces) * 5;
 
         // King advantage in endgame
@@ -301,8 +301,8 @@ public class HardBot implements IBotStrategy {
         int kingAdvantage = (myKings - oppKings) * 8;
 
         int baseValue = (color == PieceColor.RED)
-                ? (redScore - blackScore)
-                : (blackScore - redScore);
+                ? (redScore - whiteScore)
+                : (whiteScore - redScore);
 
         int totalValue = baseValue + materialAdvantage + kingAdvantage;
 

@@ -45,7 +45,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.dama.damajatek.enums.game.GameResult.RED_FORFEIT;
+import static org.dama.damajatek.enums.game.GameResult.WHITE_FORFEIT;
 import static org.dama.damajatek.enums.game.PieceColor.RED;
+import static org.dama.damajatek.enums.game.PieceColor.WHITE;
 import static org.dama.damajatek.util.BoardInitializer.createStartingBoard;
 import static org.dama.damajatek.util.BoardSerializer.loadBoard;
 import static org.dama.damajatek.util.BoardSerializer.saveBoard;
@@ -71,13 +74,13 @@ public class GameService implements IGameService {
 
     @Transactional
     @Override
-    public Game createGame(Player redPlayer, Player blackPlayer, Room room) {
+    public Game createGame(Player redPlayer, Player whitePlayer, Room room) {
         Board board = createStartingBoard();
 
         Game game = Game.builder()
                 .room(room)
                 .redPlayer(redPlayer)
-                .blackPlayer(blackPlayer)
+                .whitePlayer(whitePlayer)
                 .build();
 
         // Save initial board state
@@ -85,9 +88,9 @@ public class GameService implements IGameService {
         gameRepository.save(game);
 
         // Add 1s delay to the bot to let the user load the page
-        if (game.getCurrentTurn() == PieceColor.WHITE && blackPlayer instanceof BotPlayer) {
+        if (game.getCurrentTurn() == RED && whitePlayer instanceof BotPlayer) {
             CompletableFuture
-                    .delayedExecutor(1, TimeUnit.SECONDS)
+                    .delayedExecutor(5, TimeUnit.SECONDS)
                     .execute(() -> botService.playBotTurnAsync(game.getId())); // Make bot move and send the move event through websocket
         }
 
@@ -106,7 +109,7 @@ public class GameService implements IGameService {
         PieceColor playerColor =
                 isHumanPlayerMatchingUser(game.getRedPlayer(), loggedInUser)
                         ? RED
-                        : PieceColor.WHITE;
+                        : WHITE;
 
         Board board = loadBoard(game);
         List<Move> validMoves = gameEngine.getAvailableMoves(board, game.getCurrentTurn());
@@ -159,8 +162,8 @@ public class GameService implements IGameService {
         PieceColor currentTurn = game.getCurrentTurn();
 
         // Turn validation
-        if ((currentTurn == PieceColor.RED && !isHumanPlayerMatchingUser(game.getRedPlayer(), loggedInUser)) ||
-                (currentTurn == PieceColor.WHITE && !isHumanPlayerMatchingUser(game.getBlackPlayer(), loggedInUser))) {
+        if ((currentTurn == RED && !isHumanPlayerMatchingUser(game.getRedPlayer(), loggedInUser)) ||
+                (currentTurn == WHITE && !isHumanPlayerMatchingUser(game.getWhitePlayer(), loggedInUser))) {
             throw new AccessDeniedException("Not your turn");
         }
 
@@ -211,25 +214,25 @@ public class GameService implements IGameService {
 
         // Verify that the user is forfeiting their own color
         boolean isUserColor =
-                (pieceColor == PieceColor.RED && isHumanPlayerMatchingUser(game.getRedPlayer(), loggedInUser)) ||
-                        (pieceColor == PieceColor.WHITE && isHumanPlayerMatchingUser(game.getBlackPlayer(), loggedInUser));
+                (pieceColor == RED && isHumanPlayerMatchingUser(game.getRedPlayer(), loggedInUser)) ||
+                        (pieceColor == WHITE && isHumanPlayerMatchingUser(game.getWhitePlayer(), loggedInUser));
 
         if (!isUserColor) {
             throw new AccessDeniedException("You can only forfeit your own game");
         }
 
         // Determine winner and result
-        Player winner = (pieceColor == PieceColor.RED)
-                ? game.getBlackPlayer()
+        Player winner = (pieceColor == RED)
+                ? game.getWhitePlayer()
                 : game.getRedPlayer();
 
-        PieceColor winnerColor = (pieceColor == PieceColor.RED)
-                ? PieceColor.WHITE
-                : PieceColor.RED;
+        PieceColor winnerColor = (pieceColor == RED)
+                ? WHITE
+                : RED;
 
-        GameResult result = (pieceColor == PieceColor.RED)
-                ? GameResult.RED_FORFEIT
-                : GameResult.BLACK_FORFEIT;
+        GameResult result = (pieceColor == RED)
+                ? RED_FORFEIT
+                : WHITE_FORFEIT;
 
         game.markFinished(winner, result);
         gameRepository.save(game);

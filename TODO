@@ -8,7 +8,7 @@
 - Profilkép
 - Leütött dáma bábu számláló (-)
 - Auth baj, unauth kéréseknél nem jó a handling
-- WebSocket room list
+- room list refresh (-)
 - Room kidobás és tiltás
 - Emote game közben
 

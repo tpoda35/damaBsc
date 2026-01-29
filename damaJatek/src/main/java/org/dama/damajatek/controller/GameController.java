@@ -55,19 +55,19 @@ public class GameController {
         AppUser loggedInUser = appUserService.getLoggedInUser();
 
         Player redPlayer;
-        Player blackPlayer;
+        Player whitePlayer;
 
         Random random = new Random();
         int number = random.nextInt(2) + 1;
         if (number == 1) {
-            blackPlayer = PlayerMapper.createBotPlayer(aiGameCreateDto.getBotDifficulty());
+            whitePlayer = PlayerMapper.createBotPlayer(aiGameCreateDto.getBotDifficulty());
             redPlayer = PlayerMapper.createHumanPlayer(loggedInUser);
         } else {
-            blackPlayer = PlayerMapper.createHumanPlayer(loggedInUser);
+            whitePlayer = PlayerMapper.createHumanPlayer(loggedInUser);
             redPlayer = PlayerMapper.createBotPlayer(aiGameCreateDto.getBotDifficulty());
         }
 
-        Game game = gameService.createGame(redPlayer, blackPlayer, null);
+        Game game = gameService.createGame(redPlayer, whitePlayer, null);
         return game.getId();
     }
 

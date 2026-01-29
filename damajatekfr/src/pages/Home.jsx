@@ -1,24 +1,13 @@
 import {useSharedAuth} from "../contexts/AuthContext";
 import styles from "./Home.module.css";
-import {useNavigate} from "react-router-dom";
 
 import React from "react";
 import CheckersHeroAnimation from "../components/CheckersHeroAnimation.jsx";
-import {motion} from "framer-motion";
 import CheckersRulesPanel from "../components/CheckersRulesPanel.jsx";
 import AnimatedPage from "../components/AnimatedPage.jsx";
 
 const Home = () => {
     const { user } = useSharedAuth();
-    const navigate = useNavigate();
-
-    const handleLoginRedirect = () => {
-        navigate("/login");
-    };
-
-    const handleRegisterRedirect = () => {
-        navigate("/register");
-    };
 
     return (
         <AnimatedPage className={styles.mainContainer}>

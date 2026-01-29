@@ -16,7 +16,7 @@ public interface IGameRepository extends JpaRepository<Game, Long> {
     @Query("""
         SELECT g FROM Game g
         LEFT JOIN FETCH g.redPlayer
-        LEFT JOIN FETCH g.blackPlayer
+        LEFT JOIN FETCH g.whitePlayer
         WHERE g.id = :id
     """)
     Optional<Game> findByIdWithPlayers(@Param("id") Long id);
@@ -24,8 +24,8 @@ public interface IGameRepository extends JpaRepository<Game, Long> {
     @Query("""
         SELECT g FROM Game g
         LEFT JOIN TREAT(g.redPlayer AS HumanPlayer) redPlayer
-        LEFT JOIN TREAT(g.blackPlayer AS HumanPlayer) blackPlayer
-        WHERE (redPlayer.user.id = :userId OR blackPlayer.user.id = :userId)
+        LEFT JOIN TREAT(g.whitePlayer AS HumanPlayer) whitePlayer
+        WHERE (redPlayer.user.id = :userId OR whitePlayer.user.id = :userId)
         ORDER BY g.startTime DESC
     """)
     Page<Game> findByPlayerId(@Param("userId") Long userId, Pageable pageable);
@@ -34,13 +34,13 @@ public interface IGameRepository extends JpaRepository<Game, Long> {
         SELECT COUNT(g)
         FROM Game g
         LEFT JOIN TREAT(g.redPlayer AS BotPlayer) redBot
-        LEFT JOIN TREAT(g.blackPlayer AS BotPlayer) blackBot
+        LEFT JOIN TREAT(g.whitePlayer AS BotPlayer) whiteBot
         LEFT JOIN TREAT(g.redPlayer AS HumanPlayer) redHuman
-        LEFT JOIN TREAT(g.blackPlayer AS HumanPlayer) blackHuman
+        LEFT JOIN TREAT(g.whitePlayer AS HumanPlayer) whiteHuman
         WHERE
-          (redHuman.user.id = :playerId AND blackBot.id IS NOT NULL AND g.result IN ('RED_WIN','BLACK_FORFEIT'))
+          (redHuman.user.id = :playerId AND whiteBot.id IS NOT NULL AND g.result IN ('RED_WIN','WHITE_FORFEIT'))
           OR
-          (blackHuman.user.id = :playerId AND redBot.id IS NOT NULL AND g.result IN ('BLACK_WIN','RED_FORFEIT'))
+          (whiteHuman.user.id = :playerId AND redBot.id IS NOT NULL AND g.result IN ('WHITE_WIN','RED_FORFEIT'))
     """)
     Integer countWinsVsAI(@Param("playerId") Long playerId);
 
@@ -49,13 +49,13 @@ public interface IGameRepository extends JpaRepository<Game, Long> {
         SELECT COUNT(g)
         FROM Game g
         LEFT JOIN TREAT(g.redPlayer AS BotPlayer) redBot
-        LEFT JOIN TREAT(g.blackPlayer AS BotPlayer) blackBot
+        LEFT JOIN TREAT(g.whitePlayer AS BotPlayer) whiteBot
         LEFT JOIN TREAT(g.redPlayer AS HumanPlayer) redHuman
-        LEFT JOIN TREAT(g.blackPlayer AS HumanPlayer) blackHuman
+        LEFT JOIN TREAT(g.whitePlayer AS HumanPlayer) whiteHuman
         WHERE
-          (redHuman.user.id = :playerId AND blackBot.id IS NOT NULL AND g.result IN ('BLACK_WIN','RED_FORFEIT'))
+          (redHuman.user.id = :playerId AND whiteBot.id IS NOT NULL AND g.result IN ('WHITE_WIN','RED_FORFEIT'))
           OR
-          (blackHuman.user.id = :playerId AND redBot.id IS NOT NULL AND g.result IN ('RED_WIN','BLACK_FORFEIT'))
+          (whiteHuman.user.id = :playerId AND redBot.id IS NOT NULL AND g.result IN ('RED_WIN','WHITE_FORFEIT'))
     """)
     Integer countLossesVsAI(@Param("playerId") Long playerId);
 
@@ -65,11 +65,11 @@ public interface IGameRepository extends JpaRepository<Game, Long> {
         SELECT COUNT(g)
         FROM Game g
         LEFT JOIN TREAT(g.redPlayer AS HumanPlayer) redHuman
-        LEFT JOIN TREAT(g.blackPlayer AS HumanPlayer) blackHuman
+        LEFT JOIN TREAT(g.whitePlayer AS HumanPlayer) whiteHuman
         WHERE
-          (redHuman.user.id = :playerId AND blackHuman.user.id IS NOT NULL AND g.result IN ('RED_WIN', 'BLACK_FORFEIT'))
+          (redHuman.user.id = :playerId AND whiteHuman.user.id IS NOT NULL AND g.result IN ('RED_WIN', 'WHITE_FORFEIT'))
           OR
-          (blackHuman.user.id = :playerId AND redHuman.user.id IS NOT NULL AND g.result IN ('BLACK_WIN', 'RED_FORFEIT'))
+          (whiteHuman.user.id = :playerId AND redHuman.user.id IS NOT NULL AND g.result IN ('WHITE_WIN', 'RED_FORFEIT'))
     """)
     Integer countWinsVsPlayer(@Param("playerId") Long playerId);
 
@@ -78,11 +78,11 @@ public interface IGameRepository extends JpaRepository<Game, Long> {
         SELECT COUNT(g)
         FROM Game g
         LEFT JOIN TREAT(g.redPlayer AS HumanPlayer) redHuman
-        LEFT JOIN TREAT(g.blackPlayer AS HumanPlayer) blackHuman
+        LEFT JOIN TREAT(g.whitePlayer AS HumanPlayer) whiteHuman
         WHERE
-            (redHuman.user.id = :playerId AND blackHuman.user.id IS NOT NULL AND g.result IN ('BLACK_WIN', 'RED_FORFEIT'))
+            (redHuman.user.id = :playerId AND whiteHuman.user.id IS NOT NULL AND g.result IN ('white_WIN', 'RED_FORFEIT'))
             OR
-            (blackHuman.user.id = :playerId AND redHuman.user.id IS NOT NULL AND g.result IN ('RED_WIN', 'BLACK_FORFEIT'))
+            (whiteHuman.user.id = :playerId AND redHuman.user.id IS NOT NULL AND g.result IN ('RED_WIN', 'white_FORFEIT'))
     """)
     Integer countLossesVsPlayer(@Param("playerId") Long playerId);
 
@@ -90,9 +90,9 @@ public interface IGameRepository extends JpaRepository<Game, Long> {
         SELECT COALESCE(COUNT(g), 0)
         FROM Game g
         LEFT JOIN TREAT(g.redPlayer AS HumanPlayer) redHuman
-        LEFT JOIN TREAT(g.blackPlayer AS BotPlayer) blackBot
-        WHERE (redHuman.user.id = :playerId AND blackBot IS NOT NULL AND g.result = 'DRAW')
-           OR (blackBot IS NOT NULL AND redHuman.user.id = :playerId AND g.result = 'DRAW')
+        LEFT JOIN TREAT(g.whitePlayer AS BotPlayer) whiteBot
+        WHERE (redHuman.user.id = :playerId AND whiteBot IS NOT NULL AND g.result = 'DRAW')
+           OR (whiteBot IS NOT NULL AND redHuman.user.id = :playerId AND g.result = 'DRAW')
     """)
     Integer countDrawsVsAI(@Param("playerId") Long playerId);
 
@@ -101,9 +101,9 @@ public interface IGameRepository extends JpaRepository<Game, Long> {
         SELECT COALESCE(COUNT(g), 0)
         FROM Game g
         LEFT JOIN TREAT(g.redPlayer AS HumanPlayer) redHuman
-        LEFT JOIN TREAT(g.blackPlayer AS HumanPlayer) blackHuman
-        WHERE (redHuman.user.id = :playerId AND blackHuman.id IS NOT NULL AND g.result = 'DRAW')
-           OR (blackHuman.user.id = :playerId AND redHuman.id IS NOT NULL AND g.result = 'DRAW')
+        LEFT JOIN TREAT(g.whitePlayer AS HumanPlayer) whiteHuman
+        WHERE (redHuman.user.id = :playerId AND whiteHuman.id IS NOT NULL AND g.result = 'DRAW')
+           OR (whiteHuman.user.id = :playerId AND redHuman.id IS NOT NULL AND g.result = 'DRAW')
     """)
     Integer countDrawsVsPlayer(@Param("playerId") Long playerId);
 

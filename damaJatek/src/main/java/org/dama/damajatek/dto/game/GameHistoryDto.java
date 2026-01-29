@@ -19,7 +19,7 @@ public class GameHistoryDto {
     private Long id;
 
     private Player redPlayer;
-    private Player blackPlayer;
+    private Player whitePlayer;
 
     private GameStatus status;
     private GameResult result;
