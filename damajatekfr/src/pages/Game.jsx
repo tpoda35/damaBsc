@@ -458,11 +458,18 @@ const Game = () => {
 
     console.log('Game: ', game);
 
+    const playerColor = game.playerColor?.toUpperCase();
+
+    const enemyColor =
+        playerColor === "WHITE" ? "RED" : "WHITE";
+
     if (showIntro) {
         return (
             <GameIntro
-                playerOne={user.displayName || "Red"}
-                playerTwo={game.enemyDisplayName || "White"}
+                playerOne={user.displayName || playerColor}
+                playerOneColor={playerColor}
+                playerTwo={game.enemyDisplayName || enemyColor}
+                playerTwoColor={enemyColor}
                 onFinish={() => setShowIntro(false)}
             />
         );

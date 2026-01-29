@@ -3,14 +3,13 @@ package org.dama.damajatek.authentication.auth;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dama.damajatek.exception.auth.InvalidRefreshTokenException;
-import org.dama.damajatek.exception.auth.RefreshTokenNotFoundException;
-import org.dama.damajatek.exception.UserNotFoundException;
 import org.dama.damajatek.authentication.config.JwtService;
 import org.dama.damajatek.authentication.token.Token;
 import org.dama.damajatek.authentication.token.TokenRepository;
 import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.AppUserRepository;
+import org.dama.damajatek.exception.auth.InvalidRefreshTokenException;
+import org.dama.damajatek.exception.auth.RefreshTokenNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -53,6 +52,7 @@ public class AuthenticationService {
 
     @Transactional
     public AuthenticationResponse login(AuthenticationRequest request) {
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -61,10 +61,12 @@ public class AuthenticationService {
         );
 
         AppUser user = repository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UserNotFoundException("User not found."));
+                .orElseThrow(() ->
+                        new IllegalStateException("Authenticated user not found")
+                );
 
         String jwtToken = jwtService.generateToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user); // Will be modified to stay the same for 30 days.
+        String refreshToken = jwtService.generateRefreshToken(user);
 
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);

@@ -14,17 +14,11 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-/**
- * Service class for logout.
- */
 @Service
 public class LogoutService implements LogoutHandler {
 
     private final TokenRepository tokenRepository;
 
-    /**
-     * This resolver sends the exceptions to the global handler.
-     */
     private final HandlerExceptionResolver resolver;
 
     public LogoutService(

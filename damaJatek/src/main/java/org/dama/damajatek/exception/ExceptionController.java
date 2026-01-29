@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -76,22 +77,25 @@ public class ExceptionController {
             CompletionException e
     ) {
         Throwable cause = e.getCause();
-        if (cause instanceof UserNotFoundException) {
-            return handleUserNotFoundException((UserNotFoundException) cause);
-        } else if (cause instanceof IllegalStateException) {
-            return handleIllegalStateException((IllegalStateException) cause);
+
+        if (cause instanceof AuthenticationException) {
+            return buildResponse(
+                    "Invalid email or password",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
+
+        if (cause instanceof IllegalStateException ise) {
+            return handleIllegalStateException(ise);
+        }
+
         return globalExceptionHandler(e);
     }
+
 
     // ----------------------
     // Specific exceptions
     // ----------------------
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<CustomExceptionDto> handleUserNotFoundException(UserNotFoundException e) {
-        return buildResponse(e.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(RefreshTokenNotFoundException.class)
     public ResponseEntity<CustomExceptionDto> handleRefreshTokenNotFoundException(RefreshTokenNotFoundException e) {
         return buildResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);

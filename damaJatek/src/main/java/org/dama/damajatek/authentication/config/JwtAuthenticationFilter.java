@@ -21,12 +21,6 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import java.io.IOException;
 import java.util.Optional;
 
-/**
- * Custom JWT filter class.
- *
- * <p>Gets called at every request, because it extends {@link OncePerRequestFilter}.
- * Ensures that the JWT is always in the header, and it's not expired.</p>
- */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -34,9 +28,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final TokenRepository tokenRepository;
 
-    /**
-     * This resolver sends the exceptions to the global handler.
-     */
     private final HandlerExceptionResolver resolver;
 
     public JwtAuthenticationFilter(

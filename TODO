@@ -7,7 +7,7 @@
 - Room chat (-)
 - Profilkép
 - Leütött dáma bábu számláló (-)
-- Auth baj, unauth kéréseknél nem jó a handling
+- Auth baj, unauth kéréseknél nem jó a handling (-)
 - room list refresh (-)
 - Room kidobás és tiltás
 - Emote game közben

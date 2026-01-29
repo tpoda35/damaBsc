@@ -38,7 +38,7 @@
     font-weight: 700;
 }
 
-.turnColorWhite {
+.white {
     display: inline-block;
     padding: 0.3rem 0.85rem;
     border-radius: 999px;
@@ -51,7 +51,7 @@
     border: 1px solid #ddd;
 }
 
-.turnColorRed {
+.red {
     display: inline-block;
     padding: 0.3rem 0.85rem;
     border-radius: 999px;

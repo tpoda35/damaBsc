@@ -2,11 +2,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
 import styles from "./GameIntro.module.css";
 
-const GameIntro = ({ playerOne, playerTwo, onFinish }) => {
+const GameIntro = ({ playerOne, playerOneColor, playerTwo, playerTwoColor, onFinish }) => {
     useEffect(() => {
         const timer = setTimeout(onFinish, 3000);
         return () => clearTimeout(timer);
     }, [onFinish]);
+
+    const p1Color = playerOneColor?.toLowerCase();
+    const p2Color = playerTwoColor?.toLowerCase();
 
     return (
         <AnimatePresence>
@@ -36,9 +39,9 @@ const GameIntro = ({ playerOne, playerTwo, onFinish }) => {
                         ease: "backOut",
                     }}
                 >
-                    <span className={styles.turnColorWhite}>{playerOne}</span>
+                    <span className={styles[p1Color]}>{playerOne}</span>
                     <span className={styles.vs}>vs</span>
-                    <span className={styles.turnColorRed}>{playerTwo}</span>
+                    <span className={styles[p2Color]}>{playerTwo}</span>
                 </motion.h2>
             </motion.div>
         </AnimatePresence>
