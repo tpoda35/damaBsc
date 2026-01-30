@@ -139,12 +139,12 @@ public class GameService implements IGameService {
     @Async
     @Transactional
     @Override
-    public CompletableFuture<Page<GameHistoryDto>> getGameHistory() {
+    public CompletableFuture<Page<GameHistoryDto>> getGameHistory(int pageNum, int pageSize) {
         AppUser loggedInUser = appUserService.getLoggedInUser();
 
         Page<Game> games = gameRepository.findByPlayerId(
                 loggedInUser.getId(),
-                PageRequest.of(0, 50)
+                PageRequest.of(pageNum, pageSize)
         );
 
         Page<GameHistoryDto> dtoPage = games.map(game -> {

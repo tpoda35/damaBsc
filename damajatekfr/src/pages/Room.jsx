@@ -7,6 +7,7 @@ import Button from "../components/Button.jsx";
 import Loader from "../components/Loader.jsx";
 import {withToastError} from "../utils/withToastError.js";
 import RoomChat from "../components/RoomChat.jsx";
+import {toast} from "react-toastify";
 
 const Room = () => {
     const { roomId } = useParams();
@@ -101,7 +102,7 @@ const Room = () => {
                             case "OPPONENT_LEAVE":
                                 setRoom((prev) => {
                                     if (prev?.isHost) {
-                                        console.log(`[WS] Opponent left.`);
+                                        toast.warn("Opponent left");
                                         return {
                                             ...prev,
                                             opponent: null
@@ -112,6 +113,9 @@ const Room = () => {
                                 break;
 
                             case "HOST_LEAVE":
+                                if (!room?.isHost) {
+                                    toast.warn("Host left, room closed");
+                                }
                                 console.warn(`[WS] Host left, room ${roomId} is closing`);
                                 hasLeftRoom.current = true;
                                 navigate("/rooms");

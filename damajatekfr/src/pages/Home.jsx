@@ -13,7 +13,7 @@ const Home = () => {
         <AnimatedPage className={styles.mainContainer}>
             {!user ? (
                 <div className={styles.heroContainer}>
-                    <h1>
+                    <h1 className={styles.welcomeText}>
                         Welcome!
                         Please log in to play.
                     </h1>

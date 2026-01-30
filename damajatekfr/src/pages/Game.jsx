@@ -139,7 +139,7 @@ const Game = () => {
                                 // Store animation data
                                 const animationId = `capture-${Date.now()}`;
 
-                                // IMPORTANT: Don't remove captured pieces immediately - remove them during animation
+                                // IMPORTANT: Don't remove captured pieces immediately, remove them during animation
                                 // Store captured pieces for removal during animation
                                 const capturedPositions = move.capturedPieces || [];
 
@@ -156,7 +156,7 @@ const Game = () => {
                                         animationPath.push({
                                             row,
                                             col,
-                                            duration: 300,
+                                            duration: 1000,
                                             pause: index < move.path.length - 1 ? 500 : 0,
                                             removeCapturedAtThisStep: index // Remove captured pieces at each jump step
                                         });
@@ -167,7 +167,7 @@ const Game = () => {
                                 animationPath.push({
                                     row: move.toRow,
                                     col: move.toCol,
-                                    duration: 300,
+                                    duration: 1000,
                                     pause: 0,
                                     removeCapturedAtThisStep: move.path ? move.path.length : 0
                                 });
@@ -186,13 +186,13 @@ const Game = () => {
                                         piece: movingPiece
                                     },
                                     capturedPositions: capturedPositions,
-                                    removedCapturedPieces: [] // Track which pieces we've already removed
+                                    removedCapturedPieces: []
                                 };
 
                                 // Start animation sequence
                                 const animateStep = (stepIndex) => {
                                     if (stepIndex >= animationPath.length) {
-                                        // Animation complete - place piece at final position
+                                        // Animation complete, place piece at final position
                                         setTimeout(() => {
                                             setGame(prev => {
                                                 if (!prev || !prev.animation || prev.animation.animationId !== animationId) {
@@ -216,7 +216,7 @@ const Game = () => {
                                                     animation: null
                                                 };
                                             });
-                                        }, 100);
+                                        }, 300);
 
                                         return;
                                     }

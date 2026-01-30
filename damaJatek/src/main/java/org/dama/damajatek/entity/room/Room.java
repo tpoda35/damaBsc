@@ -78,5 +78,6 @@ public class Room {
     public void init() {
         hostReadyStatus = NOT_READY;
         opponentReadyStatus = NOT_READY;
+        started = false;
     }
 }

@@ -2,29 +2,36 @@ import {useEffect, useState} from "react";
 import ApiService from "../services/ApiService";
 import {useSharedAuth} from "../contexts/AuthContext.jsx";
 import styles from "./Profile.module.css";
-import Loader from "../components/Loader.jsx";
-import Button from "../components/Button.jsx";
 import AnimatedPage from "../components/AnimatedPage.jsx";
+import {toast} from "react-toastify";
+import Pagination from "../components/Pagination.jsx";
 
 const Profile = () => {
     const { user, fetchUser } = useSharedAuth();
-    const [gameHistory, setGameHistory] = useState([]);
+    const [gameHistoryPage, setGameHistoryPage] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    console.log('User: ', user);
-
     const [pageNum, setPageNum] = useState(0);
     const [pageSize] = useState(5);
 
-    const fetchGameHistory = async () => {
-        try {
-            const response = await ApiService.get("/games/game-history");
-            setGameHistory(response.content);
-        } catch (err) {
-            setError(err.message || "Failed to fetch game history");
-        }
+    const fetchGameHistory = async (page = pageNum, size = pageSize) => {
+        const response = await ApiService.get(`/games/game-history?pageNum=${page}&pageSize=${size}`);
+        setGameHistoryPage(response);
     };
+
+    useEffect(() => {
+        const loadGameHistory = async () => {
+            try {
+                setLoading(true);
+                await fetchGameHistory(pageNum);
+            } catch {
+                toast.error("Failed to load game history");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadGameHistory();
+    }, [pageNum, pageSize]);
 
     useEffect(() => {
         const loadAll = async () => {
@@ -32,12 +39,14 @@ const Profile = () => {
                 setLoading(true);
                 await fetchUser();
                 await fetchGameHistory();
-            } catch (err) {
-                setError(err.message || "Failed to load profile");
+            } catch {
+                // I didn't used the withToastError.js here, because I dont want to return the api error response
+                toast.error("Failed to load profile");
             } finally {
                 setLoading(false);
             }
         };
+
         loadAll();
     }, [fetchUser]);
 
@@ -45,13 +54,13 @@ const Profile = () => {
         RED_WIN: "Red won",
         BLACK_WIN: "Black won",
         RED_FORFEIT: "Red forfeited",
-        BLACK_FORFEIT: "Black forfeited",
+        WHITE_FORFEIT: "White forfeited",
         DRAW: "Draw",
         UNDECIDED: "Undecided"
     };
 
-    if (loading) return <Loader />;
-    // if (error) return <p style={{ color: "red" }}>{error}</p>; TODO: fix this
+    const gameHistoryList = gameHistoryPage?.content || [];
+    const totalPages = gameHistoryPage?.totalPages || 1;
 
     return (
         <AnimatedPage className={styles.profile}>
@@ -98,7 +107,7 @@ const Profile = () => {
 
             <div className={styles.profileCard}>
                 <h3>Game History</h3>
-                {gameHistory.length === 0 ? (
+                {gameHistoryPage.length === 0 ? (
                     <p className={styles.profileNoGames}>No games played yet.</p>
                 ) : (
                     <>
@@ -114,9 +123,7 @@ const Profile = () => {
                             </tr>
                             </thead>
                             <tbody>
-                            {gameHistory
-                                .slice(pageNum * pageSize, (pageNum + 1) * pageSize)
-                                .map((game) => (
+                            {gameHistoryList.map((game) => (
                                     <tr key={game.id}>
                                         <td>{game.redPlayer.displayName}</td>
                                         <td>{game.whitePlayer.displayName}</td>
@@ -144,25 +151,11 @@ const Profile = () => {
                             </tbody>
                         </table>
 
-                        <div className={styles.profilePagination}>
-                            <Button
-                                onClick={() => setPageNum((prev) => Math.max(prev - 1, 0))}
-                                disabled={pageNum === 0}
-                                children="Prev"
-                            />
-                            <span className={styles.profilePagination}>
-                                Page {pageNum + 1} of {Math.ceil(gameHistory.length / pageSize)}
-                            </span>
-                            <Button
-                                onClick={() =>
-                                    setPageNum((prev) =>
-                                        Math.min(prev + 1, Math.ceil(gameHistory.length / pageSize) - 1)
-                                    )
-                                }
-                                disabled={pageNum + 1 >= Math.ceil(gameHistory.length / pageSize)}
-                                children="Next"
-                            />
-                        </div>
+                        <Pagination
+                            pageNum={pageNum}
+                            totalPages={totalPages}
+                            onPageChange={setPageNum}
+                        />
                     </>
                 )}
             </div>

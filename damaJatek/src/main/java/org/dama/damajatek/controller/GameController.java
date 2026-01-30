@@ -72,8 +72,11 @@ public class GameController {
     }
 
     @GetMapping("/game-history")
-    public CompletableFuture<Page<GameHistoryDto>> getGameHistory() {
-        return gameService.getGameHistory();
+    public CompletableFuture<Page<GameHistoryDto>> getGameHistory(
+            @RequestParam(defaultValue = "0") int pageNum,
+            @RequestParam(defaultValue = "5") int pageSize
+    ) {
+        return gameService.getGameHistory(pageNum, pageSize);
     }
 
 }
