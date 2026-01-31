@@ -1,6 +1,6 @@
-import { NavLink, useNavigate } from "react-router-dom";
-import { useSharedAuth } from "../contexts/AuthContext";
-import React, { useState, useRef, useEffect } from "react";
+import {NavLink, useNavigate} from "react-router-dom";
+import {useSharedAuth} from "../contexts/AuthContext";
+import React, {useEffect, useRef, useState} from "react";
 import styles from "./Navbar.module.css";
 import Modal from "./Modal.jsx";
 import Form from "./Form.jsx";
@@ -112,9 +112,6 @@ const Navbar = () => {
 
                     <NavLink to="/profile" className={getNavLinkClass}>
                         Profile
-                    </NavLink>
-                    <NavLink to="/friends" className={getNavLinkClass}>
-                        Friends
                     </NavLink>
                     <button onClick={logout} className={styles.navbarButton}>
                         Logout

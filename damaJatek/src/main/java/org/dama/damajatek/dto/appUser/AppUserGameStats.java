@@ -11,7 +11,7 @@ public record AppUserGameStats(
         int vsPlayerDraws
 ) {
 
-    // Total games including draws
+    // Total games vs ai
     public int vsAiGames() {
         return vsAiWins + vsAiLoses + vsAiDraws;
     }

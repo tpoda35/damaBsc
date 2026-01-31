@@ -20,15 +20,14 @@ public class AuthenticationController {
     private final AuthenticationService service;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(
+    public void register(
             @RequestBody @Valid RegisterRequest request
     ) {
         service.register(request);
-        return ResponseEntity.ok("Registered");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(
+    public void login(
             @RequestBody @Valid AuthenticationRequest request,
             HttpServletResponse response
     ) {
@@ -52,8 +51,6 @@ public class AuthenticationController {
 
         response.addHeader(SET_COOKIE, accessTokenCookie.toString());
         response.addHeader(SET_COOKIE, refreshTokenCookie.toString());
-
-        return ResponseEntity.ok(authResponse.getAccessToken()); // this is just for testing purposes
     }
 
     @PostMapping("/refresh")

@@ -26,7 +26,7 @@ class ApiService {
             throw new Error(message);
         }
 
-        // Stop infinite loops: if already retried refresh once, fail
+        // if already retried refresh once, fail
         if (originalRequest._retryRefresh) {
             return Promise.reject(error);
         }
@@ -38,7 +38,7 @@ class ApiService {
             originalRequest._retry = true;
 
             try {
-                // Use TokenRefreshService to handle the refresh
+                // refresh
                 await tokenRefreshService.refresh();
 
                 // Retry the original request

@@ -36,7 +36,7 @@ public class EasyBot implements IBotStrategy {
             return moves.getFirst();
         }
 
-        // Occasionally make a blunder
+        // Occasionally make a mistake
         if (random.nextDouble() < BLUNDER_CHANCE) {
             Move blunderMove = moves.get(random.nextInt(moves.size()));
             recordBoardState(board, blunderMove);

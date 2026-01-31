@@ -29,17 +29,6 @@ public class LogoutService implements LogoutHandler {
         this.resolver = resolver;
     }
 
-    /**
-     * Method, which logs out the user. (will be reformated)
-     *
-     * <p>Gets the cookies from the header, saves the JWT.
-     * Sets the JWT expiration and validation to false.
-     * Removes the cookies and clears the auth context.</p>
-     *
-     * @param request incoming http request.
-     * @param response of the incoming http request.
-     * @param authentication user authentication object.
-     */
     @Override
     @Transactional
     public void logout(

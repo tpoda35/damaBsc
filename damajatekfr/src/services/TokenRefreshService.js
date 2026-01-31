@@ -12,7 +12,6 @@ class TokenRefreshService {
         this.isRefreshing = false;
         this.failedQueue = [];
 
-        // Token refresh timer
         this.refreshTimerRef = null;
         // Token TTL is 30 minutes, refresh at 25 minutes
         this.TOKEN_REFRESH_INTERVAL = 25 * 60 * 1000;
@@ -92,14 +91,9 @@ class TokenRefreshService {
         }
     }
 
-    // Manually trigger a token refresh (useful for fallback scenarios)
+    // Manually trigger a token refresh
     async refresh() {
         return this.refreshToken();
-    }
-
-    // Check if currently refreshing
-    isCurrentlyRefreshing() {
-        return this.isRefreshing;
     }
 
     // Cleanup resources (call on logout)
