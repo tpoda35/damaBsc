@@ -6,7 +6,6 @@ import {tokenRefreshEmitter} from "../services/TokenRefreshEmitter.js";
 
 const websocketUrl = import.meta.env.VITE_API_WEBSOCKET_URL;
 
-// Older messages will be dropped
 const MAX_QUEUE_SIZE = 500;
 
 const useWebSocket = () => {
@@ -15,17 +14,20 @@ const useWebSocket = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
 
-    // Map<destination, { callback, headers, subscription }>
-    const subscriptionsRef = useRef(new Map());
+    // Data format: Map<destination, { callback, headers, subscription }>
+    const subscriptionsRef = useRef(new Map()); // Handles the subs like reconnect
 
-    // Prevent connect race conditions
+    // Connect race condition prevention
+    // If 2 connect starts, only the new one will work
     const connectAttemptIdRef = useRef(0);
+
+    // Checks if there's any connection running, only 1 can run at a time
     const pendingConnectPromiseRef = useRef(null);
 
-    // Queue for messages attempted while disconnected
+    // Disconnected messages queue
     const messageQueueRef = useRef([]);
 
-    // Debounce reconnect requests
+    // Debounce reconnect for requests
     const reconnectTimeoutRef = useRef(null);
 
     const flushQueue = useCallback(() => {
@@ -60,10 +62,12 @@ const useWebSocket = () => {
         });
     }, []);
 
+    // Need it to reconnect the user, because we can await it
     const deactivateClient = useCallback(() => {
         const client = stompClientRef.current;
         if (!client || !client.active) return Promise.resolve();
 
+        // Give back promise, so we can await it
         return new Promise((resolve) => {
             let resolved = false;
             const originalOnDisconnect = client.onDisconnect;
@@ -80,7 +84,7 @@ const useWebSocket = () => {
 
             client.deactivate();
 
-            // Safety timeout
+            // timeout
             setTimeout(() => {
                 if (!resolved) {
                     resolved = true;
@@ -91,7 +95,6 @@ const useWebSocket = () => {
     }, []);
 
     const connect = useCallback(() => {
-        // Return existing in-flight promise if any
         if (pendingConnectPromiseRef.current) {
             return pendingConnectPromiseRef.current;
         }
@@ -107,7 +110,6 @@ const useWebSocket = () => {
 
             let token;
             try {
-                // Get WebSocket token (ApiService will handle 401 refresh if needed)
                 token = await apiService.post('/auth/ws-token');
                 console.log('[WebSocket] Got WebSocket token');
             } catch (err) {
@@ -121,7 +123,7 @@ const useWebSocket = () => {
                 try {
                     stompClientRef.current.deactivate();
                 } catch {
-                    /* noop */
+                    /* -- */
                 }
             }
 
@@ -142,7 +144,6 @@ const useWebSocket = () => {
                     },
 
                     onConnect: () => {
-                        // Ignore stale connects
                         if (attemptId !== connectAttemptIdRef.current) return;
 
                         if (timer) clearTimeout(timer);
@@ -200,18 +201,16 @@ const useWebSocket = () => {
     }, [flushQueue, resubscribeAll]);
 
     const disconnect = useCallback(() => {
-        // Clear any pending reconnect
         if (reconnectTimeoutRef.current) {
             clearTimeout(reconnectTimeoutRef.current);
             reconnectTimeoutRef.current = null;
         }
 
-        // Unsubscribe from all subscriptions
         subscriptionsRef.current.forEach((sub) => {
             try {
                 sub.subscription?.unsubscribe();
             } catch {
-                /* noop */
+                /* -- */
             }
         });
         subscriptionsRef.current.clear();
@@ -241,7 +240,6 @@ const useWebSocket = () => {
         return tokenRefreshEmitter.subscribe(() => {
             console.log('[WebSocket] Token refreshed, scheduling reconnect');
 
-            // Clear any existing reconnect timeout
             if (reconnectTimeoutRef.current) {
                 clearTimeout(reconnectTimeoutRef.current);
             }
@@ -255,7 +253,6 @@ const useWebSocket = () => {
         });
     }, [reconnect]);
 
-    // Cleanup on unmount
     useEffect(() => {
         return () => {
             disconnect();
@@ -277,7 +274,7 @@ const useWebSocket = () => {
                     try {
                         existing.subscription?.unsubscribe();
                     } catch {
-                        /* noop */
+                        /* -- */
                     }
                 } else {
                     console.warn(`[WebSocket] Already subscribed to ${destination}`);
@@ -288,7 +285,6 @@ const useWebSocket = () => {
             const subscription = client.subscribe(destination, callback, headers);
             subscriptionsRef.current.set(destination, { callback, headers, subscription });
 
-            // Return unsubscribe function
             return () => {
                 try {
                     subscription.unsubscribe();
@@ -314,7 +310,7 @@ const useWebSocket = () => {
     const enqueueMessage = (payload) => {
         const queue = messageQueueRef.current;
         if (queue.length >= MAX_QUEUE_SIZE) {
-            queue.shift(); // Drop oldest
+            queue.shift(); // Drop the oldest
         }
         queue.push(payload);
     };

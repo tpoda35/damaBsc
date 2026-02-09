@@ -2,6 +2,7 @@ import axios from "axios";
 import { getErrorMessage } from "../utils/getErrorMessage.js";
 import tokenRefreshService from "./TokenRefreshService.js";
 
+// TODO: fix the user request at first page loading
 class ApiService {
     constructor() {
         this.client = axios.create({
@@ -31,7 +32,7 @@ class ApiService {
             return Promise.reject(error);
         }
 
-        // If unauthorized and not retried yet (FALLBACK for missed timer refreshes)
+        // If unauthorized and not retried yet
         if (error.response?.status === 401 && !originalRequest._retry) {
             console.log('[ApiService] 401 detected, attempting refresh (fallback)');
 
@@ -47,6 +48,7 @@ class ApiService {
                 // Mark that refresh failed to prevent further retries
                 originalRequest._retryRefresh = true;
                 console.warn('[ApiService] Token refresh failed');
+                this.redirectToLogin();
 
                 return Promise.reject(refreshError);
             }
@@ -55,6 +57,13 @@ class ApiService {
         // Otherwise, just handle as a normal error
         const message = getErrorMessage(error, "API request failed.");
         throw new Error(message);
+    }
+
+    redirectToLogin() {
+        if (window.location.pathname === '/login' || window.location.pathname === '/') {
+            return;
+        }
+        window.location.href = '/login';
     }
 
     async request(config) {

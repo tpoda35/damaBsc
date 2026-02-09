@@ -13,19 +13,17 @@ class TokenRefreshService {
         this.failedQueue = [];
 
         this.refreshTimerRef = null;
-        // Token TTL is 30 minutes, refresh at 25 minutes
-        this.TOKEN_REFRESH_INTERVAL = 25 * 60 * 1000;
+        this.TOKEN_REFRESH_INTERVAL = 25 * 60 * 1000; // ttl 30 min
     }
 
 
-    // Start the refresh timer
     start() {
         // Clear any existing timer
         if (this.refreshTimerRef) {
             clearInterval(this.refreshTimerRef);
         }
 
-        // Set up interval to refresh token
+        // Refresh interval
         this.refreshTimerRef = setInterval(async () => {
             console.log('[TokenRefreshService] Token refresh triggered');
             try {
@@ -38,7 +36,6 @@ class TokenRefreshService {
         console.log(`[TokenRefreshService] Started (refreshing every ${this.TOKEN_REFRESH_INTERVAL / 60000} minutes)`);
     }
 
-    // Stop the refresh timer
     stop() {
         if (this.refreshTimerRef) {
             clearInterval(this.refreshTimerRef);
@@ -47,7 +44,6 @@ class TokenRefreshService {
         }
     }
 
-    // Process queued requests after refresh completes
     processQueue(error = null) {
         this.failedQueue.forEach((prom) =>
             error ? prom.reject(error) : prom.resolve()
@@ -55,7 +51,7 @@ class TokenRefreshService {
         this.failedQueue = [];
     }
 
-    // Refresh the access token.
+    // Refresh the access token
     // If already refreshing, returns a promise that resolves when current refresh completes
     async refreshToken() {
         // If already refreshing, queue this request
@@ -70,11 +66,10 @@ class TokenRefreshService {
         try {
             await this.client.post("/auth/refresh");
 
-            // Notify all listeners that token was refreshed
+            // Notify listeners that token was refreshed
             tokenRefreshEmitter.emit();
             console.log('[TokenRefreshService] Token refreshed successfully, notified listeners');
 
-            // Process all queued requests
             this.processQueue(null);
         } catch (error) {
             console.error('[TokenRefreshService] Token refresh failed:', error.message);
@@ -91,12 +86,11 @@ class TokenRefreshService {
         }
     }
 
-    // Manually trigger a token refresh
     async refresh() {
         return this.refreshToken();
     }
 
-    // Cleanup resources (call on logout)
+    // Manual cleanup
     cleanup() {
         this.stop();
         this.failedQueue = [];

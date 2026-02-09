@@ -7,7 +7,7 @@ const pieces = [
     { color: "red", style: { top: "10%", left: "40%" }, delay: 0.4 }
 ];
 
-export default function CheckersHeroAnimation() {
+const CheckersHeroAnimation = () => {
     return (
         <div className={styles.scene}>
             {pieces.map((piece, i) => (
@@ -27,3 +27,5 @@ export default function CheckersHeroAnimation() {
         </div>
     );
 }
+
+export default CheckersHeroAnimation;

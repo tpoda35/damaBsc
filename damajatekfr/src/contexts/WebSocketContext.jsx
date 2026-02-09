@@ -3,7 +3,7 @@ import {createContext, useContext} from "react";
 
 const WebSocketContext = createContext(null);
 
-export function WebSocketProvider({ children }) {
+export const WebSocketProvider = ({ children }) => {
     const ws = useWebSocket();
 
     return (
