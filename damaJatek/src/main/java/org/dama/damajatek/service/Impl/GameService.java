@@ -123,6 +123,8 @@ public class GameService implements IGameService {
 
         verifyUserAccess(game, loggedInUser);
 
+        if (game.isFinished()) throw new GameAlreadyFinishedException();
+
         PieceColor playerColor =
                 isHumanPlayerMatchingUser(game.getRedPlayer(), loggedInUser)
                         ? RED

@@ -161,6 +161,9 @@ const Room = () => {
 
                             case "START":
                                 console.log(`[WS] Game started in room ${roomId}, with gameId ${gameId}`);
+
+                                hasLeftRoom.current = true;
+
                                 navigate(`/games/${gameId}`);
                                 break;
 
@@ -231,7 +234,7 @@ const Room = () => {
 
     if (!room) {
         return (
-            <div className={styles.container}>
+            <div className={styles.notFoundContainer}>
                 <h2>Room not found</h2>
                 <Button onClick={() => navigate("/rooms")}>
                     Back to Rooms

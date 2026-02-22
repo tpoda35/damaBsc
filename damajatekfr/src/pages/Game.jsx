@@ -181,7 +181,8 @@ const Game = () => {
                                         piece: movingPiece
                                     },
                                     capturedPositions: capturedPositions,
-                                    removedCapturedPieces: []
+                                    removedCapturedPieces: [],
+                                    pendingPromotion: null  // Will be set by PROMOTED_PIECE if needed
                                 };
 
                                 const animateStep = (stepIndex) => {
@@ -200,7 +201,14 @@ const Game = () => {
                                                     newGrid[r][c] = null;
                                                 });
 
-                                                newGrid[finalRow][finalCol] = piece;
+                                                // Apply promotion here if it was flagged during animation, in the same state update
+                                                let finalPiece = piece;
+                                                const pending = prev.animation.pendingPromotion;
+                                                if (pending && pending.row === finalRow && pending.col === finalCol) {
+                                                    finalPiece = { ...piece, king: true };
+                                                }
+
+                                                newGrid[finalRow][finalCol] = finalPiece;
 
                                                 return {
                                                     ...prev,
@@ -278,30 +286,17 @@ const Game = () => {
                                         prevGame.animation.finalPosition.row === row &&
                                         prevGame.animation.finalPosition.col === col
                                     ) {
-                                        const lastStep = prevGame.animation.path[prevGame.animation.path.length - 1];
-                                        const delay = lastStep?.duration || 0;
-
-                                        setTimeout(() => {
-                                            setGame(current => {
-                                                if (!current) return current;
-
-                                                const newGrid = current.board.grid.map(r => [...r]);
-                                                const piece = newGrid[row][col];
-
-                                                if (piece && piece.color.toLowerCase() === pieceColor.toLowerCase()) {
-                                                    newGrid[row][col] = { ...piece, king: true };
-                                                    console.log(`Piece at (${row}, ${col}) promoted to king after capture animation`);
-                                                }
-
-                                                return {
-                                                    ...current,
-                                                    board: { ...current.board, grid: newGrid }
-                                                };
-                                            });
-                                        }, delay);
-
-                                        return prevGame;
+                                        // Store promotion intent on animation state instead of using a racing setTimeout.
+                                        // The animation completion block will apply it atomically in the same setGame call.
+                                        return {
+                                            ...prevGame,
+                                            animation: {
+                                                ...prevGame.animation,
+                                                pendingPromotion: { row, col, pieceColor }
+                                            }
+                                        };
                                     } else {
+                                        // No capture animation running, apply promotion immediately
                                         const newGrid = prevGame.board.grid.map(r => [...r]);
                                         const piece = newGrid[row][col];
                                         if (piece && piece.color.toLowerCase() === pieceColor.toLowerCase()) {
