@@ -60,7 +60,6 @@ const CheckersRulesSliderMotion = () => {
 
     return (
         <motion.div
-            className={styles.sliderContainer}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}

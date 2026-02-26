@@ -246,91 +246,93 @@ const Room = () => {
     const { id, name, host, opponent, isHost } = room;
 
     return (
-        <div className={styles.container}>
-            <h2 className={styles.title}>
-                Room: {name || `Room ${id}`}
-            </h2>
+        <div className={styles.mainContainer}>
+            <div className={styles.container}>
+                <h2 className={styles.title}>
+                    Room: {name || `Room ${id}`}
+                </h2>
 
-            <div className={styles.playersSection}>
-                <h3 className={styles.playersTitle}>Players</h3>
+                <div className={styles.playersSection}>
+                    <h3 className={styles.playersTitle}>Players</h3>
 
-                <div className={styles.playersGrid}>
-                    <div className={styles.playerCard}>
-                        <div className={styles.playerName}>
-                            Host: {host?.displayName || "Unknown"}
+                    <div className={styles.playersGrid}>
+                        <div className={styles.playerCard}>
+                            <div className={styles.playerName}>
+                                Host: {host?.displayName || "Unknown"}
+                            </div>
+                            <div
+                                className={`${styles.status} ${
+                                    host?.readyStatus === "READY"
+                                        ? styles.statusReady
+                                        : styles.statusNotReady
+                                }`}
+                            >
+                                Status: {host?.readyStatus || "NOT_READY"}
+                            </div>
                         </div>
-                        <div
-                            className={`${styles.status} ${
-                                host?.readyStatus === "READY"
-                                    ? styles.statusReady
-                                    : styles.statusNotReady
-                            }`}
-                        >
-                            Status: {host?.readyStatus || "NOT_READY"}
-                        </div>
-                    </div>
 
-                    <div className={styles.playerCard}>
-                        <div className={styles.playerName}>
-                            Opponent:{" "}
-                            {opponent ? opponent.displayName : "Waiting for opponent..."}
-                        </div>
-                        <div
-                            className={`${styles.status} ${
-                                opponent?.readyStatus === "READY"
-                                    ? styles.statusReady
-                                    : opponent
-                                        ? styles.statusNotReady
-                                        : styles.statusWaiting
-                            }`}
-                        >
-                            Status: {opponent?.readyStatus || "N/A"}
+                        <div className={styles.playerCard}>
+                            <div className={styles.playerName}>
+                                Opponent:{" "}
+                                {opponent ? opponent.displayName : "Waiting for opponent..."}
+                            </div>
+                            <div
+                                className={`${styles.status} ${
+                                    opponent?.readyStatus === "READY"
+                                        ? styles.statusReady
+                                        : opponent
+                                            ? styles.statusNotReady
+                                            : styles.statusWaiting
+                                }`}
+                            >
+                                Status: {opponent?.readyStatus || "N/A"}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <RoomChat
-                roomId={roomId}
-                chatMessages={room.messages}
-            />
-
-            <div className={styles.actions}>
-                <Button
-                    onClick={handleToggleReady}
-                    children={
-                    isHost
-                        ? host?.readyStatus === "READY"
-                            ? "Unready"
-                            : "Ready"
-                        : opponent?.readyStatus === "READY"
-                            ? "Unready"
-                            : "Ready"
-                }
+                <RoomChat
+                    roomId={roomId}
+                    chatMessages={room.messages}
                 />
 
-                {isHost && opponent && (
+                <div className={styles.actions}>
                     <Button
-                        onClick={handleKickOpponent}
-                        children="Kick Opponent"
+                        onClick={handleToggleReady}
+                        children={
+                            isHost
+                                ? host?.readyStatus === "READY"
+                                    ? "Unready"
+                                    : "Ready"
+                                : opponent?.readyStatus === "READY"
+                                    ? "Unready"
+                                    : "Ready"
+                        }
                     />
-                )}
 
-                <Button
-                    onClick={handleLeaveRoom}
-                    children="Leave Room"
-                />
+                    {isHost && opponent && (
+                        <Button
+                            onClick={handleKickOpponent}
+                            children="Kick Opponent"
+                        />
+                    )}
 
-                {isHost && (
                     <Button
-                        onClick={handleStartGame}
-                        children="Start Game"
+                        onClick={handleLeaveRoom}
+                        children="Leave Room"
                     />
-                )}
-            </div>
 
-            <div className={styles.info}>
-                Waiting for both players to be ready...
+                    {isHost && (
+                        <Button
+                            onClick={handleStartGame}
+                            children="Start Game"
+                        />
+                    )}
+                </div>
+
+                <div className={styles.info}>
+                    Waiting for both players to be ready...
+                </div>
             </div>
         </div>
     );

@@ -13,6 +13,8 @@ import AnimatedPage from "../components/AnimatedPage.jsx";
 import Pagination from "../components/Pagination.jsx";
 import {useMinimumLoading} from "../utils/useMinimumLoading.js";
 
+// TODO: Description lock or smth
+
 const Rooms = () => {
     const [roomsPage, setRoomsPage] = useState(null);
     const [loading, setLoading] = useState(true);

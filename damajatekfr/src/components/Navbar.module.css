@@ -98,3 +98,13 @@
     background: var(--btn-light-hover);
 }
 
+@media (max-width: 628px) {
+    .navbar {
+        display: block;
+        width: inherit;
+    }
+
+    .logoBtn {
+        margin: 1rem;
+    }
+}

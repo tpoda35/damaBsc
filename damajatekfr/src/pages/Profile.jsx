@@ -9,7 +9,6 @@ import Pagination from "../components/Pagination.jsx";
 const Profile = () => {
     const { user, fetchUser } = useSharedAuth();
     const [gameHistoryPage, setGameHistoryPage] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [pageNum, setPageNum] = useState(0);
     const [pageSize] = useState(5);
 
@@ -21,12 +20,9 @@ const Profile = () => {
     useEffect(() => {
         const loadGameHistory = async () => {
             try {
-                setLoading(true);
                 await fetchGameHistory(pageNum);
             } catch {
                 toast.error("Failed to load game history");
-            } finally {
-                setLoading(false);
             }
         };
 
@@ -36,14 +32,11 @@ const Profile = () => {
     useEffect(() => {
         const loadAll = async () => {
             try {
-                setLoading(true);
                 await fetchUser();
                 await fetchGameHistory();
             } catch {
                 // I didn't used the withToastError.js here, because I dont want to return the api error response
                 toast.error("Failed to load profile");
-            } finally {
-                setLoading(false);
             }
         };
 
@@ -67,10 +60,10 @@ const Profile = () => {
             {user && (
                 <div className={styles.profileCard}>
                     <div className={styles.profileDefaultData}>
-                        <p><strong>Name:</strong> {user.displayName}</p>
-                        <p><strong>Email:</strong> {user.email}</p>
-                        <p><strong>Created At:</strong> {new Date(user.createdAt).toLocaleString()}</p>
-                        <p><strong>Updated At:</strong> {new Date(user.updatedAt).toLocaleString()}</p>
+                        <p><strong>Name:</strong><br /> {user.displayName}</p>
+                        <p><strong>Email:</strong><br /> {user.email}</p>
+                        <p><strong>Created At:</strong><br /> {new Date(user.createdAt).toLocaleString()}</p>
+                        <p><strong>Updated At:</strong><br /> {new Date(user.updatedAt).toLocaleString()}</p>
                     </div>
 
                     <h3>Room Stats</h3>
@@ -111,26 +104,42 @@ const Profile = () => {
                     <p className={styles.profileNoGames}>No games played yet.</p>
                 ) : (
                     <>
-                        <table className={styles.profileGameTable}>
-                            <thead>
-                            <tr>
-                                <th>Red Player</th>
-                                <th>Black Player</th>
-                                <th>Result</th>
-                                <th>Winner</th>
-                                <th>Total Moves</th>
-                                <th>Game Time</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {gameHistoryList.map((game) => (
+                        <div className={styles.tableWrapper}>
+                            <table className={styles.profileGameTable}>
+                                <thead>
+                                <tr>
+                                    <th>Red Player</th>
+                                    <th>Black Player</th>
+                                    <th>Result</th>
+                                    <th>Winner</th>
+                                    <th>Total Moves</th>
+                                    <th>Game Time</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {gameHistoryList.map((game) => (
                                     <tr key={game.id}>
-                                        <td>{game.redPlayer.displayName}</td>
-                                        <td>{game.whitePlayer.displayName}</td>
-                                        <td>{GAME_RESULT_LABELS[game.result] ?? "Unknown"}</td>
-                                        <td>{game.winner ? game.winner.displayName : "---"}</td>
-                                        <td>{game.totalMoves}</td>
-                                        <td>
+                                        <td data-label="Red Player">
+                                            {game.redPlayer.displayName}
+                                        </td>
+
+                                        <td data-label="Black Player">
+                                            {game.whitePlayer.displayName}
+                                        </td>
+
+                                        <td data-label="Result">
+                                            {GAME_RESULT_LABELS[game.result] ?? "Unknown"}
+                                        </td>
+
+                                        <td data-label="Winner">
+                                            {game.winner ? game.winner.displayName : "---"}
+                                        </td>
+
+                                        <td data-label="Total Moves">
+                                            {game.totalMoves}
+                                        </td>
+
+                                        <td data-label="Game Time">
                                             {game.startTime && game.endTime
                                                 ? (() => {
                                                     const totalSeconds = Math.round(
@@ -145,11 +154,11 @@ const Profile = () => {
                                                 })()
                                                 : "-"}
                                         </td>
-
                                     </tr>
                                 ))}
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
 
                         <Pagination
                             pageNum={pageNum}

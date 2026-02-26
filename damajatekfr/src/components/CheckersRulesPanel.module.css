@@ -1,7 +1,3 @@
-.sliderContainer {
-    padding: 20px;
-}
-
 .slider {
     background-color: var(--text-primary);
     color: var(--text-inverse);
@@ -77,4 +73,14 @@
 
 .arrow:hover {
     opacity: 0.7;
+}
+
+@media (max-width: 500px) {
+    .slider {
+        width: 380px;
+    }
+
+    .content {
+        min-height: 280px;
+    }
 }

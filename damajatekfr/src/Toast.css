@@ -1,0 +1,31 @@
+.appToastContainer {
+    top: 65px;
+    width: auto;
+}
+
+.appToast {
+    padding: 16px 20px;
+    border-radius: 12px;
+}
+
+.appToastBody {
+    font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+    .appToastContainer {
+        width: 300px;
+        left: 2% !important;
+    }
+
+    .appToast {
+        width: 100%;
+        padding: 14px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .appToastBody {
+        font-size: 0.8rem;
+    }
+}

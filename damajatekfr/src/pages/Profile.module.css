@@ -56,23 +56,6 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }
 
-.profileGameTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-}
-
-.profileGameTable th,
-.profileGameTable td {
-    text-align: center;
-    padding: 0.75rem 0.5rem;
-    border-bottom: 1px solid var(--border-default);
-}
-
-.profileGameTable th {
-    background: var(--bg-disabled);
-}
-
 .profileNoGames {
     color: var(--text-secondary);
     text-align: center;
@@ -91,4 +74,82 @@
     font-size: 0.95rem;
     font-weight: 500;
     color: var(--text-secondary);
+}
+
+.tableWrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.profileGameTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.profileGameTable th,
+.profileGameTable td {
+    text-align: center;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid var(--border-default);
+}
+
+.profileGameTable th {
+    background: var(--bg-disabled);
+}
+
+@media (max-width: 768px) {
+
+    .profileGameTable thead {
+        display: none;
+    }
+
+    .profileGameTable,
+    .profileGameTable tbody,
+    .profileGameTable tr,
+    .profileGameTable td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .profileGameTable tr {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        background: var(--bg-disabled);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .profileGameTable td {
+        text-align: right;
+        padding: 0.5rem 0;
+        border: none;
+        position: relative;
+        font-size: 0.9rem;
+    }
+
+    .profileGameTable td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-align: left;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .profile {
+        padding: 1rem;
+    }
+
+    .profileCard {
+        padding: 1.25rem;
+    }
+
+    .profileGameTable td {
+        font-size: 0.85rem;
+    }
 }

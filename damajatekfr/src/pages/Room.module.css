@@ -1,7 +1,16 @@
+.mainContainer {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 40px 16px;
+    box-sizing: border-box;
+}
+
 .container {
     max-width: 900px;
-    margin: 40px auto;
-    padding: 24px;
+    width: 900px;
+    margin: 0 auto;
+    padding: 10px 10px 15px 10px;
     background: var(--bg-page);
     border-radius: 14px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -9,7 +18,7 @@
 
 .notFoundContainer {
     max-width: 900px;
-    margin: 40px auto;
+    margin: 0 auto;
     padding: 24px;
     background: var(--bg-page);
     border-radius: 14px;

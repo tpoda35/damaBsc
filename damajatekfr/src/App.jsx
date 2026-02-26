@@ -13,6 +13,7 @@ import Game from "./pages/Game.jsx";
 import Profile from "./pages/Profile.jsx";
 import {Bounce, ToastContainer} from "react-toastify";
 import GameEnded from "./pages/GameEnded.jsx";
+import "./Toast.css";
 
 function App() {
     const { user } = useSharedAuth();
@@ -49,14 +50,13 @@ function App() {
         <>
             <BrowserRouter>
                 <ToastContainer
-                    style={{ top: '80px' }}
-                    toastStyle={{ padding: '16px 20px' }}
+                    className="appToastContainer"
+                    toastClassName="appToast"
+                    bodyClassName="appToastBody"
                     position="top-left"
                     autoClose={5000}
                     hideProgressBar={false}
-                    newestOnTop={false}
                     closeOnClick={false}
-                    rtl={false}
                     pauseOnFocusLoss
                     draggable
                     pauseOnHover
@@ -69,8 +69,9 @@ function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/rooms" element={<Rooms />} />
-                        <Route path="/rooms/:roomId" element={<Room />} />
                     </Route>
+
+                    <Route path="/rooms/:roomId" element={<Room />} />
 
                     <Route path="/games/:gameId" element={<Game />} />
                     <Route path="/game-ended" element={<GameEnded />} />
