@@ -17,3 +17,17 @@
     font-weight: bold;
     color: black;
 }
+
+@media (max-width: 570px) {
+    .piece {
+        width: 38px;
+        height: 38px;
+    }
+}
+
+@media (max-width: 438px) {
+    .piece {
+        width: 34px;
+        height: 34px;
+    }
+}

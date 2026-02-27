@@ -480,8 +480,8 @@ const Game = () => {
                             <span
                                 className={`${styles.playerColor} ${styles[game.playerColor.toLowerCase()]}`}
                             >
-                            {game.playerColor.toLowerCase()}
-                        </span>
+                                {game.playerColor.toLowerCase()}
+                            </span>
                         </h2>
 
                         <p className={styles.turnInfo}>

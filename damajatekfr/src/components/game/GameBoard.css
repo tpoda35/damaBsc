@@ -53,3 +53,17 @@
     border-color: #00bfff;
     z-index: 1000;
 }
+
+@media (max-width: 570px) {
+    .board {
+        width: 400px;
+        height: 400px;
+    }
+}
+
+@media (max-width: 438px) {
+    .board {
+        width: 350px;
+        height: 350px;
+    }
+}
