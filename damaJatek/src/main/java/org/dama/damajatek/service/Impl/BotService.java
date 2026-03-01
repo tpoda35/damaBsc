@@ -3,23 +3,19 @@ package org.dama.damajatek.service.Impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dama.damajatek.bot.EasyBot;
-import org.dama.damajatek.bot.HardBot;
 import org.dama.damajatek.bot.IBotStrategy;
-import org.dama.damajatek.bot.MediumBot;
 import org.dama.damajatek.dto.game.MoveResult;
 import org.dama.damajatek.dto.game.websocket.IGameEvent;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.player.BotPlayer;
 import org.dama.damajatek.entity.player.Player;
-import org.dama.damajatek.enums.game.BotDifficulty;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.exception.game.GameNotFoundException;
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Move;
 import org.dama.damajatek.repository.IGameRepository;
+import org.dama.damajatek.service.IBotCacheService;
 import org.dama.damajatek.service.IBotService;
-import org.dama.damajatek.service.IGameEngine;
 import org.dama.damajatek.service.IGameWebSocketService;
 import org.dama.damajatek.service.IMoveProcessor;
 import org.springframework.scheduling.annotation.Async;
@@ -35,10 +31,10 @@ import static org.dama.damajatek.util.BoardSerializer.loadBoard;
 @Slf4j
 public class BotService implements IBotService {
 
-    private final IGameEngine gameEngine;
     private final IGameRepository gameRepository;
     private final IGameWebSocketService gameWebSocketService;
     private final IMoveProcessor moveProcessor;
+    private final IBotCacheService botCacheService;
 
     @Async
     @Transactional
@@ -80,7 +76,7 @@ public class BotService implements IBotService {
         }
 
         // Get the bot with the right difficulty, then generate a move
-        IBotStrategy bot = getBot(botPlayer.getDifficulty());
+        IBotStrategy bot = botCacheService.getOrCreateBot(game.getId(), botPlayer.getDifficulty());
         Move botMove = bot.chooseMove(board, game.getCurrentTurn());
 
         if (botMove == null) {
@@ -95,14 +91,6 @@ public class BotService implements IBotService {
         botEvents.addAll(result.events());
 
         return botEvents;
-    }
-
-    private IBotStrategy getBot(BotDifficulty difficulty) {
-        return switch (difficulty) {
-            case EASY -> new EasyBot(gameEngine);
-            case MEDIUM -> new MediumBot(gameEngine);
-            case HARD -> new HardBot(gameEngine);
-        };
     }
 
     private Game findGameByIdWithPlayers(Long gameId) {

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.player.Player;
-import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Move;
@@ -18,8 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.dama.damajatek.enums.game.GameResult.WHITE_WIN;
-import static org.dama.damajatek.enums.game.GameResult.RED_WIN;
+import static org.dama.damajatek.enums.game.GameResult.*;
 import static org.dama.damajatek.enums.game.PieceColor.RED;
 
 @Slf4j
@@ -277,7 +275,7 @@ public class GameEngine implements IGameEngine {
         // For regular pieces:
         // - RED: forward means row increasing (dir[0] > 0)
         // - WHITE: forward means row decreasing (dir[0] < 0)
-        if (piece.getColor() == PieceColor.RED) {
+        if (piece.getColor() == RED) {
             return dir[0] <= 0; // red moves downwards (increase row)
         } else {
             return dir[0] >= 0; // white moves upwards (decrease row)
@@ -301,8 +299,8 @@ public class GameEngine implements IGameEngine {
         // If player has no pieces
         if (!playerHasPieces) {
             log.info("Game over: {} has no pieces, opponent wins", playerToMove);
-            Player winner = (playerToMove == PieceColor.RED) ? game.getWhitePlayer() : game.getRedPlayer();
-            game.markFinished(winner, (playerToMove == PieceColor.RED) ? WHITE_WIN : RED_WIN);
+            Player winner = (playerToMove == RED) ? game.getWhitePlayer() : game.getRedPlayer();
+            game.markFinished(winner, (playerToMove == RED) ? WHITE_WIN : RED_WIN);
             return true;
         }
 
@@ -310,21 +308,21 @@ public class GameEngine implements IGameEngine {
         List<Move> validMoves = getAvailableMoves(board, playerToMove);
         if (validMoves.isEmpty()) {
             log.info("Game over: {} has no valid moves, loses", playerToMove);
-            Player winner = (playerToMove == PieceColor.RED) ? game.getWhitePlayer() : game.getRedPlayer();
-            game.markFinished(winner, (playerToMove == PieceColor.RED) ? WHITE_WIN : RED_WIN);
+            Player winner = (playerToMove == RED) ? game.getWhitePlayer() : game.getRedPlayer();
+            game.markFinished(winner, (playerToMove == RED) ? WHITE_WIN : RED_WIN);
             return true;
         }
 
         // Draw conditions
         if (game.getMovesWithoutCaptureOrPromotion() >= 80) {
             log.info("Game over: draw (80-move rule)");
-            game.markFinished(null, GameResult.DRAW, "80 moves without capture/promotion");
+            game.markFinished(null, DRAW, "80 moves without capture/promotion");
             return true;
         }
 
         if (game.getTotalMoves() >= 200) {
             log.info("Game over: draw (200 total moves)");
-            game.markFinished(null, GameResult.DRAW, "200 total moves reached");
+            game.markFinished(null, DRAW, "200 total moves reached");
             return true;
         }
 

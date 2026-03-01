@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import static org.dama.damajatek.enums.game.PieceColor.RED;
 import static org.dama.damajatek.util.BoardSerializer.copy;
 import static org.dama.damajatek.util.BotUtils.boardHash;
 import static org.dama.damajatek.util.BotUtils.opposite;
@@ -82,9 +83,9 @@ public class MediumBot implements IBotStrategy {
         // Forward advancement (non-king pieces)
         Piece movingPiece = board.getPiece(move.getFromRow(), move.getFromCol());
         if (movingPiece != null && !movingPiece.isKing()) {
-            int advancement = (movingPiece.getColor() == PieceColor.RED)
-                    ? (move.getFromRow() - move.getToRow())
-                    : (move.getToRow() - move.getFromRow());
+            int advancement = (movingPiece.getColor() == RED)
+                    ? (move.getToRow() - move.getFromRow())
+                    : (move.getFromRow() - move.getToRow());
             if (advancement > 0) score += advancement * 3;
         }
 
@@ -113,11 +114,11 @@ public class MediumBot implements IBotStrategy {
     private int minimax(Board board, PieceColor turn, int depth, int maxDepth,
                         int alpha, int beta, PieceColor maximizingColor) {
 
-        if (depth >= maxDepth || gameEngine.getAvailableMoves(board, turn).isEmpty()) {
+        List<Move> moves = gameEngine.getAvailableMoves(board, turn);
+
+        if (depth >= maxDepth || moves.isEmpty()) {
             return evaluateBoard(board, maximizingColor);
         }
-
-        List<Move> moves = gameEngine.getAvailableMoves(board, turn);
 
         if (turn == maximizingColor) {
             int maxEval = Integer.MIN_VALUE;
@@ -166,15 +167,15 @@ public class MediumBot implements IBotStrategy {
 
                 // Bonus for approaching promotion
                 if (!piece.isKing()) {
-                    value += (int) ((piece.getColor() == PieceColor.RED) ? (7 - r) * 0.5 : r * 0.5);
+                    value += (int) ((piece.getColor() == RED) ? (7 - r) * 0.5 : r * 0.5);
                 }
 
-                if (piece.getColor() == PieceColor.RED) redScore += value;
+                if (piece.getColor() == RED) redScore += value;
                 else whiteScore += value;
             }
         }
 
-        int value = (color == PieceColor.RED)
+        int value = (color == RED)
                 ? (redScore - whiteScore)
                 : (whiteScore - redScore);
 

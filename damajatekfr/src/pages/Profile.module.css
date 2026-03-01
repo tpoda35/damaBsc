@@ -1,5 +1,5 @@
 .profile {
-    padding: 2rem;
+    padding: 1rem;
     max-width: 1000px;
     margin: 0 auto;
 }
@@ -140,10 +140,6 @@
 }
 
 @media (max-width: 480px) {
-
-    .profile {
-        padding: 1rem;
-    }
 
     .profileCard {
         padding: 1.25rem;

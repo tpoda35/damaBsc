@@ -145,8 +145,8 @@ public class HardBot implements IBotStrategy {
             // Forward progression for non-kings
             if (!movingPiece.isKing()) {
                 int advancement = (movingPiece.getColor() == PieceColor.RED)
-                        ? (move.getFromRow() - move.getToRow())
-                        : (move.getToRow() - move.getFromRow());
+                        ? (move.getToRow() - move.getFromRow())
+                        : (move.getFromRow() - move.getToRow());
                 score += advancement * 5;
             }
 

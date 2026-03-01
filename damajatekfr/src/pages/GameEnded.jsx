@@ -53,7 +53,7 @@ export default function GameEnded() {
 
                 <Button
                     onClick={() => navigate("/")}
-                    children="Back to Lobby"
+                    children="Back to main menu"
                 />
             </div>
         </div>

@@ -45,7 +45,7 @@ const Profile = () => {
 
     const GAME_RESULT_LABELS = {
         RED_WIN: "Red won",
-        BLACK_WIN: "Black won",
+        WHITE_WIN: "White won",
         RED_FORFEIT: "Red forfeited",
         WHITE_FORFEIT: "White forfeited",
         DRAW: "Draw",
@@ -54,6 +54,8 @@ const Profile = () => {
 
     const gameHistoryList = gameHistoryPage?.content || [];
     const totalPages = gameHistoryPage?.totalPages || 1;
+
+    console.log(gameHistoryList);
 
     return (
         <AnimatedPage className={styles.profile}>

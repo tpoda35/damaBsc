@@ -81,11 +81,11 @@ public class EasyBot implements IBotStrategy {
     private int minimax(Board board, PieceColor turn, int depth, int maxDepth,
                         int alpha, int beta, PieceColor maximizingColor) {
 
-        if (depth >= maxDepth || gameEngine.getAvailableMoves(board, turn).isEmpty()) {
+        List<Move> moves = gameEngine.getAvailableMoves(board, turn);
+
+        if (depth >= maxDepth || moves.isEmpty()) {
             return evaluateBoard(board, maximizingColor);
         }
-
-        List<Move> moves = gameEngine.getAvailableMoves(board, turn);
 
         if (turn == maximizingColor) {
             int maxEval = Integer.MIN_VALUE;
