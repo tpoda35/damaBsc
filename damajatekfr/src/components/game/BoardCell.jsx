@@ -1,6 +1,5 @@
 import React from "react";
 import Piece from "./Piece";
-import { AnimatePresence } from "framer-motion";
 import "./GameBoard.css";
 
 const BoardCell = ({
@@ -27,16 +26,14 @@ const BoardCell = ({
             className={cellClass}
             onClick={() => onClick(row, col)}
         >
-            <AnimatePresence>
-                {piece && (
-                    <Piece
-                        key={`piece-${piece.id}`}
-                        color={piece.color}
-                        isKing={piece.king}
-                        pieceId={piece.id}
-                    />
-                )}
-            </AnimatePresence>
+            {piece && (
+                <Piece
+                    key={`piece-${piece.id}`}
+                    color={piece.color}
+                    isKing={piece.king}
+                    pieceId={piece.id}
+                />
+            )}
         </div>
     );
 };

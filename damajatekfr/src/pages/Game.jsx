@@ -140,8 +140,10 @@ const Game = () => {
                                 // Store captured pieces for removal during animation
                                 const capturedPositions = move.capturedPieces || [];
 
-                                // Remove the piece from the starting pos
-                                updatedGame.board.grid[move.fromRow][move.fromCol] = null;
+                                // Do NOT remove the piece from the starting position here.
+                                // Keeping it in place allows Framer Motion to record the piece's
+                                // real DOM position before we move it, so it can animate smoothly.
+                                // animateStep(0) will clear this cell in its first setGame call.
 
                                 const animationPath = [];
 
@@ -237,8 +239,12 @@ const Game = () => {
                                             const currentPos = animationPath[stepIndex];
                                             newGrid[currentPos.row][currentPos.col] = prev.animation.piece;
 
-                                            // Remove from previous position
-                                            if (stepIndex > 0) {
+                                            // Remove from previous position.
+                                            // On step 0, clear the original fromRow/fromCol so Framer Motion
+                                            // has already committed the starting DOM position before we remove it.
+                                            if (stepIndex === 0) {
+                                                newGrid[move.fromRow][move.fromCol] = null;
+                                            } else {
                                                 const prevPos = animationPath[stepIndex - 1];
                                                 newGrid[prevPos.row][prevPos.col] = null;
                                             }

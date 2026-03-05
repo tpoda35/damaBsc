@@ -13,17 +13,22 @@ import AnimatedPage from "../components/AnimatedPage.jsx";
 import Pagination from "../components/Pagination.jsx";
 import {useMinimumLoading} from "../utils/useMinimumLoading.js";
 
-// TODO: Description lock or smth
-
 const Rooms = () => {
     const [roomsPage, setRoomsPage] = useState(null);
+
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     const showLoader = useMinimumLoading(loading, 500);
     const [refreshing, setRefreshing] = useState(false);
-    const [error, setError] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState(false);
+
     const [pageNum, setPageNum] = useState(0);
     const [pageSize] = useState(6);
+
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [selectedRoom, setSelectedRoom] = useState(null);
 
     const navigate = useNavigate();
 
@@ -66,7 +71,7 @@ const Rooms = () => {
     }, [pageNum, pageSize]);
 
     const handleHostRoom = () => {
-        setIsModalOpen(true);
+        setIsCreateRoomModalOpen(true);
     };
 
     const handleRefreshRooms = () => {
@@ -75,38 +80,55 @@ const Rooms = () => {
 
     const handleJoinRoom = async (room) => {
         try {
-            let joinedRoomId;
-
             if (room.locked) {
-                const password = prompt(`Enter password for room "${room.name}"`);
-                if (!password || password.trim() === "") return;
-
-                joinedRoomId = await ApiService.post(`/rooms/${room.id}/join`, { password });
-            } else {
-                joinedRoomId = await ApiService.post(`/rooms/${room.id}/join`, null);
+                setSelectedRoom(room);
+                setIsPasswordModalOpen(true);
+                return;
             }
 
+            const joinedRoomId = await ApiService.post(`/rooms/${room.id}/join`, null);
             navigate(`/rooms/${joinedRoomId}`);
         } catch (err) {
             toast.error(getErrorMessage(err, "Failed to join room"));
         }
     };
 
+    const handlePasswordSubmit = async (formData) => {
+        try {
+            setError(null);
+
+            const joinedRoomId = await ApiService.post(
+                `/rooms/${selectedRoom.id}/join`,
+                { password: formData.password }
+            );
+
+            setIsPasswordModalOpen(false);
+            setSelectedRoom(null);
+            navigate(`/rooms/${joinedRoomId}`);
+        } catch (err) {
+            setError(getErrorMessage(err, "Failed to join room"));
+        }
+    };
+
     const handleCreateRoom = async (formData) => {
         try {
             const roomId = await ApiService.post("/rooms", formData);
-            setIsModalOpen(false);
+            setIsCreateRoomModalOpen(false);
             navigate(`/rooms/${roomId}`);
         } catch (err) {
             toast.error(getErrorMessage(err, "Failed to create room"));
         }
     };
 
-    const fields = [
+    const createRoomFields = [
         { label: "Room name", name: "name", type: "text", placeholder: "MyRoom123", required: true },
         { label: "Room description", name: "description", type: "text", placeholder: "MyRoomDescription123", required: false },
         { label: "Locked", name: "locked", type: "checkbox", required: true },
         { label: "Password", name: "password", type: "password", placeholder: "********", required: true },
+    ];
+
+    const passwordFields=[
+            { label: "Password", name: "password", type: "password", placeholder: "Enter room password", required: true },
     ];
 
     const roomList = roomsPage?.content || [];
@@ -177,12 +199,12 @@ const Rooms = () => {
 
 
             <Modal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                isOpen={isCreateRoomModalOpen}
+                onClose={() => setIsCreateRoomModalOpen(false)}
                 title="Host a New Room"
             >
                 <Form
-                    fields={fields}
+                    fields={createRoomFields}
                     onSubmit={handleCreateRoom}
                     buttonText="Host"
                     error={error}
@@ -190,6 +212,23 @@ const Rooms = () => {
                         if (field.name === "password") return formData.locked;
                         return true;
                     }}
+                />
+            </Modal>
+
+            <Modal
+                isOpen={isPasswordModalOpen}
+                onClose={() => {
+                    setIsPasswordModalOpen(false);
+                    setSelectedRoom(null);
+                    setError(null);
+                }}
+                title={`Enter password for "${selectedRoom?.name}"`}
+            >
+                <Form
+                    fields={passwordFields}
+                    onSubmit={handlePasswordSubmit}
+                    buttonText="Join Room"
+                    error={error}
                 />
             </Modal>
         </>

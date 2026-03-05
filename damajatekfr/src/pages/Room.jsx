@@ -18,6 +18,12 @@ const Room = () => {
     const ws = useSharedWebSocket();
     const navigate = useNavigate();
 
+    // Added this, bcs of the async state
+    const roomRef = useRef(room);
+    useEffect(() => {
+        roomRef.current = room;
+    }, [room]);
+
     const handleLeaveRoom = async () => {
         if (hasLeftRoom.current) return;
         hasLeftRoom.current = true;
@@ -86,59 +92,63 @@ const Room = () => {
                         const { action, player, gameId } = body;
 
                         switch (action) {
-                            case "OPPONENT_JOIN":
-                                setRoom((prev) => {
-                                    if (prev?.isHost) {
-                                        console.log(`[WS] Opponent joined:`, player);
-                                        return {
-                                            ...prev,
-                                            opponent: player
-                                        };
-                                    }
-                                    return prev;
-                                });
-                                break;
+                            case "OPPONENT_JOIN": {
+                                const currentRoom = roomRef.current;
+                                if (!currentRoom || !currentRoom.isHost) break;
 
-                            case "OPPONENT_LEAVE":
-                                setRoom((prev) => {
-                                    if (prev?.isHost) {
-                                        toast.warn("Opponent left");
-                                        return {
-                                            ...prev,
-                                            opponent: null
-                                        };
-                                    }
-                                    return prev;
-                                });
-                                break;
+                                toast.success("Opponent joined");
 
-                            case "HOST_LEAVE":
-                                if (!room?.isHost) {
-                                    toast.warn("Host left, room closed");
-                                }
-                                console.warn(`[WS] Host left, room ${roomId} is closing`);
+                                setRoom((prev) => ({
+                                    ...prev,
+                                    opponent: player
+                                }));
+                                break;
+                            }
+
+                            case "OPPONENT_LEAVE": {
+                                const currentRoom = roomRef.current;
+                                if (!currentRoom || !currentRoom.isHost) break;
+
+                                toast.warn("Opponent left");
+
+                                setRoom((prev) => ({
+                                    ...prev,
+                                    opponent: null
+                                }));
+                                break;
+                            }
+
+                            case "HOST_LEAVE": {
+                                const currentRoom = roomRef.current;
+                                if (!currentRoom || currentRoom.isHost) break;
+
+                                toast.warn("Host left, room closed");
                                 hasLeftRoom.current = true;
                                 navigate("/rooms");
                                 break;
+                            }
 
-                            case "KICK":
-                                setRoom((prev) => {
-                                    if (!prev?.isHost) {
-                                        console.warn(`[WS] You were kicked from room ${roomId}`);
-                                        navigate("/rooms");
-                                        return prev;
-                                    } else {
-                                        console.log(`[WS] Opponent was kicked.`);
-                                        return {
-                                            ...prev,
-                                            opponent: null
-                                        };
-                                    }
-                                });
+                            case "KICK": {
+                                const currentRoom = roomRef.current;
+                                if (!currentRoom) break;
+
+                                if (!currentRoom.isHost) {
+                                    toast.error("You were kicked from room");
+                                    hasLeftRoom.current = true;
+                                    navigate("/rooms");
+                                    break;
+                                }
+
+                                toast.success("Opponent kicked successfully");
+
+                                setRoom((prev) => ({
+                                    ...prev,
+                                    opponent: null
+                                }));
                                 break;
+                            }
 
                             case "HOST_READY":
-                                console.log(`[WS] Host ready status:`, player?.readyStatus);
                                 setRoom((prev) => ({
                                     ...prev,
                                     host: {
@@ -149,7 +159,6 @@ const Room = () => {
                                 break;
 
                             case "OPPONENT_READY":
-                                console.log(`[WS] Opponent ready status:`, player?.readyStatus);
                                 setRoom((prev) => ({
                                     ...prev,
                                     opponent: {
@@ -160,8 +169,6 @@ const Room = () => {
                                 break;
 
                             case "START":
-                                console.log(`[WS] Game started in room ${roomId}, with gameId ${gameId}`);
-
                                 hasLeftRoom.current = true;
 
                                 navigate(`/games/${gameId}`);
@@ -235,10 +242,12 @@ const Room = () => {
     if (!room) {
         return (
             <div className={styles.notFoundContainer}>
-                <h2>Room not found</h2>
-                <Button onClick={() => navigate("/rooms")}>
-                    Back to Rooms
-                </Button>
+                <div className={styles.notFoundCard}>
+                    <h2>Room not found</h2>
+                    <Button onClick={() => navigate("/rooms")}>
+                        Back to Rooms
+                    </Button>
+                </div>
             </div>
         );
     }
