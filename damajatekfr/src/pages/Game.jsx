@@ -125,7 +125,6 @@ const Game = () => {
                             case "CAPTURE_MADE": {
                                 const { move } = response;
 
-                                // Get the moving piece
                                 const movingPiece = updatedGame.board.grid[move.fromRow][move.fromCol];
 
                                 if (!movingPiece) {
@@ -133,28 +132,22 @@ const Game = () => {
                                     return prevGame;
                                 }
 
-                                // Store animation data
                                 const animationId = `capture-${Date.now()}`;
 
                                 // Don't remove captured pieces immediately, remove them during animation
                                 // Store captured pieces for removal during animation
                                 const capturedPositions = move.capturedPieces || [];
 
-                                // Do NOT remove the piece from the starting position here.
-                                // Keeping it in place allows Framer Motion to record the piece's
-                                // real DOM position before we move it, so it can animate smoothly.
-                                // animateStep(0) will clear this cell in its first setGame call.
-
                                 const animationPath = [];
 
-                                // Add all intermediate jumps from move.path
+                                // Add all jumps from move path to create the anim
                                 if (move.path && move.path.length > 0) {
                                     move.path.forEach(([row, col], index) => {
                                         animationPath.push({
                                             row,
                                             col,
-                                            duration: 1000,
-                                            pause: index < move.path.length - 1 ? 500 : 0,
+                                            duration: 1000, // How long the piece move is
+                                            pause: index < move.path.length - 1 ? 500 : 0, // How long the piece waits
                                             removeCapturedAtThisStep: index
                                         });
                                     });
@@ -234,14 +227,14 @@ const Game = () => {
                                                 currentStep: stepIndex
                                             };
 
-                                            // Temporarily place piece at current step position for Framer Motion
+                                            // Place the piece to the current path, bcs of framer motion anim
                                             const newGrid = prev.board.grid.map(row => [...row]);
                                             const currentPos = animationPath[stepIndex];
                                             newGrid[currentPos.row][currentPos.col] = prev.animation.piece;
 
-                                            // Remove from previous position.
-                                            // On step 0, clear the original fromRow/fromCol so Framer Motion
-                                            // has already committed the starting DOM position before we remove it.
+                                            // Remove piece from previous position
+                                            // On step 0, clear the original fromRow and fromCol so Framer Motion
+                                            // has already committed the starting DOM position before we remove it
                                             if (stepIndex === 0) {
                                                 newGrid[move.fromRow][move.fromCol] = null;
                                             } else {
@@ -292,8 +285,7 @@ const Game = () => {
                                         prevGame.animation.finalPosition.row === row &&
                                         prevGame.animation.finalPosition.col === col
                                     ) {
-                                        // Store promotion intent on animation state instead of using a racing setTimeout.
-                                        // The animation completion block will apply it atomically in the same setGame call.
+                                        // Store promotion intent on animation state
                                         return {
                                             ...prevGame,
                                             animation: {

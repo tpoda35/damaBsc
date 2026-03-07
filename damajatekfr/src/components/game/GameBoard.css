@@ -5,9 +5,10 @@
 
 .piece-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 4px;
+    left: 3px;
     pointer-events: none;
+    z-index: 10;
 }
 
 .piece-overlay-cell {
@@ -38,9 +39,10 @@
     align-items: center;
     justify-content: center;
     cursor: default;
-    transition: transform 0.15s ease-in-out;
-    border: 2px solid transparent;
+    transition: outline 0.1s ease-in-out;
     box-sizing: border-box;
+    outline: 2px solid transparent;
+    outline-offset: -2px;
 }
 
 .rotated .cell {
@@ -49,8 +51,8 @@
 
 .cell.can-select:hover {
     cursor: pointer;
-    border-color: #00bfff;
-    z-index: 1000;
+    outline: 2px solid #00bfff;
+    outline-offset: -2px;
 }
 
 .cell.dark {
@@ -62,8 +64,8 @@
 }
 
 .cell.highlighted {
-    border: 2px solid #32cd32;
-    z-index: 1000;
+    outline: 2px solid #32cd32;
+    outline-offset: -2px;
 }
 
 .cell.highlighted:hover {
@@ -71,8 +73,8 @@
 }
 
 .cell.selected {
-    border-color: #00bfff;
-    z-index: 1000;
+    outline: 2px solid #00bfff;
+    outline-offset: -2px;
 }
 
 @media (max-width: 570px) {
@@ -86,5 +88,9 @@
     .board {
         width: 350px;
         height: 350px;
+    }
+
+    .piece-overlay {
+        left: 4px;
     }
 }

@@ -16,12 +16,17 @@ const GameBoard = ({
     const boardRef = useRef(null);
     const [cellSize, setCellSize] = useState(null);
 
-    // Measure cell size so the piece overlay can position pieces correctly
+    // Measure the inner cell size, excluding the boards border
+    // Its needed, because of the responsive design
+    // Im used this, because useEffect async was buggy
     useLayoutEffect(() => {
         const measure = () => {
             if (boardRef.current) {
-                const rect = boardRef.current.getBoundingClientRect();
-                setCellSize(rect.width / BOARD_SIZE);
+                const style = window.getComputedStyle(boardRef.current);
+                const borderLeft = parseFloat(style.borderLeftWidth) || 0;
+                const borderRight = parseFloat(style.borderRightWidth) || 0;
+                const innerWidth = boardRef.current.getBoundingClientRect().width - borderLeft - borderRight;
+                setCellSize(innerWidth / BOARD_SIZE);
             }
         };
         measure();
@@ -41,31 +46,31 @@ const GameBoard = ({
     const isHighlighted = (row, col) =>
         movesForSelected.some((m) => m.toRow === row && m.toCol === col);
 
-    const shouldRotate = playerColor.toLowerCase() === "white";
-
     // Collect all pieces with their positions for the overlay layer
     const pieces = [];
     board.grid.forEach((rowData, rowIndex) => {
         rowData.forEach((piece, colIndex) => {
-            if (piece) {
-                pieces.push({ piece, rowIndex, colIndex });
-            }
+            if (piece) pieces.push({ piece, rowIndex, colIndex });
         });
     });
 
-    // When the board CSS is rotated 180deg, row 0 visually appears at the bottom.
-    // We must apply the same transform mathematically to place overlay pieces correctly.
+    // Rotate the board
+    const shouldRotate = playerColor.toLowerCase() !== "white";
+
+    // Rotates the board if needed
     const toVisualPos = (row, col) => {
-        if (shouldRotate) return { vRow: row, vCol: col };
-        return { vRow: BOARD_SIZE - 1 - row, vCol: BOARD_SIZE - 1 - col };
+        if (shouldRotate) {
+            return { vRow: BOARD_SIZE - 1 - row, vCol: BOARD_SIZE - 1 - col };
+        }
+        return { vRow: row, vCol: col };
     };
 
     return (
         <div className="board-wrapper">
-            {/* Grid of cells — purely visual + click targets, no pieces rendered inside */}
+            {/* Grid of cells are purely visual + click targets */}
             <div
                 ref={boardRef}
-                className={`board ${shouldRotate ? "" : "rotated"}`}
+                className={`board ${shouldRotate ? "rotated" : ""}`}
             >
                 {board.grid.map((rowData, rowIndex) =>
                     rowData.map((_, colIndex) => {
@@ -95,9 +100,7 @@ const GameBoard = ({
                 )}
             </div>
 
-            {/* Piece overlay — pieces live here and are NEVER unmounted on moves.
-                Each piece is a motion.div whose `left`/`top` is animated by Framer Motion
-                whenever the grid position changes, giving smooth movement with zero flash. */}
+            {/* Piece overlay */}
             {cellSize && (
                 <div className="piece-overlay">
                     <AnimatePresence>
