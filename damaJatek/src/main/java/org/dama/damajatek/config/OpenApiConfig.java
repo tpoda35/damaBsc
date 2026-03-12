@@ -1,4 +1,4 @@
-package org.dama.damajatek.authentication.config;
+package org.dama.damajatek.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
