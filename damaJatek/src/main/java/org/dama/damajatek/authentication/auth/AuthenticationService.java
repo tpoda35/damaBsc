@@ -43,8 +43,6 @@ public class AuthenticationService {
                 .displayName(request.getDisplayName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(USER)
-                .status(OFFLINE)
                 .build();
 
         repository.save(user);

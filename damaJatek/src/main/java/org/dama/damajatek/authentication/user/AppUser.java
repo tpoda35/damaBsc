@@ -45,12 +45,6 @@ public class AppUser implements UserDetails {
     @NotBlank(message = "Password cannot be empty.")
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    private Status status;
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
     @OneToMany(mappedBy = "appUser")
     @JsonIgnore
     @ToString.Exclude
@@ -76,7 +70,7 @@ public class AppUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return role.getAuthorities();
+        return null;
     }
 
     @Override

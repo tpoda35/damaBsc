@@ -85,10 +85,6 @@ public class GameService implements IGameService {
         this.taskScheduler = taskScheduler;
     }
 
-    // Rule source: https://www.okosjatek.hu/custom/okosjatek/image/data/srattached/1fb12c3bdc1f524812fb6c5043d11637_D%C3%A1ma%20j%C3%A1t%C3%A9kszab%C3%A1ly.pdf
-    // The forced capture rule is used, so if there's a capture, then the user only gets that move.
-    // Only the longest capture move is returned.
-
     @Transactional
     @Override
     public Game createGame(Player redPlayer, Player whitePlayer, Room room) {
@@ -105,7 +101,7 @@ public class GameService implements IGameService {
         gameRepository.save(game);
 
         // Add 1s delay to the bot to let the user load the page
-        if (game.getCurrentTurn() == RED && redPlayer instanceof BotPlayer) {
+        if (redPlayer instanceof BotPlayer && game.getCurrentTurn() == RED) {
             CompletableFuture
                     .delayedExecutor(5, TimeUnit.SECONDS)
                     .execute(() -> botService.playBotTurnAsync(game.getId())); // Make bot move and send the move event through websocket

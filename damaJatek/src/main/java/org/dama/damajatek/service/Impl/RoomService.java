@@ -203,7 +203,6 @@ public class RoomService implements IRoomService {
             Player redPlayer;
             Player whitePlayer;
 
-            // This logic will be used temporarily
             Random random = new Random();
             int number = random.nextInt(2) + 1;
             if (number == 1) {

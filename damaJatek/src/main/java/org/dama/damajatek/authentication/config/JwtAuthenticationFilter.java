@@ -42,19 +42,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.resolver = resolver;
     }
 
-    /**
-     * Method, which checks the JWT.
-     *
-     * <p>If the path contains /api/v1/auth, then we don't need to filter,
-     * because we have the authentication endpoints there.
-     * The filter gets the cookies from the header, saves the JWT in a variable if it's found.
-     * Extract the email, and then checks it and the auth context if it is null.
-     * Checks if the token is valid. Sets the auth context and switches to the next filter.</p>
-     *
-     * @param request incoming http request.
-     * @param response of the incoming http request.
-     * @param filterChain the Spring Security filter chain.
-     */
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,

@@ -62,7 +62,7 @@ const useWebSocket = () => {
         });
     }, []);
 
-    // Need it to reconnect the user, because we can await it
+    // It just deactivates the client, it let the vars be
     const deactivateClient = useCallback(() => {
         const client = stompClientRef.current;
         if (!client || !client.active) return Promise.resolve();
@@ -200,6 +200,7 @@ const useWebSocket = () => {
         return promise;
     }, [flushQueue, resubscribeAll]);
 
+    // Full disconnect (it clears subs...)
     const disconnect = useCallback(() => {
         if (reconnectTimeoutRef.current) {
             clearTimeout(reconnectTimeoutRef.current);
