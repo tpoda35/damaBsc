@@ -76,6 +76,12 @@ public class Game {
     @Builder.Default
     private Integer removedWhitePieces = 0;
 
+    @Builder.Default
+    private Boolean redDisconnected = false;
+
+    @Builder.Default
+    private Boolean whiteDisconnected = false;
+
     @Column(nullable = false, updatable = false)
     private OffsetDateTime startTime;
 

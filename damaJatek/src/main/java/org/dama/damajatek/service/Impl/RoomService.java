@@ -32,6 +32,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.Random;
@@ -217,7 +219,18 @@ public class RoomService implements IRoomService {
             roomRepository.save(room);
 
             Game game = gameService.createGame(redPlayer, whitePlayer, room);
-            roomWebSocketService.broadcastRoomUpdate(START, game.getId(), "/topic/rooms/" + roomId);
+            TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            roomWebSocketService.broadcastRoomUpdate(
+                                    START,
+                                    game.getId(),
+                                    "/topic/rooms/" + roomId
+                            );
+                        }
+                    }
+            );
         } else {
             log.warn("Game start blocked for room(id: {}): hostReadyStatus={}, opponentReadyStatus={}",
                     roomId, room.getHostReadyStatus(), room.getOpponentReadyStatus());

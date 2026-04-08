@@ -24,10 +24,7 @@ import org.dama.damajatek.mapper.GameMapper;
 import org.dama.damajatek.model.Board;
 import org.dama.damajatek.model.Move;
 import org.dama.damajatek.repository.IGameRepository;
-import org.dama.damajatek.service.IBotService;
-import org.dama.damajatek.service.IGameEngine;
-import org.dama.damajatek.service.IGameService;
-import org.dama.damajatek.service.IMoveProcessor;
+import org.dama.damajatek.service.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,8 +42,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.dama.damajatek.enums.game.GameResult.RED_FORFEIT;
-import static org.dama.damajatek.enums.game.GameResult.WHITE_FORFEIT;
+import static org.dama.damajatek.enums.game.GameResult.*;
 import static org.dama.damajatek.enums.game.PieceColor.RED;
 import static org.dama.damajatek.enums.game.PieceColor.WHITE;
 import static org.dama.damajatek.util.BoardInitializer.createStartingBoard;
@@ -262,6 +258,30 @@ public class GameService implements IGameService {
                 result,
                 "Game forfeited"
         );
+    }
+
+    @Override
+    public void handleTimeout(String email) {
+        Game game = gameRepository.findInProgressGameByUserEmail(email)
+                .orElseThrow(GameNotFoundException::new);
+
+        IGameEvent gameEvent = null;
+
+        Player winner = null;
+        PieceColor winnerColor = null;
+        GameResult gameResult = null;
+
+        if (game.getRedDisconnected()) {
+            winner = game.getWhitePlayer();
+            winnerColor = WHITE;
+            gameResult = WHITE_WIN;
+
+            gameEvent = EventMapper.createGameOverEvent(
+                    winner.getDisplayName(),
+                    winnerColor,
+                    gameResult
+            );
+        }
     }
 
     private Game findGameByIdWithPlayers(Long gameId) {
