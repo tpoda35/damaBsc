@@ -48,7 +48,6 @@ public class BotService implements IBotService {
             List<IGameEvent> botEvents = playBotTurnIfNeeded(game, board);
 
             if (!botEvents.isEmpty()) {
-                // Send the events out for the frontend
                 for (IGameEvent event : botEvents) {
                     gameWebSocketService.broadcastGameUpdate(event, null, gameId);
                 }

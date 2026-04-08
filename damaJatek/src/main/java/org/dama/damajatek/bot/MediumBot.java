@@ -89,7 +89,7 @@ public class MediumBot implements IBotStrategy {
             if (advancement > 0) score += advancement * 3;
         }
 
-        // Prefer moves that keep pieces protected (on back rows or edges initially)
+        // Prefer moves that keep pieces protected (on back rows or edges)
         if (move.getToRow() == 0 || move.getToRow() == 7 ||
                 move.getToCol() == 0 || move.getToCol() == 7) {
             score += 2;

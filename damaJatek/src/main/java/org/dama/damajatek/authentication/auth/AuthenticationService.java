@@ -19,8 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import static org.dama.damajatek.authentication.token.TokenType.BEARER;
-import static org.dama.damajatek.authentication.user.Role.USER;
-import static org.dama.damajatek.authentication.user.Status.OFFLINE;
 
 @Service
 @RequiredArgsConstructor

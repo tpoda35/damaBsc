@@ -63,7 +63,6 @@ public class GameEngine implements IGameEngine {
 
         if (piece == null) return moves;
 
-        // Check regular moves
         int[][] directions = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
 
         for (int[] dir : directions) {
@@ -119,21 +118,18 @@ public class GameEngine implements IGameEngine {
                 .toCol(col)
                 .build();
 
-        // Start the recursive chain capture search
         findChainCapturesRecursive(board, row, col, piece, initialMove, new HashSet<>(), allCaptures);
 
-        // If no chain captures found, return empty list
         if (allCaptures.isEmpty()) {
             return allCaptures;
         }
 
-        // Find the maximum number of captures in any chain
         int maxCaptures = allCaptures.stream()
                 .mapToInt(move -> move.getCapturedPieces().size())
                 .max()
                 .orElse(0);
 
-        // Only return moves with the maximum number of captures
+        // Return moves with the max num of captures
         return allCaptures.stream()
                 .filter(move -> move.getCapturedPieces().size() == maxCaptures)
                 .collect(Collectors.toList());
@@ -152,7 +148,6 @@ public class GameEngine implements IGameEngine {
         int[][] directions = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
 
         for (int[] dir : directions) {
-            // Skip backward moves for regular pieces
             if (isDirectionNotAllowedForPiece(originalPiece, dir)) continue;
 
             int middleRow = currentRow + dir[0];
@@ -173,7 +168,6 @@ public class GameEngine implements IGameEngine {
                 if (middle != null && middle.getColor() != originalPiece.getColor()) {
                     foundCapture = true;
 
-                    // Create a new move with this capture added
                     Move newMove = Move.builder()
                             .fromRow(currentMove.getFromRow())
                             .fromCol(currentMove.getFromCol())
@@ -200,7 +194,7 @@ public class GameEngine implements IGameEngine {
                     Set<String> newCaptured = new HashSet<>(capturedPositions);
                     newCaptured.add(middleKey);
 
-                    // Continue searching for more captures from the landing position
+                    // Continue searching for more captures from the landing pos
                     findChainCapturesRecursive(
                             board,
                             jumpRow,
@@ -214,10 +208,10 @@ public class GameEngine implements IGameEngine {
             }
         }
 
-        // If no more captures possible from this position, add this as a complete chain
+        // If no more captures possible from this position add this as a complete chain
         if (!foundCapture && !currentMove.getCapturedPieces().isEmpty()) {
 
-            // Remove the last element, since we have it in the Move (the toRow, toCol part)
+            // Remove the last element, since we have it in the Move obj (the toRow, toCol part)
             List<int[]> path = currentMove.getPath();
             if (!path.isEmpty()) {
                 int[] last = path.getLast();
@@ -273,8 +267,8 @@ public class GameEngine implements IGameEngine {
         if (piece.isKing()) return false;
 
         // For regular pieces:
-        // - RED: forward means row increasing (dir[0] > 0)
-        // - WHITE: forward means row decreasing (dir[0] < 0)
+        // RED: forward row increasing (dir[0] > 0)
+        // WHITE: forward row decreasing (dir[0] < 0)
         if (piece.getColor() == RED) {
             return dir[0] <= 0; // red moves downwards (increase row)
         } else {

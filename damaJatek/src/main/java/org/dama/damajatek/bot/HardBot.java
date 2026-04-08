@@ -124,9 +124,7 @@ public class HardBot implements IBotStrategy {
         if (!move.getCapturedPieces().isEmpty()) {
             for (int[] captured : move.getCapturedPieces()) {
                 Piece capturedPiece = board.getPiece(captured[0], captured[1]);
-                if (capturedPiece != null) {
-                    score += capturedPiece.isKing() ? 100 : 50;
-                }
+                if (capturedPiece != null) score += capturedPiece.isKing() ? 100 : 50;
             }
         }
 
@@ -135,10 +133,9 @@ public class HardBot implements IBotStrategy {
             score += 40;
         }
 
-        // Strategic positioning
         Piece movingPiece = board.getPiece(move.getFromRow(), move.getFromCol());
         if (movingPiece != null) {
-            // Center control (more valuable for kings)
+            // Center control
             int centerDistance = Math.abs(move.getToRow() - 3) + Math.abs(move.getToCol() - 3);
             score += movingPiece.isKing() ? (8 - centerDistance) : (6 - centerDistance);
 
@@ -246,7 +243,7 @@ public class HardBot implements IBotStrategy {
         int whiteScore = 0;
 
         int redPieces = 0, whitePieces = 0;
-        int redKings = 0, blackKings = 0;
+        int redKings = 0, whiteKings = 0;
 
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
@@ -285,7 +282,7 @@ public class HardBot implements IBotStrategy {
                 } else {
                     whiteScore += value;
                     whitePieces++;
-                    if (piece.isKing()) blackKings++;
+                    if (piece.isKing()) whiteKings++;
                 }
             }
         }
@@ -296,8 +293,8 @@ public class HardBot implements IBotStrategy {
         int materialAdvantage = (myPieces - oppPieces) * 5;
 
         // King advantage in endgame
-        int myKings = (color == PieceColor.RED) ? redKings : blackKings;
-        int oppKings = (color == PieceColor.RED) ? blackKings : redKings;
+        int myKings = (color == PieceColor.RED) ? redKings : whiteKings;
+        int oppKings = (color == PieceColor.RED) ? whiteKings : redKings;
         int kingAdvantage = (myKings - oppKings) * 8;
 
         int baseValue = (color == PieceColor.RED)

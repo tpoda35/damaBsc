@@ -17,8 +17,8 @@ const GameBoard = ({
     const [cellSize, setCellSize] = useState(null);
 
     // Measure the inner cell size, excluding the boards border
-    // Its needed, because of the responsive design
-    // Im used this, because useEffect async was buggy
+    // It's needed, because of the responsive design
+    // I used this, because useEffect async was buggy
     useLayoutEffect(() => {
         const measure = () => {
             if (boardRef.current) {
@@ -67,7 +67,7 @@ const GameBoard = ({
 
     return (
         <div className="board-wrapper">
-            {/* Grid of cells are purely visual + click targets */}
+            {/* Grid of cells are visual + click targets */}
             <div
                 ref={boardRef}
                 className={`board ${shouldRotate ? "rotated" : ""}`}

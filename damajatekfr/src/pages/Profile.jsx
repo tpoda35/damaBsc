@@ -111,7 +111,7 @@ const Profile = () => {
                                 <thead>
                                 <tr>
                                     <th>Red Player</th>
-                                    <th>Black Player</th>
+                                    <th>White Player</th>
                                     <th>Result</th>
                                     <th>Winner</th>
                                     <th>Total Moves</th>
@@ -125,7 +125,7 @@ const Profile = () => {
                                             {game.redPlayer.displayName}
                                         </td>
 
-                                        <td data-label="Black Player">
+                                        <td data-label="White Player">
                                             {game.whitePlayer.displayName}
                                         </td>
 
