@@ -20,6 +20,7 @@ public class GameOverEvent implements IGameEvent {
     private GameWsAction action = GAME_OVER;
 
     private String winnerName;
+    private String winMessage;
     private PieceColor winnerColor;
     private GameResult gameResult;
 

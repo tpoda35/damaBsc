@@ -9,6 +9,7 @@ import org.dama.damajatek.entity.room.Room;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.model.Move;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.Authentication;
 
 import java.security.Principal;
 import java.util.List;
@@ -20,5 +21,5 @@ public interface IGameService {
     CompletableFuture<Page<GameHistoryDto>> getGameHistory(int pageNum, int pageSize);
     List<IGameEvent> makeMove(Long gameId, Move move, Principal principal);
     IGameEvent forfeit(Long gameId, PieceColor pieceColor);
-    void handleTimeout(String email);
+    void handleTimeout(String email, Authentication auth);
 }

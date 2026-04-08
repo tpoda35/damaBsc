@@ -1,8 +1,8 @@
 package org.dama.damajatek.service;
 
-import org.dama.damajatek.dto.game.websocket.disconnect.DisconnectDto;
+import org.springframework.security.core.Authentication;
 
 public interface IGameConnectionHandler {
-    DisconnectDto handleDisconnect(String email);
-    void handleReconnect(String email);
+    void handleDisconnect(String email, Authentication auth);
+    void handleReconnect(String email, Authentication auth);
 }

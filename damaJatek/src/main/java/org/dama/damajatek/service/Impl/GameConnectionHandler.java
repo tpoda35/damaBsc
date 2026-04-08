@@ -3,7 +3,6 @@ package org.dama.damajatek.service.Impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.dama.damajatek.dto.game.websocket.IGameEvent;
-import org.dama.damajatek.dto.game.websocket.disconnect.DisconnectDto;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.player.HumanPlayer;
 import org.dama.damajatek.exception.auth.AccessDeniedException;
@@ -13,6 +12,8 @@ import org.dama.damajatek.mapper.EventMapper;
 import org.dama.damajatek.repository.IGameRepository;
 import org.dama.damajatek.service.IGameConnectionHandler;
 import org.dama.damajatek.service.IGameScheduler;
+import org.dama.damajatek.service.IGameWebSocketService;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import static org.dama.damajatek.enums.game.GameResult.DRAW;
@@ -23,16 +24,17 @@ public class GameConnectionHandler implements IGameConnectionHandler {
 
     private final IGameRepository gameRepository;
     private final IGameScheduler gameScheduler;
+    private final IGameWebSocketService gameWebSocketService;
 
     @Transactional
     @Override
-    public DisconnectDto handleDisconnect(String email) {
+    public void handleDisconnect(String email, Authentication auth) {
         Game game = gameRepository.findInProgressGameByUserEmail(email)
                 .orElseThrow(GameNotFoundException::new);
 
         if (game.isFinished()) throw new GameAlreadyFinishedException();
 
-        IGameEvent event = null;
+        IGameEvent gameEvent = null;
 
         boolean isRed = game.getRedPlayer() instanceof HumanPlayer redHuman &&
                 redHuman.getUser().getEmail().equals(email);
@@ -45,33 +47,35 @@ public class GameConnectionHandler implements IGameConnectionHandler {
         if (isRed) {
             if (Boolean.TRUE.equals(game.getWhiteDisconnected())) {
                 game.markFinished(null, DRAW, "Opponent disconnected");
-                event = EventMapper.createGameDrawEvent("Opponent disconnected");
+                gameEvent = EventMapper.createGameDrawEvent("Opponent disconnected");
             } else {
                 game.setRedDisconnected(true);
 
-                gameScheduler.scheduleTimeout(email, game.getId());
+                gameScheduler.scheduleTimeout(email, game.getId(), auth);
             }
         } else {
             if (Boolean.TRUE.equals(game.getRedDisconnected())) {
                 game.markFinished(null, DRAW, "Opponent disconnected");
-                event = EventMapper.createGameDrawEvent("Opponent disconnected");
+                gameEvent = EventMapper.createGameDrawEvent("Opponent disconnected");
             } else {
                 game.setWhiteDisconnected(true);
 
-                gameScheduler.scheduleTimeout(email, game.getId());
+                gameScheduler.scheduleTimeout(email, game.getId(), auth);
             }
         }
 
         gameRepository.save(game);
 
-        return DisconnectDto.builder()
-                .gameEvent(event)
-                .gameId(game.getId())
-                .build();
+        if (gameEvent != null) {
+            gameWebSocketService.broadcastGameUpdate(
+                    gameEvent, auth, game.getId()
+            );
+        }
     }
 
+    @Transactional
     @Override
-    public void handleReconnect(String email) {
+    public void handleReconnect(String email, Authentication auth) {
         Game game = gameRepository.findInProgressGameByUserEmail(email)
                 .orElseThrow(GameNotFoundException::new);
 
@@ -90,6 +94,8 @@ public class GameConnectionHandler implements IGameConnectionHandler {
         } else {
             game.setWhiteDisconnected(false);
         }
+
+        gameScheduler.cancelSchedule(email);
     }
 
 }

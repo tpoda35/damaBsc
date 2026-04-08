@@ -44,6 +44,15 @@ public class EventMapper {
                 .build();
     }
 
+    public static GameOverEvent createGameOverEvent(String winnerName, String winMessage, PieceColor winnerColor, GameResult gameResult) {
+        return GameOverEvent.builder()
+                .winnerName(winnerName)
+                .winMessage(winMessage)
+                .winnerColor(winnerColor)
+                .gameResult(gameResult)
+                .build();
+    }
+
     public static GameDrawEvent createGameDrawEvent() {
         return GameDrawEvent.builder().build();
     }

@@ -55,6 +55,7 @@ const Game = () => {
             navigate("/game-ended", {
                 state: {
                     winner: game.winner,
+                    winMessage: game.winMessage,
                     playerColor: game.playerColor,
                     gameId: game.id,
                     drawReason: game.drawReason,
@@ -316,13 +317,13 @@ const Game = () => {
                             }
 
                             case "GAME_OVER": {
-                                const { winnerName, winnerColor, gameResult } = response;
+                                const { winnerName, winMessage, winnerColor, gameResult } = response;
+                                console.log('Response: ', response);
                                 console.log(`Game over! Winner: ${winnerName} (${winnerColor})`);
 
                                 updatedGame.currentTurn = null;
                                 updatedGame.allowedMoves = [];
-                                updatedGame.winner = { name: winnerName, color: winnerColor, result: gameResult };
-
+                                updatedGame.winner = { name: winnerName, winMessage: winMessage, color: winnerColor, result: gameResult };
                                 break;
                             }
 

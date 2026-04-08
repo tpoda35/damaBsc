@@ -37,14 +37,13 @@ export default function GameEnded() {
             ? drawReason ?? "No winner this time"
             : `Winner: ${winner.name}`;
 
-
     return (
         <div className={styles.container}>
             <div className={styles.card}>
                 <h1 className={styles.title}>{title}</h1>
 
                 <p className={styles.subtitle}>
-                    Game #{gameId}
+                    {winner.winMessage}
                 </p>
 
                 <p className={styles.result}>

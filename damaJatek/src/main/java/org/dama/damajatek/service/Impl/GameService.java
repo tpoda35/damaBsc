@@ -62,6 +62,7 @@ public class GameService implements IGameService {
     private final IMoveProcessor moveProcessor;
     private final IAppUserCacheService appUserCacheService;
     private final TaskScheduler taskScheduler;
+    private final IGameWebSocketService gameWebSocketService;
 
     public GameService(
             IGameRepository gameRepository,
@@ -70,7 +71,8 @@ public class GameService implements IGameService {
             IBotService botService,
             IMoveProcessor moveProcessor,
             IAppUserCacheService appUserCacheService,
-            @Qualifier("taskScheduler") TaskScheduler taskScheduler
+            @Qualifier("taskScheduler") TaskScheduler taskScheduler,
+            IGameWebSocketService gameWebSocketService
     ) {
         this.gameRepository = gameRepository;
         this.appUserService = appUserService;
@@ -79,6 +81,7 @@ public class GameService implements IGameService {
         this.moveProcessor = moveProcessor;
         this.appUserCacheService = appUserCacheService;
         this.taskScheduler = taskScheduler;
+        this.gameWebSocketService = gameWebSocketService;
     }
 
     @Transactional
@@ -260,26 +263,44 @@ public class GameService implements IGameService {
         );
     }
 
+    @Transactional
     @Override
-    public void handleTimeout(String email) {
+    public void handleTimeout(String email, Authentication auth) {
         Game game = gameRepository.findInProgressGameByUserEmail(email)
                 .orElseThrow(GameNotFoundException::new);
 
-        IGameEvent gameEvent = null;
-
-        Player winner = null;
-        PieceColor winnerColor = null;
-        GameResult gameResult = null;
+        IGameEvent gameEvent;
+        Player winner;
+        PieceColor winnerColor;
+        GameResult gameResult;
 
         if (game.getRedDisconnected()) {
             winner = game.getWhitePlayer();
             winnerColor = WHITE;
             gameResult = WHITE_WIN;
 
-            gameEvent = EventMapper.createGameOverEvent(
-                    winner.getDisplayName(),
-                    winnerColor,
-                    gameResult
+        } else if (game.getWhiteDisconnected()) {
+            winner = game.getRedPlayer();
+            winnerColor = RED;
+            gameResult = RED_WIN;
+
+        } else {
+            return;
+        }
+
+        gameEvent = EventMapper.createGameOverEvent(
+                winner.getDisplayName(),
+                "Opponent left the game",
+                winnerColor,
+                gameResult
+        );
+
+        game.markFinished(winner, gameResult);
+        gameRepository.save(game);
+
+        if (gameEvent != null) {
+            gameWebSocketService.broadcastGameUpdate(
+                    gameEvent, auth, game.getId()
             );
         }
     }
