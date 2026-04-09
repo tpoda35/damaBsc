@@ -31,10 +31,6 @@ public class Game {
     @GeneratedValue
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "room_id")
-    private Room room;
-
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "red_player_id")
     private Player redPlayer;

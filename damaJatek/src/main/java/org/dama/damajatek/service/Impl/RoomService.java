@@ -22,6 +22,7 @@ import org.dama.damajatek.mapper.ChatMessageMapper;
 import org.dama.damajatek.mapper.PlayerMapper;
 import org.dama.damajatek.mapper.RoomMapper;
 import org.dama.damajatek.repository.IChatMessageRepository;
+import org.dama.damajatek.repository.IGameRepository;
 import org.dama.damajatek.repository.IRoomRepository;
 import org.dama.damajatek.service.IGameService;
 import org.dama.damajatek.service.IRoomService;
@@ -56,6 +57,7 @@ public class RoomService implements IRoomService {
     private final AppUserRepository appUserRepository;
     private final IAppUserCacheService appUserCacheService;
     private final IChatMessageRepository chatMessageRepository;
+    private final IGameRepository gameRepository;
 
     // Lock handling, also set database restr. with flyway
     @Transactional
@@ -125,7 +127,7 @@ public class RoomService implements IRoomService {
 
         if (isHost(room, loggedInUser)) {
             log.info("Host left the room(id: {}), deleting room", roomId);
-            if (room.getStarted() != null && !room.getStarted()) roomRepository.delete(room);
+            roomRepository.delete(room);
 
             roomWebSocketService.broadcastRoomUpdate(HOST_LEAVE, "/topic/rooms/" + roomId);
         } else if (room.getOpponent() != null && isOpponent(room, loggedInUser)) {
@@ -215,10 +217,10 @@ public class RoomService implements IRoomService {
                 redPlayer = PlayerMapper.createHumanPlayer(room.getHost());
             }
 
-            room.setStarted(true);
-            roomRepository.save(room);
+            gameRepository.finishAllInProgressGamesForUser(loggedInUser.getEmail());
 
-            Game game = gameService.createGame(redPlayer, whitePlayer, room);
+            Game game = gameService.createGame(redPlayer, whitePlayer);
+            roomRepository.delete(room);
             TransactionSynchronizationManager.registerSynchronization(
                     new TransactionSynchronization() {
                         @Override

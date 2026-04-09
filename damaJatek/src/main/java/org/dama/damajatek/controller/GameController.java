@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dama.damajatek.authentication.user.AppUser;
 import org.dama.damajatek.authentication.user.IAppUserService;
-import org.dama.damajatek.dto.game.AiGameCreateDto;
-import org.dama.damajatek.dto.game.ForfeitRequest;
-import org.dama.damajatek.dto.game.GameHistoryDto;
-import org.dama.damajatek.dto.game.GameInfoDto;
+import org.dama.damajatek.dto.game.*;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.player.Player;
 import org.dama.damajatek.mapper.PlayerMapper;
@@ -67,7 +64,7 @@ public class GameController {
             redPlayer = PlayerMapper.createBotPlayer(aiGameCreateDto.getBotDifficulty());
         }
 
-        Game game = gameService.createGame(redPlayer, whitePlayer, null);
+        Game game = gameService.createGame(redPlayer, whitePlayer);
         return game.getId();
     }
 
@@ -77,6 +74,11 @@ public class GameController {
             @RequestParam(defaultValue = "5") int pageSize
     ) {
         return gameService.getGameHistory(pageNum, pageSize);
+    }
+
+    @GetMapping("/in-progress")
+    public InGameDto isPlayerInGame() {
+        return gameService.isPlayerInGame();
     }
 
 }

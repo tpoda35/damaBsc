@@ -6,6 +6,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [inGame, setInGame] = useState(false);
 
     const fetchUser = useCallback(async () => {
         setLoading(true);
@@ -19,9 +20,34 @@ export const AuthProvider = ({ children }) => {
         }
     }, []);
 
+    const fetchInGameStatus = useCallback(async () => {
+        try {
+            const data = await ApiService.get("/games/in-progress");
+
+            if (data.isInGame) {
+                setInGame({
+                    isInGame: true,
+                    gameId: data.gameId
+                });
+            } else {
+                setInGame({ isInGame: false });
+            }
+        } catch {
+            setInGame({ isInGame: false });
+        }
+    }, []);
+
     useEffect(() => {
         fetchUser();
     }, [fetchUser]);
+
+    useEffect(() => {
+        if (user) {
+            fetchInGameStatus();
+        } else {
+            setInGame(null);
+        }
+    }, [user, fetchInGameStatus]);
 
     const login = useCallback(async (formData) => {
         setLoading(true);
@@ -53,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout, fetchUser }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, fetchUser, inGame }}>
             {children}
         </AuthContext.Provider>
     );

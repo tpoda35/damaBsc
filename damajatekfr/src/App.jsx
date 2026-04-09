@@ -1,4 +1,4 @@
-import {BrowserRouter, Route, Routes} from "react-router-dom";
+import {BrowserRouter, Route, Routes, useLocation, useNavigate} from "react-router-dom";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -16,12 +16,15 @@ import GameEnded from "./pages/GameEnded.jsx";
 import "./Toast.css";
 
 function App() {
-    const { user } = useSharedAuth();
+    const { user, inGame } = useSharedAuth();
     const { connect, disconnect, isConnected, subscribe } = useSharedWebSocket();
 
     const isAuthenticated = !!user;
 
     useTokenRefresh(isAuthenticated);
+
+    const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (isAuthenticated && !isConnected) {
@@ -45,10 +48,20 @@ function App() {
         };
     }, [isAuthenticated, isConnected, subscribe]);
 
+    useEffect(() => {
+        if (
+            inGame?.isInGame &&
+            inGame.gameId &&
+            !location.pathname.startsWith("/games/") &&
+            !location.pathname.startsWith("/game-ended")
+        ) {
+            navigate(`/games/${inGame.gameId}`);
+        }
+    }, [inGame, navigate, location]);
+
 
     return (
         <>
-            <BrowserRouter>
                 <ToastContainer
                     className="appToastContainer"
                     toastClassName="appToast"
@@ -79,7 +92,6 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                 </Routes>
-            </BrowserRouter>
         </>
     );
 }

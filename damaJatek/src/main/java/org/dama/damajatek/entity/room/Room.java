@@ -58,11 +58,6 @@ public class Room {
 
     private ReadyStatus opponentReadyStatus;
 
-    private Boolean started;
-
-    @OneToOne(mappedBy = "room")
-    private Game game;
-
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatMessage> chatMessages = new ArrayList<>();
 
@@ -78,6 +73,5 @@ public class Room {
     public void init() {
         hostReadyStatus = NOT_READY;
         opponentReadyStatus = NOT_READY;
-        started = false;
     }
 }

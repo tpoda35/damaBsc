@@ -2,10 +2,10 @@ package org.dama.damajatek.service;
 
 import org.dama.damajatek.dto.game.GameHistoryDto;
 import org.dama.damajatek.dto.game.GameInfoDto;
+import org.dama.damajatek.dto.game.InGameDto;
 import org.dama.damajatek.dto.game.websocket.IGameEvent;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.player.Player;
-import org.dama.damajatek.entity.room.Room;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.model.Move;
 import org.springframework.data.domain.Page;
@@ -16,10 +16,11 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface IGameService {
-    Game createGame(Player redPlayer, Player whitePlayer, Room room);
+    Game createGame(Player redPlayer, Player whitePlayer);
     CompletableFuture<GameInfoDto> getGame(Long gameId);
     CompletableFuture<Page<GameHistoryDto>> getGameHistory(int pageNum, int pageSize);
     List<IGameEvent> makeMove(Long gameId, Move move, Principal principal);
     IGameEvent forfeit(Long gameId, PieceColor pieceColor);
     void handleTimeout(String email, Authentication auth);
+    InGameDto isPlayerInGame();
 }

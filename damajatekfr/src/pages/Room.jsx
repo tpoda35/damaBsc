@@ -169,8 +169,6 @@ const Room = () => {
                                 break;
 
                             case "START":
-                                hasLeftRoom.current = true;
-
                                 navigate(`/games/${gameId}`);
                                 break;
 
@@ -195,47 +193,6 @@ const Room = () => {
             }
         };
     }, [ws, roomId, navigate]);
-
-    // React unmount (navigation within app)
-    useEffect(() => {
-        if (!roomId) return;
-        return () => {
-            if (!hasLeftRoom.current) {
-                hasLeftRoom.current = true;
-                ApiService.post(`/rooms/${roomId}/leave`).catch(err =>
-                    console.warn("Failed to auto-leave room:", err)
-                );
-            }
-        };
-    }, [roomId]);
-
-    // Browser close/reload
-    useEffect(() => {
-        if (!roomId) return;
-
-        const handleBeforeUnload = () => {
-            if (!hasLeftRoom.current) {
-                hasLeftRoom.current = true;
-
-                try {
-                    const backendBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
-                    const url = `${backendBaseUrl}/rooms/${roomId}/leave`;
-                    const blob = new Blob([JSON.stringify({})], { type: "application/json" });
-
-                    const ok = navigator.sendBeacon(url, blob);
-                    console.log(`[Beacon] Leave room ${roomId} sent:`, ok);
-                } catch (err) {
-                    console.warn(`[Beacon] Failed to send leave for room ${roomId}:`, err);
-                }
-            }
-        };
-
-        window.addEventListener("beforeunload", handleBeforeUnload);
-
-        return () => {
-            window.removeEventListener("beforeunload", handleBeforeUnload);
-        };
-    }, [roomId]);
 
     if (loading) return <Loader />;
 

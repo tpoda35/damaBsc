@@ -4,11 +4,12 @@ import org.dama.damajatek.entity.Game;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -122,4 +123,28 @@ public interface IGameRepository extends JpaRepository<Game, Long> {
         )
     """)
     Optional<Game> findInProgressGameByUserEmail(@Param("email") String email);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("""
+        UPDATE Game g
+        SET g.status = org.dama.damajatek.enums.game.GameStatus.FINISHED
+        WHERE g.status = org.dama.damajatek.enums.game.GameStatus.IN_PROGRESS
+        AND (
+            TREAT(g.redPlayer AS HumanPlayer).user.email = :email
+            OR TREAT(g.whitePlayer AS HumanPlayer).user.email = :email
+        )
+    """)
+    void finishAllInProgressGamesForUser(@Param("email") String email);
+
+    @Query("""
+        SELECT g.id
+        FROM Game g
+        WHERE g.status = org.dama.damajatek.enums.game.GameStatus.IN_PROGRESS
+        AND (
+            TREAT(g.redPlayer AS HumanPlayer).user.email = :email
+            OR TREAT(g.whitePlayer AS HumanPlayer).user.email = :email
+        )
+    """)
+    Optional<Long> findInProgressGameIdByUserEmail(@Param("email") String email);
 }

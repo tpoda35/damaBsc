@@ -7,12 +7,12 @@ import org.dama.damajatek.authentication.user.IAppUserCacheService;
 import org.dama.damajatek.authentication.user.IAppUserService;
 import org.dama.damajatek.dto.game.GameHistoryDto;
 import org.dama.damajatek.dto.game.GameInfoDto;
+import org.dama.damajatek.dto.game.InGameDto;
 import org.dama.damajatek.dto.game.MoveResult;
 import org.dama.damajatek.dto.game.websocket.IGameEvent;
 import org.dama.damajatek.entity.Game;
 import org.dama.damajatek.entity.player.BotPlayer;
 import org.dama.damajatek.entity.player.Player;
-import org.dama.damajatek.entity.room.Room;
 import org.dama.damajatek.enums.game.GameResult;
 import org.dama.damajatek.enums.game.PieceColor;
 import org.dama.damajatek.exception.auth.AccessDeniedException;
@@ -39,6 +39,7 @@ import java.security.Principal;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -86,11 +87,10 @@ public class GameService implements IGameService {
 
     @Transactional
     @Override
-    public Game createGame(Player redPlayer, Player whitePlayer, Room room) {
+    public Game createGame(Player redPlayer, Player whitePlayer) {
         Board board = createStartingBoard();
 
         Game game = Game.builder()
-                .room(room)
                 .redPlayer(redPlayer)
                 .whitePlayer(whitePlayer)
                 .build();
@@ -303,6 +303,25 @@ public class GameService implements IGameService {
                     gameEvent, auth, game.getId()
             );
         }
+    }
+
+    @Override
+    public InGameDto isPlayerInGame() {
+        AppUser user = appUserService.getLoggedInUser();
+
+        Optional<Long> gameId =
+                gameRepository.findInProgressGameIdByUserEmail(user.getEmail());
+
+        if (gameId.isEmpty()) {
+            return InGameDto.builder()
+                    .isInGame(false)
+                    .build();
+        }
+
+        return InGameDto.builder()
+                .isInGame(true)
+                .gameId(gameId.get())
+                .build();
     }
 
     private Game findGameByIdWithPlayers(Long gameId) {

@@ -21,8 +21,7 @@ public interface IRoomRepository extends JpaRepository<Room, Long> {
     @Query("SELECT r FROM Room r " +
             "LEFT JOIN FETCH r.host " +
             "LEFT JOIN FETCH r.opponent " +
-            "WHERE r.started = false AND" +
-            " r.host = :user OR r.opponent = :user")
+            "WHERE r.host = :user OR r.opponent = :user")
     Optional<Room> findByHostOrOpponent(@Param("user") AppUser user);
 
     Integer countByHostId(Long hostId);
