@@ -217,7 +217,8 @@ public class RoomService implements IRoomService {
                 redPlayer = PlayerMapper.createHumanPlayer(room.getHost());
             }
 
-            gameRepository.finishAllInProgressGamesForUser(loggedInUser.getEmail());
+            gameRepository.finishAllInProgressGamesForUser(room.getHost().getEmail());
+            gameRepository.findInProgressGameByUserEmail(room.getOpponent().getEmail());
 
             Game game = gameService.createGame(redPlayer, whitePlayer);
             roomRepository.delete(room);
