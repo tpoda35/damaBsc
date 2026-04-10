@@ -1,8 +1,6 @@
 package org.dama.damajatek.dto.appUser;
 
 public record AppUserGameStats(
-        int hostedRooms,
-        int joinedRooms,
         int vsAiWins,
         int vsAiLoses,
         int vsAiDraws,

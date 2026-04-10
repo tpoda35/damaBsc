@@ -68,12 +68,6 @@ const Profile = () => {
                         <p><strong>Updated At:</strong><br /> {new Date(user.updatedAt).toLocaleString()}</p>
                     </div>
 
-                    <h3>Room Stats</h3>
-                    <ul className={styles.profileStatsList}>
-                        <li>Hosted Rooms: {user.hostedRoomNum}</li>
-                        <li>Joined Rooms: {user.joinedRoomNum}</li>
-                    </ul>
-
                     <h3>Vs AI Stats</h3>
                     <ul className={styles.profileStatsList}>
                         <li>Games: {user.vsAiGames}</li>

@@ -1,14 +1,12 @@
 package org.dama.damajatek.entity.room;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.dama.damajatek.entity.Game;
-import org.dama.damajatek.enums.room.ReadyStatus;
 import org.dama.damajatek.authentication.user.AppUser;
+import org.dama.damajatek.enums.room.ReadyStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,10 +32,10 @@ public class Room {
     @GeneratedValue
     private Long id;
 
-    @NotBlank(message = "Room name cannot be blank.")
     @Column(nullable = false)
     private String name;
 
+    @Column(length = 30)
     private String description;
 
     // If this is true, then the room requires password

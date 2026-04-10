@@ -17,9 +17,6 @@ public class AppUserInfoDto {
     private String displayName;
     private String email;
 
-    private Integer hostedRoomNum;
-    private Integer joinedRoomNum;
-
     private Integer vsAiWins;
     private Integer vsAiLoses;
     private Integer vsAiDraws;

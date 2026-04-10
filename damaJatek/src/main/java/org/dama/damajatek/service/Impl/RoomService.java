@@ -72,6 +72,7 @@ public class RoomService implements IRoomService {
         Room room = RoomMapper.createRoom(roomCreateDto, host, encodedPassword);
 
         appUserCacheService.evictProfileCache(host.getId());
+        deleteRoomsByHost(host.getId());
 
         return roomRepository.save(room).getId();
     }
@@ -318,6 +319,12 @@ public class RoomService implements IRoomService {
 
             roomWebSocketService.broadcastRoomUpdate(OPPONENT_LEAVE, "/topic/rooms/" + room.getId());
         }
+    }
+
+    @Transactional
+    protected void deleteRoomsByHost(Long hostId) {
+        List<Room> rooms = roomRepository.findAllByHost_Id(hostId);
+        roomRepository.deleteAll(rooms);
     }
 
     private Room findRoomByIdWithUsers(Long roomId) {

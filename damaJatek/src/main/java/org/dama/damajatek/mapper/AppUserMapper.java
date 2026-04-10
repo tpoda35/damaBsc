@@ -12,9 +12,6 @@ public class AppUserMapper {
                 .displayName(appUser.getDisplayName())
                 .email(appUser.getEmail())
 
-                .hostedRoomNum(stats.hostedRooms())
-                .joinedRoomNum(stats.joinedRooms())
-
                 .vsAiWins(stats.vsAiWins())
                 .vsAiLoses(stats.vsAiLoses())
                 .vsAiDraws(stats.vsAiDraws())
