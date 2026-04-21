@@ -137,14 +137,13 @@ public interface IGameRepository extends JpaRepository<Game, Long> {
     """)
     void finishAllInProgressGamesForUser(@Param("email") String email);
 
-    @Query("""
+    @Query(value = """
         SELECT g.id
-        FROM Game g
-        WHERE g.status = org.dama.damajatek.enums.game.GameStatus.IN_PROGRESS
-        AND (
-            TREAT(g.redPlayer AS HumanPlayer).user.email = :email
-            OR TREAT(g.whitePlayer AS HumanPlayer).user.email = :email
-        )
-    """)
-    Optional<Long> findInProgressGameIdByUserEmail(@Param("email") String email);
+        FROM games g
+        LEFT JOIN players red ON red.id = g.red_player_id AND red.player_type = 'HUMAN'
+        LEFT JOIN players white ON white.id = g.white_player_id AND white.player_type = 'HUMAN'
+        WHERE g.status = 'IN_PROGRESS'
+        AND (red.user_id = :userId OR white.user_id = :userId)
+    """, nativeQuery = true)
+    Optional<Long> findInProgressGameIdByUserId(@Param("userId") Long userId);
 }

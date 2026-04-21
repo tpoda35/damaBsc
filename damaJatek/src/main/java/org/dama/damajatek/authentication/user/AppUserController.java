@@ -2,8 +2,9 @@ package org.dama.damajatek.authentication.user;
 
 import lombok.RequiredArgsConstructor;
 import org.dama.damajatek.dto.AppUserInfoDto;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -13,14 +14,6 @@ import java.util.concurrent.CompletableFuture;
 public class AppUserController {
 
     private final IAppUserService appUserService;
-
-    @PostMapping("/changePassword")
-    public ResponseEntity<?> changePassword(
-          @RequestBody ChangePasswordRequest request
-    ) {
-        appUserService.changePassword(request);
-        return ResponseEntity.ok().build();
-    }
 
     @GetMapping
     public CompletableFuture<AppUserInfoDto> getUserInfo() {

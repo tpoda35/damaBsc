@@ -310,7 +310,7 @@ public class GameService implements IGameService {
         AppUser user = appUserService.getLoggedInUser();
 
         Optional<Long> gameId =
-                gameRepository.findInProgressGameIdByUserEmail(user.getEmail());
+                gameRepository.findInProgressGameIdByUserId(user.getId());
 
         if (gameId.isEmpty()) {
             return InGameDto.builder()

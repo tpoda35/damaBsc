@@ -1,4 +1,4 @@
-import {BrowserRouter, Route, Routes, useLocation, useNavigate} from "react-router-dom";
+import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -16,7 +16,7 @@ import GameEnded from "./pages/GameEnded.jsx";
 import "./Toast.css";
 
 function App() {
-    const { user, inGame } = useSharedAuth();
+    const { user, inGame, fetchInGameStatus } = useSharedAuth();
     const { connect, disconnect, isConnected, subscribe } = useSharedWebSocket();
 
     const isAuthenticated = !!user;
@@ -50,6 +50,18 @@ function App() {
 
     useEffect(() => {
         if (
+            isAuthenticated &&
+            !location.pathname.startsWith("/games/") &&
+            !location.pathname.startsWith("/game-ended")
+        ) {
+            fetchInGameStatus();
+        }
+    }, [location, isAuthenticated]);
+
+    useEffect(() => {
+        if (inGame === null) return;
+
+        if (
             inGame?.isInGame &&
             inGame.gameId &&
             !location.pathname.startsWith("/games/") &&
@@ -59,6 +71,7 @@ function App() {
         }
     }, [inGame, navigate, location]);
 
+    console.log('Ingame:', inGame);
 
     return (
         <>

@@ -219,7 +219,7 @@ public class RoomService implements IRoomService {
             }
 
             gameRepository.finishAllInProgressGamesForUser(room.getHost().getEmail());
-            gameRepository.findInProgressGameByUserEmail(room.getOpponent().getEmail());
+            gameRepository.finishAllInProgressGamesForUser(room.getOpponent().getEmail());
 
             Game game = gameService.createGame(redPlayer, whitePlayer);
             roomRepository.delete(room);

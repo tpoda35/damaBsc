@@ -1,17 +1,21 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./GameEnded.module.css";
 import Button from "../components/Button.jsx";
+import {useSharedAuth} from "../contexts/AuthContext.jsx";
 
 export default function GameEnded() {
     const navigate = useNavigate();
     const { state } = useLocation();
+    const { clearInGame } = useSharedAuth();
+
+    clearInGame();
 
     if (!state) {
         navigate("/");
         return null;
     }
 
-    const { gameId, playerColor, winner, drawReason, draw } = state;
+    const { playerColor, winner, drawReason, draw } = state;
 
     const isDraw = draw === true;
 
